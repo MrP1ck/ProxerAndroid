@@ -4,6 +4,16 @@
 
 This app is not maintained anymore and will not receive any more updates. It might or might not work anymore.
 
+### About this fork
+
+This fork contains fixes on top of the last official release (1.11.5):
+
+- The manga reader shows WebP pages, which are used by many newer webtoon uploads. Previously these pages stayed
+  blank forever ([#1](https://github.com/MrP1ck/ProxerAndroid/pull/1)).
+- The project builds again after the shutdown of jcenter.
+
+The downloads below are the official releases and do not include these fixes. To use them, build the app yourself.
+
 ### What is this?
 
 Proxer.Me Android is the official mobile client for the german Anime & Manga page [Proxer.Me](https://proxer.me).<br>
@@ -20,12 +30,12 @@ It features major functionalities including an anime player for various hosters 
 After having installed the following tools: 
 
 - [Git](https://git-scm.com/download)
-- [JDK](https://oracle.com/technetwork/java/javase/downloads/index.html)
+- [JDK 11](https://adoptium.net/temurin/releases/?version=11) (the Gradle version used does not run on newer JDKs)
 - [Android SDK](https://developer.android.com/studio/#downloads)
 
 You can run these commands:
 
-- `git clone https://github.com/proxer/ProxerAndroid`
+- `git clone https://github.com/MrP1ck/ProxerAndroid`
 - `cd ProxerAndroid`
 
 This app needs an API-key to work. You can request one from the administrators at Proxer.
@@ -59,7 +69,7 @@ You can then build the app by running:
 gradlew.bat assembleRelease
 ```
 
-You can find the app in the `app/build/outputs/apk/release/` folder.<br>
+You can find the app in the `build/outputs/apk/release/` folder.<br>
 A direct install of the app is possible for phones connected to your pc by running:
 
 ```bash
@@ -79,6 +89,10 @@ If you want to build the app for testing purposes in the `debug` variant, run:
 # Windows
 gradlew.bat assembleDebug
 ```
+
+Some dependencies were only published on jcenter, which is shut down. Most of them are replaced with artifacts from
+Maven Central (see `gradle/dependencies.gradle`). ExoPlayer 2.11.8 is not available anywhere else, so it is downloaded
+from the [Aliyun jcenter mirror](https://maven.aliyun.com/repository/jcenter) (see `gradle/repositories.gradle`).
 
 ### Screenshots
 
