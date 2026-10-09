@@ -75,7 +75,7 @@ class TouchablePlayerView @JvmOverloads constructor(
 
             override fun onScroll(
                 initialEvent: MotionEvent?,
-                movingEvent: MotionEvent?,
+                movingEvent: MotionEvent,
                 distanceX: Float,
                 distanceY: Float
             ): Boolean {

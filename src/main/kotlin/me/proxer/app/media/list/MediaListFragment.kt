@@ -23,7 +23,7 @@ import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.autoDisposable
 import kotterknife.bindView
-import me.proxer.app.GlideApp
+import com.bumptech.glide.Glide
 import me.proxer.app.R
 import me.proxer.app.base.BackPressAware
 import me.proxer.app.base.PagedContentFragment
@@ -237,7 +237,7 @@ class MediaListFragment : PagedContentFragment<MediaListEntry>(R.layout.fragment
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        innerAdapter.glide = GlideApp.with(this)
+        innerAdapter.glide = Glide.with(this)
 
         searchBottomSheetManager = MediaListSearchBottomSheet.bindTo(this, viewModel)
     }
@@ -253,7 +253,7 @@ class MediaListFragment : PagedContentFragment<MediaListEntry>(R.layout.fragment
             else -> error("Unsupported sort criteria: $sortCriteria")
         }
 
-        val filterSubMenu = menu.findItem(R.id.filter).subMenu
+        val filterSubMenu = requireNotNull(menu.findItem(R.id.filter).subMenu)
 
         when (category) {
             Category.ANIME -> filterSubMenu.setGroupVisible(R.id.filterManga, false)

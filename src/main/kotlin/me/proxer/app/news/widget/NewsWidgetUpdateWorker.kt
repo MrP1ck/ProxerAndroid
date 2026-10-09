@@ -1,6 +1,7 @@
 package me.proxer.app.news.widget
 
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -27,6 +28,7 @@ import me.proxer.app.R
 import me.proxer.app.forum.TopicActivity
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction
+import me.proxer.app.util.extension.PENDING_INTENT_FLAG_MUTABLE
 import me.proxer.app.util.extension.intentFor
 import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toInstantBP
@@ -151,7 +153,7 @@ class NewsWidgetUpdateWorker(
         }
 
         val detailIntent = applicationContext.intentFor<TopicActivity>()
-        val detailPendingIntent = PendingIntent.getActivity(applicationContext, 0, detailIntent, FLAG_UPDATE_CURRENT)
+        val detailPendingIntent = PendingIntent.getActivity(applicationContext, 0, detailIntent, FLAG_UPDATE_CURRENT or PENDING_INTENT_FLAG_MUTABLE)
 
         bindBaseLayout(id, views)
 
@@ -177,7 +179,7 @@ class NewsWidgetUpdateWorker(
         views.setTextViewText(R.id.errorText, applicationContext.getString(errorAction.message))
 
         if (errorIntent != null) {
-            val errorPendingIntent = PendingIntent.getActivity(applicationContext, 0, errorIntent, FLAG_UPDATE_CURRENT)
+            val errorPendingIntent = PendingIntent.getActivity(applicationContext, 0, errorIntent, FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
 
             views.setTextViewText(R.id.errorButton, applicationContext.getString(errorAction.buttonMessage))
             views.setOnClickPendingIntent(R.id.errorButton, errorPendingIntent)
@@ -204,13 +206,13 @@ class NewsWidgetUpdateWorker(
 
     private fun bindBaseLayout(id: Int, views: RemoteViews) {
         val intent = MainActivity.getSectionIntent(applicationContext, MaterialDrawerWrapper.DrawerItem.NEWS)
-        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
 
         val updateIntent = applicationContext.intentFor<NewsWidgetProvider>()
             .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
             .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(id))
 
-        val updatePendingIntent = PendingIntent.getBroadcast(applicationContext, 0, updateIntent, FLAG_UPDATE_CURRENT)
+        val updatePendingIntent = PendingIntent.getBroadcast(applicationContext, 0, updateIntent, FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
 
         views.setOnClickPendingIntent(R.id.title, pendingIntent)
         views.setOnClickPendingIntent(R.id.refresh, updatePendingIntent)

@@ -1,5 +1,6 @@
 package me.proxer.app
 
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.content.Intent
@@ -7,6 +8,7 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.postDelayed
@@ -70,6 +72,8 @@ class MainActivity : DrawerActivity() {
 
     private val inAppUpdateFlow = InAppUpdateFlow()
 
+    private val notificationPermissionRequest = registerForActivityResult(RequestPermission()) {}
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -84,6 +88,10 @@ class MainActivity : DrawerActivity() {
 
         supportPostponeEnterTransition()
         displayFirstPage(savedInstanceState)
+
+        if (isRootActivity && savedInstanceState == null) {
+            requestNotificationPermissionIfNeeded()
+        }
 
         if (isRootActivity && savedInstanceState == null && storageHelper.isLoggedIn) {
             val lastUcpSettingsUpdate = storageHelper.lastUcpSettingsUpdateDate
@@ -158,6 +166,8 @@ class MainActivity : DrawerActivity() {
                             preferenceHelper.areAccountNotificationsEnabled = option.isActivated
 
                             NotificationWorker.enqueueIfPossible(delay = true)
+
+                            if (option.isActivated) requestNotificationPermissionIfNeeded()
                         }
                         2 -> if (option.isActivated) {
                             preferenceHelper.themeContainer = ThemeContainer(Theme.CLASSIC, ThemeVariant.DARK)
@@ -205,6 +215,19 @@ class MainActivity : DrawerActivity() {
 
         supportFragmentManager.commitNow {
             replace(R.id.container, fragment)
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        val areNotificationsEnabled = preferenceHelper.areNewsNotificationsEnabled ||
+            preferenceHelper.areAccountNotificationsEnabled ||
+            preferenceHelper.areChatNotificationsEnabled
+
+        if (
+            VERSION.SDK_INT >= VERSION_CODES.TIRAMISU && areNotificationsEnabled &&
+            ContextCompat.checkSelfPermission(this, POST_NOTIFICATIONS) != PERMISSION_GRANTED
+        ) {
+            notificationPermissionRequest.launch(POST_NOTIFICATIONS)
         }
     }
 

@@ -24,8 +24,8 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.target.Target
 import me.proxer.app.BuildConfig.APPLICATION_ID
-import me.proxer.app.GlideRequest
-import me.proxer.app.GlideRequests
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.RequestManager
 import me.proxer.app.R
 import me.proxer.app.settings.theme.ThemeVariant
 import me.proxer.app.ui.LinkCheckDialog
@@ -41,7 +41,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.getKoin
 import org.koin.core.context.GlobalContext
-import org.koin.core.parameter.DefinitionParameters
+import org.koin.core.parameter.ParametersHolder
 import org.koin.core.parameter.ParametersDefinition
 import org.koin.core.qualifier.Qualifier
 import timber.log.Timber
@@ -86,12 +86,12 @@ fun PackageManager.isPackageInstalled(packageName: String) = try {
     false
 }
 
-inline fun GlideRequests.defaultLoad(view: ImageView, url: HttpUrl): Target<Drawable> = load(url.toString())
+inline fun RequestManager.defaultLoad(view: ImageView, url: HttpUrl): Target<Drawable> = load(url.toString())
     .transition(DrawableTransitionOptions.withCrossFade())
     .logErrors()
     .into(view)
 
-inline fun <T> GlideRequest<T>.logErrors(): GlideRequest<T> = this.addListener(
+inline fun <T> RequestBuilder<T>.logErrors(): RequestBuilder<T> = this.addListener(
     object : SimpleGlideRequestListener<T> {
         override fun onLoadFailed(error: GlideException?): Boolean {
             if (error != null) Timber.e(error)
@@ -134,8 +134,8 @@ inline fun Intent.addReferer(): Intent {
 
 // TODO: https://github.com/InsertKoinIO/koin/issues/303
 @Suppress("UNCHECKED_CAST")
-inline fun unsafeParametersOf(vararg parameters: Any?): DefinitionParameters {
-    return DefinitionParameters(parameters.toList())
+inline fun unsafeParametersOf(vararg parameters: Any?): ParametersHolder {
+    return ParametersHolder(parameters.toMutableList())
 }
 
 fun CustomTabsHelperFragment.fallbackHandleLink(

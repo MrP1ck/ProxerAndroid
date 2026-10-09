@@ -30,7 +30,7 @@ It features major functionalities including an anime player for various hosters 
 After having installed the following tools: 
 
 - [Git](https://git-scm.com/download)
-- [JDK 11](https://adoptium.net/temurin/releases/?version=11) (the Gradle version used does not run on newer JDKs)
+- [JDK 17](https://adoptium.net/temurin/releases/?version=17)
 - [Android SDK](https://developer.android.com/studio/#downloads)
 
 You can run these commands:

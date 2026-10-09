@@ -4,6 +4,8 @@ import android.app.Activity
 import android.view.ViewGroup
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -12,8 +14,6 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.google.android.play.core.tasks.OnFailureListener
-import com.google.android.play.core.tasks.OnSuccessListener
 import me.proxer.app.R
 import timber.log.Timber
 
@@ -41,7 +41,7 @@ class InAppUpdateFlow {
                 progressListener = progressListener(rootView, appUpdateManager)
                 failureListener = failureListener()
 
-                appUpdateManager.appUpdateInfo.addOnSuccessListener(successListener)
+                appUpdateManager.appUpdateInfo.addOnSuccessListener(requireNotNull(successListener))
                 appUpdateManager.appUpdateInfo.addOnFailureListener(requireNotNull(failureListener))
                 appUpdateManager.registerListener(requireNotNull(progressListener))
             }

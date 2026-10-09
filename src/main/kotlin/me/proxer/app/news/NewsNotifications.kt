@@ -57,7 +57,7 @@ object NewsNotifications {
                     context,
                     ID,
                     TopicActivity.getIntent(context, current.threadId, current.categoryId, current.subject),
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 style = NotificationCompat.BigTextStyle(builder)
@@ -72,7 +72,7 @@ object NewsNotifications {
                     context,
                     ID,
                     MainActivity.getSectionIntent(context, DrawerItem.NEWS),
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 style = NotificationCompat.InboxStyle().also {

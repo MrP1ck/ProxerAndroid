@@ -1,25 +1,35 @@
 package me.proxer.app.settings
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.fragment.app.commitNow
-import com.mikepenz.aboutlibraries.Libs
-import com.mikepenz.aboutlibraries.ui.LibsSupportFragment
+import com.mikepenz.aboutlibraries.LibsBuilder
 import me.proxer.app.R
 import me.proxer.app.base.DrawerActivity
+import me.proxer.app.util.extension.startActivity
 
 class ProxerLibsActivity : DrawerActivity() {
+
+    companion object {
+        fun navigateTo(context: Activity) = context.startActivity<ProxerLibsActivity>()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        title = intent.extras?.getString(Libs.BUNDLE_TITLE, "")
+        title = getString(R.string.about_licenses_activity_title)
 
-        val fragment = LibsSupportFragment().apply {
-            arguments = intent.extras
-        }
+        if (savedInstanceState == null) {
+            val fragment = LibsBuilder()
+                .withShowLoadingProgress(false)
+                .withAboutVersionShown(false)
+                .withAboutIconShown(false)
+                .withVersionShown(false)
+                .supportFragment()
 
-        supportFragmentManager.commitNow {
-            replace(R.id.container, fragment)
+            supportFragmentManager.commitNow {
+                replace(R.id.container, fragment)
+            }
         }
     }
 }

@@ -1,23 +1,53 @@
-pluginManagement { scriptHandler ->
-    apply from: "gradle/versions.gradle"
-    apply from: "gradle/repositories.gradle", to: scriptHandler
-
-    plugins {
-        id "org.jetbrains.kotlin.android" version "${kotlinVersion}"
-        id "org.jetbrains.kotlin.kapt" version "${kotlinVersion}"
-
-        id "com.mikepenz.aboutlibraries.plugin" version "${aboutLibrariesVersion}"
-
-        id "com.github.ben-manes.versions" version "${versionsPluginVersion}"
-        id "io.gitlab.arturbosch.detekt" version "${detektPluginVersion}"
-        id "org.jlleitschuh.gradle.ktlint" version "${ktlintPluginVersion}"
-    }
-
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == "com.android.application") {
-                useModule("com.android.tools.build:gradle:${androidPluginVersion}")
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex "androidx.*"
+                includeGroupByRegex "com\\.android.*"
+                includeGroupByRegex "com\\.google.*"
             }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+    repositories {
+        google {
+            mavenContent { releasesOnly() }
+            content {
+                includeGroupByRegex "androidx.*"
+                includeGroupByRegex "com\\.android.*"
+                includeGroupByRegex "com\\.google\\.android.*"
+                includeGroupByRegex "com\\.google\\.ads.*"
+                includeGroupByRegex "com\\.google\\.testing.*"
+                includeGroupByRegex "com\\.google\\.firebase.*"
+                includeGroupByRegex "com\\.google\\.gms.*"
+            }
+        }
+
+        mavenCentral {
+            mavenContent { releasesOnly() }
+            content {
+                excludeGroupByRegex "androidx.*"
+                excludeGroupByRegex "com\\.android.*"
+            }
+        }
+
+        // jcenter is shut down. ExoPlayer < 2.13 is only available from a jcenter mirror.
+        maven {
+            url "https://maven.aliyun.com/repository/jcenter"
+            mavenContent { releasesOnly() }
+            content { includeGroup "com.google.android.exoplayer" }
+        }
+
+        maven {
+            url "https://jitpack.io"
+            mavenContent { releasesOnly() }
+            content { includeGroupByRegex "com\\.github.*" }
         }
     }
 }

@@ -19,7 +19,7 @@ import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.autoDisposable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotterknife.bindView
-import me.proxer.app.GlideApp
+import com.bumptech.glide.Glide
 import me.proxer.app.R
 import me.proxer.app.anime.AnimeActivity
 import me.proxer.app.base.BaseContentFragment
@@ -39,7 +39,7 @@ import me.proxer.app.util.extension.toGeneralLanguage
 import me.proxer.library.enums.Category
 import me.proxer.library.enums.MediaLanguage
 import me.proxer.library.util.ProxerUtils
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import java.util.concurrent.TimeUnit
@@ -61,7 +61,7 @@ class EpisodeFragment : BaseContentFragment<List<EpisodeRow>>(R.layout.fragment_
     override val isSwipeToRefreshEnabled = false
 
     override val viewModel by viewModel<EpisodeViewModel> { parametersOf(id) }
-    private val mediaInfoViewModel by sharedViewModel<MediaInfoViewModel>()
+    private val mediaInfoViewModel by activityViewModel<MediaInfoViewModel>()
 
     override val hostingActivity: MediaActivity
         get() = activity as MediaActivity
@@ -129,7 +129,7 @@ class EpisodeFragment : BaseContentFragment<List<EpisodeRow>>(R.layout.fragment_
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter.glide = GlideApp.with(this)
+        adapter.glide = Glide.with(this)
 
         recyclerView.setHasFixedSize(true)
         recyclerView.enableFastScroll()

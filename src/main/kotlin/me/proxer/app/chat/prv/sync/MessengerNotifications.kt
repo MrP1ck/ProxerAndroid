@@ -102,7 +102,7 @@ object MessengerNotifications {
             .setContentIntent(
                 TaskStackBuilder.create(context)
                     .addNextIntent(MainActivity.getSectionIntent(context, DrawerItem.MESSENGER))
-                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             )
             .setDefaults(Notification.DEFAULT_ALL)
             .setColor(ContextCompat.getColor(context, R.color.primary))
@@ -162,7 +162,7 @@ object MessengerNotifications {
         val intent = TaskStackBuilder.create(context)
             .addNextIntent(MainActivity.getSectionIntent(context, DrawerItem.MESSENGER))
             .addNextIntent(PrvMessengerActivity.getIntent(context, conference))
-            .getPendingIntent(conference.id.toInt(), PendingIntent.FLAG_UPDATE_CURRENT)
+            .getPendingIntent(conference.id.toInt(), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         return NotificationCompat.Builder(context, CHAT_CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_proxer)

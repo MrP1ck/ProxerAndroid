@@ -88,7 +88,7 @@ object MessengerShortcuts {
         conference.image.isNotBlank() -> Utils.getCircleBitmapFromUrl(
             context,
             ProxerUrls.userImage(conference.image)
-        )
+        ) ?: BitmapFactory.decodeResource(context.resources, R.drawable.ic_shortcut_messenger_person)
         conference.isGroup -> BitmapFactory.decodeResource(context.resources, R.drawable.ic_shortcut_messenger_group)
         else -> BitmapFactory.decodeResource(context.resources, R.drawable.ic_shortcut_messenger_person)
     }

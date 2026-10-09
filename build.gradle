@@ -1,49 +1,38 @@
-buildscript { scriptHandler ->
-    apply from: "${projectDir}/gradle/versions.gradle"
-    apply from: "${projectDir}/gradle/repositories.gradle", to: scriptHandler
-}
-
 plugins {
-    id "com.android.application"
-    id "org.jetbrains.kotlin.android"
-    id "org.jetbrains.kotlin.kapt"
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 
-    id "com.mikepenz.aboutlibraries.plugin"
+    alias(libs.plugins.aboutlibraries)
 
-    id "com.github.ben-manes.versions"
-    id "io.gitlab.arturbosch.detekt"
-    id "org.jlleitschuh.gradle.ktlint"
+    alias(libs.plugins.versions)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
 }
 
 apply from: "${projectDir}/gradle/utils.gradle"
 
-android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    ndkVersion rootProject.ext.ndkVersion
+def appVersionMajor = libs.versions.appVersionMajor.get().toInteger()
+def appVersionMinor = libs.versions.appVersionMinor.get().toInteger()
+def appVersionPatch = libs.versions.appVersionPatch.get().toInteger()
 
-    dexOptions {
-        preDexLibraries !isCI()
-    }
+android {
+    namespace "me.proxer.app"
+    compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
         applicationId "me.proxer.app"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk libs.versions.minSdk.get().toInteger()
+        targetSdk libs.versions.targetSdk.get().toInteger()
         versionCode appVersionMajor * 1000000 + appVersionMinor * 10000 + appVersionPatch * 100
         versionName "$appVersionMajor.$appVersionMinor.$appVersionPatch"
 
         vectorDrawables.useSupportLibrary true
-        resConfigs "de"
+        resourceConfigurations += ["de"]
+    }
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                if (project.property("kapt.incremental.apt").toBoolean() == true) {
-                    arguments << ["room.incremental": "true"]
-                }
-
-                arguments << ["room.schemaLocation": "$projectDir/schemas".toString()]
-            }
-        }
+    buildFeatures {
+        buildConfig true
     }
 
     sourceSets {
@@ -66,8 +55,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility javaVersion
-        targetCompatibility javaVersion
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     signingConfigs {
@@ -89,8 +78,6 @@ android {
         }
 
         debug {
-            multiDexEnabled true
-
             ndk { abiFilters "arm64-v8a", "armeabi-v7a", "x86_64", "x86" }
 
             versionNameSuffix = "-debug"
@@ -99,15 +86,9 @@ android {
         }
 
         release {
-            postprocessing {
-                obfuscate true
-                optimizeCode true
-                removeUnusedCode true
-                removeUnusedResources true
-                proguardFile "config/shrinker/shrinker-rules.pro"
-            }
-
-            multiDexEnabled true
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "config/shrinker/shrinker-rules.pro"
 
             ndk { abiFilters "arm64-v8a", "armeabi-v7a", "x86_64", "x86" }
 
@@ -120,59 +101,47 @@ android {
         }
 
         logRelease {
-            postprocessing {
-                obfuscate true
-                optimizeCode true
-                removeUnusedCode true
-                removeUnusedResources true
-                proguardFile "config/shrinker/shrinker-rules.pro"
-            }
-
-            multiDexEnabled true
-
-            ndk { abiFilters "arm64-v8a", "armeabi-v7a", "x86_64", "x86" }
+            initWith release
+            matchingFallbacks = ["release"]
 
             versionNameSuffix = "-logRelease-${getGitHash()}"
-            buildConfigField "String", "PROXER_API_KEY", "\"${getFromSecrets("PROXER_API_KEY")}\""
             buildConfigField "boolean", "LOG", "Boolean.parseBoolean(\"true\")"
-
-            if (shouldSign()) {
-                signingConfig signingConfigs.release
-            }
         }
     }
 
-    lintOptions {
-        mkdir("$buildDir/reports/lint")
-
+    lint {
         warningsAsErrors = true
         checkReleaseBuilds = false
 
-        lintConfig file("$rootDir/config/lint/lint.xml")
-        xmlOutput file("$buildDir/reports/lint/lint-results.xml")
-        htmlOutput file("$buildDir/reports/lint/lint-results.html")
+        lintConfig = file("$rootDir/config/lint/lint.xml")
+        xmlOutput = file("$buildDir/reports/lint/lint-results.xml")
+        htmlOutput = file("$buildDir/reports/lint/lint-results.html")
     }
 
-    packagingOptions {
+    packaging {
         jniLibs {
-            useLegacyPackaging false
+            useLegacyPackaging = false
         }
 
-        exclude "META-INF/*.kotlin_module"
-        exclude "META-INF/*.version"
-        exclude "META-INF/rxkotlin.properties"
-        exclude "META-INF/proguard/**"
-        exclude "META-INF/README.md"
-        exclude "META-INF/nanohttpd/**"
-        exclude "kotlin/**"
-        exclude "kotlinx/**"
-        exclude "third_party/**"
-        exclude "jsr305_annotations/**"
-        exclude "error_prone/**"
-        exclude "auto/**"
-        exclude "build-data.properties"
-        exclude "androidsupportmultidexversion.txt"
-        exclude "play-services-*.properties"
+        resources {
+            excludes += [
+                    "META-INF/*.kotlin_module",
+                    "META-INF/*.version",
+                    "META-INF/rxkotlin.properties",
+                    "META-INF/proguard/**",
+                    "META-INF/README.md",
+                    "META-INF/nanohttpd/**",
+                    "kotlin/**",
+                    "kotlinx/**",
+                    "third_party/**",
+                    "jsr305_annotations/**",
+                    "error_prone/**",
+                    "auto/**",
+                    "build-data.properties",
+                    "androidsupportmultidexversion.txt",
+                    "play-services-*.properties"
+            ]
+        }
     }
 
     bundle {
@@ -190,36 +159,164 @@ android {
     }
 }
 
-apply from: "${projectDir}/gradle/repositories.gradle"
-apply from: "${projectDir}/gradle/dependencies.gradle"
+kotlin {
+    jvmToolchain(17)
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        allWarningsAsErrors = true
-        jvmTarget = javaVersion.toString()
-        freeCompilerArgs = ["-Xjsr305=strict", "-progressive", "-Xnew-inference"]
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
     }
 }
 
-kapt {
-    useBuildCache = true
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas".toString())
+    arg("room.incremental", "true")
+}
+
+dependencies {
+    implementation libs.kotlin.stdlib
+    implementation libs.koin.android
+
+    implementation libs.play.app.update
+    implementation libs.play.services.cast.framework
+    implementation libs.play.services.ads.identifier
+    implementation(libs.interactivemedia) {
+        version { strictly libs.versions.interactiveMedia.get() }
+    }
+
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.browser
+    implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.lifecycle.livedata.ktx
+    implementation libs.androidx.lifecycle.process
+    implementation libs.androidx.lifecycle.common.java8
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.rxjava2
+    implementation libs.androidx.work.runtime.ktx
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.fragment.ktx
+    implementation libs.androidx.sharetarget
+    implementation libs.androidx.security.crypto
+
+    implementation libs.rxjava
+    implementation libs.rxkotlin
+    implementation libs.rxandroid
+    implementation libs.rxbinding.core
+    implementation libs.rxbinding.appcompat
+    implementation libs.rxbinding.recyclerview
+    implementation libs.rxbinding.swiperefreshlayout
+    implementation libs.rxbinding.material
+    implementation libs.rx.preferences
+    implementation libs.rxbus
+    implementation libs.autodispose.ktx
+    implementation libs.autodispose.android.archcomponents.ktx
+
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.cardview
+    implementation libs.androidx.gridlayout
+    implementation libs.androidx.viewpager2
+    implementation libs.androidx.swiperefreshlayout
+    implementation libs.androidx.exifinterface
+    implementation libs.androidx.constraintlayout
+    implementation libs.material
+    implementation libs.androidx.preference
+    implementation libs.support.preference
+    implementation libs.support.spinner
+    implementation libs.iconics.core
+    implementation libs.iconics.views
+    implementation libs.community.material.typeface
+    implementation libs.materialdrawer
+    implementation libs.materialdrawer.iconics
+    implementation libs.aboutlibraries
+    implementation(libs.crossfader) { artifact { type = "aar" } }
+    implementation libs.material.about.library
+    implementation libs.subsampling.scale.image.view
+    implementation libs.subsampling.pdf.decoder
+    implementation libs.material.dialogs.core
+    implementation libs.flexbox
+    implementation libs.emoji.ios
+    implementation libs.materialprogressbar
+    implementation libs.materialratingbar
+    implementation libs.customtabshelper
+    implementation libs.introduction
+    implementation libs.aspect.ratio.imageview
+    implementation libs.gravitysnaphelper
+    implementation libs.exoplayer
+    implementation libs.exoplayer.cast
+    implementation libs.exoplayer.okhttp
+    implementation libs.exoplayer.ima
+    implementation libs.previewseekbar
+    implementation libs.previewseekbar.exoplayer
+
+    implementation libs.proxerlib
+    implementation libs.threetenabp
+    implementation libs.glide
+    implementation libs.glide.okhttp3
+    implementation libs.retrofit
+    implementation libs.okhttp
+    implementation libs.okhttp.brotli
+    implementation libs.okhttp.logging
+    implementation libs.okio
+    implementation libs.moshi
+    implementation libs.moshi.adapters
+    implementation libs.easy.header.footer.adapter
+    implementation libs.koptional.rxjava2
+    implementation libs.kotterknife
+    implementation libs.image.core
+    implementation libs.image.jpeg
+    implementation libs.image.png
+    implementation libs.better.link.movement.method
+    implementation libs.jsoup
+
+    implementation libs.hawk
+
+    implementation libs.strictmodecompat
+    implementation libs.timber
+    implementation libs.anrwatchdog
+
+    implementation libs.leakcanary.plumber
+    debugImplementation libs.leakcanary
+
+    releaseImplementation libs.customactivityoncrash
+    logReleaseImplementation libs.customactivityoncrash
+
+    ksp libs.androidx.room.compiler
+    ksp libs.glide.ksp
+    ksp libs.moshi.codegen
+
+    compileOnly libs.javax.annotation
+}
+
+configurations.configureEach {
+    resolutionStrategy.dependencySubstitution {
+        // The jitpack builds of these artifacts and the jcenter artifacts below are no longer available.
+        substitute module("com.squareup.moshi:moshi") using module("com.squareup.moshi:moshi:${libs.versions.moshi.get()}")
+        substitute module("com.google.android:flexbox") using module("com.google.android.flexbox:flexbox:${libs.versions.flexbox.get()}")
+        substitute module("com.gojuno.koptional:koptional") using module("com.github.gojuno.koptional:koptional:${libs.versions.koptional.get()}")
+        substitute module("com.gojuno.koptional:koptional-rxjava2-extensions") using module("com.github.gojuno.koptional:koptional-rxjava2-extensions:${libs.versions.koptional.get()}")
+    }
 }
 
 detekt {
-    version = detektPluginVersion
+    toolVersion = libs.versions.detekt.get()
     buildUponDefaultConfig = true
 
-    config = files("$projectDir/config/detekt/detekt.yml")
+    config.setFrom(files("$projectDir/config/detekt/detekt.yml"))
+}
+
+tasks.withType(io.gitlab.arturbosch.detekt.Detekt).configureEach {
+    jvmTarget = "17"
 
     reports {
-        xml.destination = file("$buildDir/reports/detekt/detekt.xml")
-        html.destination = file("$buildDir/reports/detekt/detekt.html")
+        xml.required = true
+        xml.outputLocation = file("$buildDir/reports/detekt/detekt.xml")
+        html.required = true
+        html.outputLocation = file("$buildDir/reports/detekt/detekt.html")
     }
 }
 
 ktlint {
-    version = ktlintVersion
-    disabledRules = ["import-ordering"]
+    version = libs.versions.ktlint.get()
     reporters {
         reporter org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE
     }
@@ -229,8 +326,4 @@ tasks.named("dependencyUpdates").configure {
     rejectVersionIf {
         it.candidate.version.contains("alpha")
     }
-}
-
-wrapper {
-    gradleVersion rootProject.ext.gradleVersion
 }

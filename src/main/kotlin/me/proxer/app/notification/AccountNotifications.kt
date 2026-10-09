@@ -55,7 +55,7 @@ object AccountNotifications {
                     context,
                     ID,
                     Intent(Intent.ACTION_VIEW, notifications.first().contentLink.androidUri()),
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 style = NotificationCompat.BigTextStyle(builder)
@@ -70,7 +70,7 @@ object AccountNotifications {
                     context,
                     ID,
                     NotificationActivity.getIntent(context),
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 style = NotificationCompat.InboxStyle().also {

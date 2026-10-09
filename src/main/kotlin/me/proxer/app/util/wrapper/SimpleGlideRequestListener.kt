@@ -14,15 +14,15 @@ interface SimpleGlideRequestListener<R> : RequestListener<R> {
     override fun onLoadFailed(
         error: GlideException?,
         model: Any?,
-        target: Target<R>?,
+        target: Target<R>,
         isFirstResource: Boolean
     ) = onLoadFailed(error)
 
     override fun onResourceReady(
-        resource: R,
-        model: Any?,
+        resource: R & Any,
+        model: Any,
         target: Target<R>?,
-        dataSource: DataSource?,
+        dataSource: DataSource,
         isFirstResource: Boolean
     ) = onResourceReady(resource)
 

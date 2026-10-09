@@ -14,7 +14,6 @@ import com.danielstone.materialaboutlibrary.MaterialAboutFragment
 import com.danielstone.materialaboutlibrary.items.MaterialAboutActionItem
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList
-import com.mikepenz.aboutlibraries.LibsBuilder
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
@@ -130,15 +129,7 @@ class AboutFragment : MaterialAboutFragment(), CustomTabsAware {
                 }
             )
             .setOnClickAction {
-                LibsBuilder()
-                    .withAutoDetect(false)
-                    .withShowLoadingProgress(false)
-                    .withAboutVersionShown(false)
-                    .withAboutIconShown(false)
-                    .withVersionShown(false)
-                    .withOwnLibsActivityClass(ProxerLibsActivity::class.java)
-                    .withActivityTitle(getString(R.string.about_licenses_activity_title))
-                    .start(requireActivity())
+                ProxerLibsActivity.navigateTo(requireActivity())
             }.build(),
         MaterialAboutActionItem.Builder()
             .text(R.string.about_source_code)

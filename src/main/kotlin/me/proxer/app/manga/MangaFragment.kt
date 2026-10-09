@@ -28,7 +28,7 @@ import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.autoDisposable
 import io.reactivex.Observable
 import kotterknife.bindView
-import me.proxer.app.GlideApp
+import com.bumptech.glide.Glide
 import me.proxer.app.R
 import me.proxer.app.base.BaseAdapter.ContainerPositionResolver
 import me.proxer.app.base.BaseContentFragment
@@ -49,7 +49,7 @@ import me.proxer.app.util.extension.toLocalDateTimeBP
 import me.proxer.app.util.extension.unsafeLazy
 import me.proxer.library.entity.info.EntryCore
 import me.proxer.library.enums.Language
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.properties.Delegates
 
@@ -67,7 +67,7 @@ class MangaFragment : BaseContentFragment<MangaChapterInfo>(R.layout.fragment_ma
         }
     }
 
-    override val viewModel by sharedViewModel<MangaViewModel> { parametersOf(id, language, episode) }
+    override val viewModel by activityViewModel<MangaViewModel> { parametersOf(id, language, episode) }
 
     override val hostingActivity: MangaActivity
         get() = activity as MangaActivity
@@ -210,8 +210,8 @@ class MangaFragment : BaseContentFragment<MangaChapterInfo>(R.layout.fragment_ma
 
         initHeaderAndFooter()
 
-        preloader.glide = GlideApp.with(this)
-        innerAdapter.glide = GlideApp.with(this)
+        preloader.glide = Glide.with(this)
+        innerAdapter.glide = Glide.with(this)
 
         bindLayoutManager()
 
