@@ -45,6 +45,15 @@
     <string name="theme_gloomy">Düster</string>
     <string name="action_navigate_up">Zurück</string>
     <string name="action_reset">Zurücksetzen</string>
+    <string name="action_remove">Entfernen</string>
+    <string name="profile_team">Team</string>
+    <string name="profile_donator">Unterstützer</string>
+    <string name="action_edit">Bearbeiten</string>
+    <string name="comments_sort_helpful">Hilfreichste</string>
+    <string name="comments_sort_newest">Neueste</string>
+    <string name="media_info_show_less">Weniger anzeigen</string>
+    <string name="media_info_unrated_tags">Unbewertete</string>
+    <string name="media_info_spoiler_tags">Spoiler</string>
     <string name="action_create_conference">Neue Unterhaltung</string>
     <string name="chat_search_hint">Unterhaltungen durchsuchen</string>
     <string name="chat_read_only">Nur lesen</string>

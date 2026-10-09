@@ -1,6 +1,7 @@
 package me.proxer.app.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,7 +30,7 @@ fun MediaCoverCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
-    overlay: @Composable () -> Unit = {}
+    overlay: @Composable BoxScope.() -> Unit = {}
 ) {
     Card(onClick = onClick, modifier = modifier) {
         Column {

@@ -1,25 +1,29 @@
 package me.proxer.app.info.translatorgroup
 
 import android.app.Activity
-import android.view.Menu
-import android.view.MenuItem
-import androidx.core.app.ShareCompat
-import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
-import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import me.proxer.app.R
-import me.proxer.app.base.ImageTabsActivity
+import me.proxer.app.base.ComposeActivity
+import me.proxer.app.info.OrganisationInfo
+import me.proxer.app.info.OrganisationProject
+import me.proxer.app.info.OrganisationScreen
+import me.proxer.app.info.displayName
+import me.proxer.app.ui.components.collectContentState
+import me.proxer.app.ui.components.map
+import me.proxer.app.ui.components.rememberErrorActionHandler
 import me.proxer.app.util.extension.getSafeStringExtra
 import me.proxer.app.util.extension.startActivity
-import me.proxer.app.util.extension.unsafeLazy
+import me.proxer.app.util.extension.toAppString
+import me.proxer.app.util.extension.toCategory
 import me.proxer.library.util.ProxerUrls
-import okhttp3.HttpUrl
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /**
  * @author Ruben Gees
  */
-class TranslatorGroupActivity : ImageTabsActivity() {
+class TranslatorGroupActivity : ComposeActivity() {
 
     companion object {
         private const val ID_EXTRA = "id"
@@ -33,66 +37,48 @@ class TranslatorGroupActivity : ImageTabsActivity() {
         }
     }
 
-    val id: String
+    private val id: String
         get() = intent.getSafeStringExtra(ID_EXTRA)
 
-    var name: String?
-        get() = intent.getStringExtra(NAME_EXTRA)
-        set(value) {
-            intent.putExtra(NAME_EXTRA, value)
+    @Composable
+    override fun Content() {
+        val context = LocalContext.current
+        val infoViewModel = koinViewModel<TranslatorGroupInfoViewModel> { parametersOf(id) }
+        val projectViewModel = koinViewModel<TranslatorGroupProjectViewModel> { parametersOf(id) }
+        val infoState = infoViewModel.collectContentState()
+        val projectsState = projectViewModel.collectContentState()
 
-            title = value
-        }
-
-    override val headerImageUrl: HttpUrl by unsafeLazy { ProxerUrls.translatorGroupImage(id) }
-    override val sectionsPagerAdapter: FragmentStateAdapter by unsafeLazy { SectionsPagerAdapter() }
-    override val sectionsTabCallback: TabLayoutMediator.TabConfigurationStrategy by unsafeLazy { SectionsTabCallback() }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        IconicsMenuInflaterUtil.inflate(menuInflater, this, R.menu.activity_share, menu, true)
-
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_share -> name?.let {
-                ShareCompat.IntentBuilder(this)
-                    .setText(getString(R.string.share_translator_group, it, ProxerUrls.translatorGroupWeb(id)))
-                    .setType("text/plain")
-                    .setChooserTitle(getString(R.string.share_title))
-                    .startChooser()
-            }
-        }
-
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun setupToolbar() {
-        super.setupToolbar()
-
-        title = name
-    }
-
-    private inner class SectionsPagerAdapter : FragmentStateAdapter(supportFragmentManager, lifecycle) {
-
-        override fun getItemCount() = 2
-
-        override fun createFragment(position: Int) = when (position) {
-            0 -> TranslatorGroupInfoFragment.newInstance()
-            1 -> TranslatorGroupProjectFragment.newInstance()
-            else -> error("Unknown index passed: $position")
-        }
-    }
-
-    private inner class SectionsTabCallback : TabLayoutMediator.TabConfigurationStrategy {
-
-        override fun onConfigureTab(tab: TabLayout.Tab, position: Int) {
-            tab.text = when (position) {
-                0 -> getString(R.string.section_translator_group_info)
-                1 -> getString(R.string.section_translator_group_projects)
-                else -> error("Unknown index passed: $position")
-            }
-        }
+        OrganisationScreen(
+            initialName = intent.getStringExtra(NAME_EXTRA),
+            shareText = R.string.share_translator_group,
+            shareUrl = ProxerUrls.translatorGroupWeb(id),
+            infoState = infoState.map { info ->
+                OrganisationInfo(
+                    name = info.name,
+                    imageUrl = if (info.image.isBlank()) null else ProxerUrls.translatorGroupImage(id),
+                    rows = listOfNotNull(
+                        info.country.displayName()?.let { context.getString(R.string.fragment_translator_group_language) to it }
+                    ),
+                    link = info.link,
+                    description = info.description
+                )
+            },
+            onInfoErrorAction = rememberErrorActionHandler(infoViewModel::load),
+            projectsState = projectsState.map { projects ->
+                projects.map { project ->
+                    OrganisationProject(
+                        id = project.id,
+                        name = project.name,
+                        subtitle = project.medium.toAppString(context) + " · " + project.state.toAppString(context),
+                        category = project.medium.toCategory(),
+                        rating = project.rating,
+                        coverUrl = ProxerUrls.entryImage(project.id)
+                    )
+                }
+            },
+            onProjectsErrorAction = rememberErrorActionHandler(projectViewModel::load),
+            onLoadMoreProjects = projectViewModel::loadIfPossible,
+            onRefreshProjects = projectViewModel::refresh
+        )
     }
 }

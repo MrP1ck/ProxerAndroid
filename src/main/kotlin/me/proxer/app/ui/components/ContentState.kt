@@ -127,3 +127,13 @@ fun rememberErrorActionHandler(onRetry: () -> Unit): (ErrorAction) -> Unit {
         }
     }
 }
+
+/**
+ * Maps the data of this state, keeping the loading and error state.
+ */
+inline fun <T, R> ContentState<T>.map(transform: (T) -> R): ContentState<R> = ContentState(
+    data = data?.let(transform),
+    error = error,
+    isLoading = isLoading,
+    refreshError = refreshError
+)

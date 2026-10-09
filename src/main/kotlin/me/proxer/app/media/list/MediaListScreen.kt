@@ -279,7 +279,7 @@ private fun MediaEntryCard(entry: MediaListEntry, category: Category, onClick: (
         overlay = {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .matchParentSize()
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {

@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.proxer.app.R
 import me.proxer.app.util.extension.flagDrawableRes
@@ -38,7 +39,7 @@ fun RatingBadge(rating: Float, modifier: Modifier = Modifier) {
         Icon(
             painter = painterResource(R.drawable.ic_symbol_star_filled),
             contentDescription = null,
-            tint = Color(0xFFFFC107),
+            tint = StarColor,
             modifier = Modifier.size(14.dp)
         )
 
@@ -58,3 +59,28 @@ fun LanguageFlag(language: Language, modifier: Modifier = Modifier) {
         modifier = modifier.size(width = 22.dp, height = 16.dp)
     )
 }
+
+/**
+ * A row of five stars showing [rating] on the scale of 0 to 5, with half stars.
+ */
+@Composable
+fun RatingStars(rating: Float, modifier: Modifier = Modifier, starSize: Dp = 16.dp) {
+    Row(modifier) {
+        repeat(5) { index ->
+            val icon = when {
+                rating >= index + 0.75f -> R.drawable.ic_symbol_star_filled
+                rating >= index + 0.25f -> R.drawable.ic_symbol_star_half
+                else -> R.drawable.ic_symbol_star
+            }
+
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = if (icon == R.drawable.ic_symbol_star) MaterialTheme.colorScheme.outline else StarColor,
+                modifier = Modifier.size(starSize)
+            )
+        }
+    }
+}
+
+private val StarColor = Color(0xFFFFC107)
