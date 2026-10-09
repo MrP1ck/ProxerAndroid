@@ -24,8 +24,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,8 +42,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.proxer.app.R
 import me.proxer.app.util.ErrorUtils.ErrorAction
-import me.proxer.app.util.ErrorUtils.ErrorAction.Companion.ACTION_MESSAGE_DEFAULT
-import me.proxer.app.util.ErrorUtils.ErrorAction.Companion.ACTION_MESSAGE_HIDE
 
 private const val DEFAULT_PAGING_THRESHOLD = 5
 
@@ -260,21 +256,12 @@ private fun RefreshErrorSnackbar(refreshError: ErrorAction?, onErrorAction: (Err
 
     LaunchedEffect(refreshError) {
         if (refreshError != null) {
-            val actionLabel = when (refreshError.buttonMessage) {
-                ACTION_MESSAGE_HIDE -> null
-                ACTION_MESSAGE_DEFAULT -> context.getString(R.string.error_action_retry)
-                else -> context.getString(refreshError.buttonMessage)
-            }
-
-            val result = snackbarHostState.showSnackbar(
-                message = context.getString(R.string.error_refresh, context.getString(refreshError.message)),
-                actionLabel = actionLabel,
-                duration = SnackbarDuration.Long
+            snackbarHostState.showErrorSnackbar(
+                context = context,
+                error = refreshError,
+                onAction = onErrorAction,
+                message = context.getString(R.string.error_refresh, context.getString(refreshError.message))
             )
-
-            if (result == SnackbarResult.ActionPerformed) {
-                onErrorAction(refreshError)
-            }
         }
     }
 }

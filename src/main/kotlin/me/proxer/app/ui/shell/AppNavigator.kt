@@ -120,7 +120,9 @@ class AppNavigator(private val activity: BaseActivity, private val navController
 
     fun showLogout() = LogoutDialog.show(activity)
 
-    fun showPage(url: HttpUrl) = activity.showPage(url, forceBrowser = false, skipCheck = false)
+    fun showPage(url: HttpUrl, forceBrowser: Boolean = false, skipCheck: Boolean = false) {
+        activity.showPage(url, forceBrowser, skipCheck)
+    }
 }
 
 val LocalAppNavigator = staticCompositionLocalOf<AppNavigator> { error("No AppNavigator provided") }

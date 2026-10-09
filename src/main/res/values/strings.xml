@@ -45,6 +45,7 @@
     <string name="theme_gloomy">Düster</string>
     <string name="action_navigate_up">Zurück</string>
     <string name="action_reset">Zurücksetzen</string>
+    <string name="action_send">Senden</string>
     <string name="action_remove">Entfernen</string>
     <string name="profile_team">Team</string>
     <string name="profile_donator">Unterstützer</string>

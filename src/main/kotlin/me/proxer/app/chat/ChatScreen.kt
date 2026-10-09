@@ -53,6 +53,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.chat.prv.ConferenceWithMessage
+import me.proxer.app.chat.prv.conference.ConferenceFragmentPingEvent
 import me.proxer.app.chat.prv.conference.ConferenceViewModel
 import me.proxer.app.chat.prv.sync.MessengerNotifications
 import me.proxer.app.chat.pub.room.ChatRoomViewModel
@@ -60,6 +61,7 @@ import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.ContentStateHost
 import me.proxer.app.ui.components.ProxerAsyncImage
 import me.proxer.app.ui.components.ProxerScaffold
+import me.proxer.app.ui.components.RegisterWhileResumed
 import me.proxer.app.ui.components.SearchableTopAppBar
 import me.proxer.app.ui.components.collectContentState
 import me.proxer.app.ui.components.plus
@@ -113,6 +115,8 @@ fun ChatScreen(
     LaunchedEffect(showMessenger) {
         if (showMessenger) pagerState.animateScrollToPage(PRIVATE_PAGE)
     }
+
+    RegisterWhileResumed(ConferenceFragmentPingEvent::class.java)
 
     LifecycleResumeEffect(Unit) {
         MessengerNotifications.cancel(context)
