@@ -594,6 +594,7 @@
     <string name="fragment_manga_left_to_right">Von links nach rechts lesen</string>
     <string name="fragment_manga_right_to_left">Von rechts nach links lesen</string>
     <string name="fragment_manga_vertical">Von oben nach unten lesen</string>
+    <string name="fragment_manga_page">Seite %1$d von %2$d</string>
     <string name="fragment_manga_low_memory">
         Dein Gerät hat zu wenig Speicher. Eventuell werden Seiten nicht korrekt angezeigt
     </string>

@@ -1,5 +1,8 @@
 package me.proxer.app.ui.preview
 
+import me.proxer.app.anime.AnimeStream
+import me.proxer.app.anime.AnimeStreamInfo
+import me.proxer.app.anime.resolver.StreamResolutionResult
 import me.proxer.app.media.comments.ParsedComment
 import me.proxer.app.ui.view.bbcode.toBBTree
 import me.proxer.library.entity.chat.ChatRoom
@@ -41,6 +44,58 @@ object PreviewData {
     private val now = Date(1_700_000_000_000L)
 
     private fun hoursAgo(hours: Long) = Date(now.time - TimeUnit.HOURS.toMillis(hours))
+
+    val animeStreamInfo = AnimeStreamInfo(
+        name = "Violet Evergarden",
+        episodeAmount = 13,
+        streams = listOf(
+            AnimeStream(
+                id = "1",
+                hoster = "proxer-stream",
+                hosterName = "Proxer-Stream",
+                image = "proxer-stream.png",
+                uploaderId = "1",
+                uploaderName = "Ruby",
+                date = Instant.ofEpochSecond(1_600_000_000),
+                translatorGroupId = "2",
+                translatorGroupName = "Gruppe Kirschblüte",
+                isOfficial = false,
+                isPublic = true,
+                isSupported = true,
+                resolutionResult = null
+            ),
+            AnimeStream(
+                id = "2",
+                hoster = "crunchyroll",
+                hosterName = "Crunchyroll",
+                image = "crunchyroll.png",
+                uploaderId = "3",
+                uploaderName = "Admin",
+                date = Instant.ofEpochSecond(1_600_000_000),
+                translatorGroupId = null,
+                translatorGroupName = null,
+                isOfficial = true,
+                isPublic = false,
+                isSupported = true,
+                resolutionResult = null
+            ),
+            AnimeStream(
+                id = "3",
+                hoster = "other",
+                hosterName = "Anderer Hoster",
+                image = "other.png",
+                uploaderId = "3",
+                uploaderName = "Admin",
+                date = Instant.ofEpochSecond(1_600_000_000),
+                translatorGroupId = null,
+                translatorGroupName = null,
+                isOfficial = false,
+                isPublic = true,
+                isSupported = false,
+                resolutionResult = StreamResolutionResult.Message("Dieser Stream ist auf https://proxer.me verfügbar.")
+            )
+        )
+    )
 
     val newsArticles = listOf(
         NewsArticle(

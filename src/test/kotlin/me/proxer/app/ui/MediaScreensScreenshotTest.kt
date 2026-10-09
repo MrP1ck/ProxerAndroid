@@ -6,6 +6,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
 import me.proxer.app.TestApplication
+import me.proxer.app.anime.AnimeContent
+import me.proxer.app.anime.StreamActions
+import me.proxer.app.ui.components.ContentState
 import me.proxer.app.comment.CommentCard
 import me.proxer.app.comment.CommentCardData
 import me.proxer.app.media.info.MediaInfoActions
@@ -62,6 +65,23 @@ class MediaScreensScreenshotTest(private val isDark: Boolean) {
             onEdit = {},
             onDelete = {},
             modifier = Modifier.padding(16.dp)
+        )
+    }
+
+    @Test
+    fun animeEpisode() = composeRule.captureScreen("screens", "anime_episode", isDark) {
+        AnimeContent(
+            state = ContentState(PreviewData.animeStreamInfo),
+            hasEntry = true,
+            episode = 2,
+            episodeAmount = 13,
+            isLoggedIn = false,
+            contentPadding = PaddingValues(),
+            onErrorAction = {},
+            onSwitchEpisode = {},
+            onBookmark = {},
+            onFinish = {},
+            actions = StreamActions()
         )
     }
 }
