@@ -3,6 +3,9 @@ package me.proxer.app.util.data
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.f2prateek.rx.preferences2.RxSharedPreferences
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import me.proxer.app.manga.MangaReaderOrientation
 import me.proxer.app.settings.theme.ThemeContainer
 import me.proxer.app.util.extension.getSafeString
@@ -35,6 +38,9 @@ class PreferenceHelper(
         const val CHECK_CELLULAR = "check_cellular"
         const val START_PAGE = "start_page"
         const val THEME = "theme"
+
+        // Dynamic colors with the system light/dark setting. Falls back to the classic theme below Android 12.
+        private const val DEFAULT_THEME = "3_2"
         const val NOTIFICATIONS_NEWS = "notifications_news"
         const val NOTIFICATIONS_ACCOUNT = "notifications_account"
         const val NOTIFICATIONS_CHAT = "notifications_chat"
@@ -155,12 +161,22 @@ class PreferenceHelper(
         get() = sharedPreferences.contains(EXTERNAL_CACHE)
 
     var themeContainer
-        get() = ThemeContainer.fromPreferenceString(sharedPreferences.getSafeString(THEME, "0_2"))
+        get() = ThemeContainer.fromPreferenceString(sharedPreferences.getSafeString(THEME, DEFAULT_THEME))
         set(value) {
             sharedPreferences.edit { putString(THEME, value.toPreferenceString()) }
+
+            mutableThemeFlow.value = value
         }
 
-    val themeObservable = rxSharedPreferences.getString(THEME, "0_2")
+    private val mutableThemeFlow = MutableStateFlow(themeContainer)
+
+    /**
+     * The current theme. Unlike [themeObservable], this emits the current value immediately, which is what Compose
+     * needs to switch the theme without recreating the Activity.
+     */
+    val themeFlow: StateFlow<ThemeContainer> = mutableThemeFlow.asStateFlow()
+
+    val themeObservable = rxSharedPreferences.getString(THEME, DEFAULT_THEME)
         .asObservable()
         .skip(1)
         .map { ThemeContainer.fromPreferenceString(it) }

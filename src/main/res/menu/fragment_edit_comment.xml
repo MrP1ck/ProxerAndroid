@@ -5,7 +5,7 @@
     <item
         android:id="@+id/preview"
         android:title="@string/action_preview"
-        app:ico_color="?attr/colorOnPrimary"
+        app:ico_color="?attr/colorToolbarIcon"
         app:ico_icon="cmd_eye"
         app:ico_padding="2dp"
         app:ico_size="24dp"
@@ -14,7 +14,7 @@
     <item
         android:id="@+id/publish"
         android:title="@string/action_publish"
-        app:ico_color="?attr/colorOnPrimary"
+        app:ico_color="?attr/colorToolbarIcon"
         app:ico_icon="cmd_send"
         app:ico_padding="2dp"
         app:ico_size="24dp"

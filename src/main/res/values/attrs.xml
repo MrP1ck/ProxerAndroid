@@ -1,15 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <attr name="colorPrimaryLight" format="color|reference" />
 
-    <attr name="colorSecondaryLight" format="color|reference" />
-    <attr name="colorSecondaryDark" format="color|reference" />
-
     <attr name="colorSelectedSurface" format="color|reference" />
-    <attr name="colorSelectedBackground" format="color|reference" />
 
     <attr name="colorDivider" format="color|reference" />
     <attr name="colorIcon" format="color|reference" />
     <attr name="colorIconDisabled" format="color|reference" />
+    <attr name="colorToolbarIcon" format="color|reference" />
 
     <attr name="colorLink" format="color|reference" />
 

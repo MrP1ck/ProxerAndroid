@@ -19,6 +19,7 @@ import me.proxer.app.auth.LogoutDialog
 import me.proxer.app.notification.NotificationActivity
 import me.proxer.app.profile.ProfileActivity
 import me.proxer.app.profile.settings.ProfileSettingsActivity
+import me.proxer.app.util.extension.resolveColor
 import me.proxer.app.util.wrapper.MaterialDrawerWrapper
 import me.proxer.app.util.wrapper.MaterialDrawerWrapper.ProfileItem
 import kotlin.properties.Delegates
@@ -52,6 +53,7 @@ abstract class DrawerActivity : BaseActivity() {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = Color.TRANSPARENT
+        drawerLayout.setStatusBarBackgroundColor(resolveColor(R.attr.colorSurface))
 
         actionBarDrawerToggle = ActionBarDrawerToggle(
             this,

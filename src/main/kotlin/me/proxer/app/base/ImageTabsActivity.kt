@@ -30,6 +30,9 @@ import okhttp3.HttpUrl
  */
 abstract class ImageTabsActivity : DrawerActivity() {
 
+    override val themeOverlay
+        get() = R.style.ThemeOverlay_App_OnImage
+
     override val contentView
         get() = R.layout.activity_image_tabs
 

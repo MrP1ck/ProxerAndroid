@@ -3,6 +3,7 @@ package me.proxer.app.chat.prv.message
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -79,7 +80,7 @@ class MessengerFragment : PagedContentFragment<LocalMessage>(R.layout.fragment_m
 
     private val actionModeCallback: ActionMode.Callback = object : ActionMode.Callback {
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            requireActivity().window.statusBarColor = requireContext().resolveColor(R.attr.colorPrimary)
+            requireActivity().window.statusBarColor = requireContext().resolveColor(R.attr.colorSurfaceContainerHigh)
 
             innerAdapter.selectedMessages.let {
                 menu.findItem(R.id.reply).isVisible = it.size == 1 && it.first().userId != storageHelper.user?.id
@@ -116,7 +117,7 @@ class MessengerFragment : PagedContentFragment<LocalMessage>(R.layout.fragment_m
             innerAdapter.clearSelection()
             innerAdapter.notifyDataSetChanged()
 
-            requireActivity().window.statusBarColor = requireContext().resolveColor(R.attr.colorPrimaryDark)
+            requireActivity().window.statusBarColor = Color.TRANSPARENT
         }
     }
 

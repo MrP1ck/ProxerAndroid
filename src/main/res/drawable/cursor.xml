@@ -6,7 +6,7 @@
 
     <shape
         android:shape="rectangle"
-        android:tint="?attr/colorOnPrimary">
+        android:tint="?attr/colorPrimary">
         <size
             android:width="2dp"
             android:height="2dp" />

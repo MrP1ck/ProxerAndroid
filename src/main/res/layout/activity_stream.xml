@@ -24,13 +24,13 @@
         android:layout_height="wrap_content"
         android:background="@color/half_transparent"
         android:fitsSystemWindows="true"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+        android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark">
+        android:theme="@style/ThemeOverlay.Material3.Dark">
 
         <me.zhanghai.android.materialprogressbar.MaterialProgressBar
             android:id="@+id/loading"

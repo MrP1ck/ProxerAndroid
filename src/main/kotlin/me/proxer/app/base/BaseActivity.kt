@@ -15,6 +15,7 @@ import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.autoDisposable
 import kotterknife.bindView
 import me.proxer.app.R
+import me.proxer.app.settings.theme.applyThemeContainer
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.compat.TaskDescriptionCompat
 import me.proxer.app.util.data.PreferenceHelper
@@ -40,6 +41,12 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
     protected open val theme
         @StyleRes get() = preferenceHelper.themeContainer.theme.main
 
+    /**
+     * An optional theme overlay applied on top of the app theme, e.g. [R.style.ThemeOverlay_App_OnImage].
+     */
+    protected open val themeOverlay: Int?
+        @StyleRes get() = null
+
     protected open val root: ViewGroup by bindView(R.id.root)
 
     protected val bus by safeInject<RxBus>()
@@ -55,7 +62,9 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
             intent.putExtras(state)
         }
 
-        getTheme().applyStyle(theme, true)
+        applyThemeContainer(preferenceHelper.themeContainer, theme)
+        themeOverlay?.let { getTheme().applyStyle(it, true) }
+
         TaskDescriptionCompat.setTaskDescription(this, preferenceHelper.themeContainer.theme.primaryColor(this))
 
         super.onCreate(savedInstanceState)

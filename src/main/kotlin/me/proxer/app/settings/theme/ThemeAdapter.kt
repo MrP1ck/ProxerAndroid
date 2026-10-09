@@ -25,7 +25,7 @@ class ThemeAdapter(currentThemeContainer: ThemeContainer) : BaseAdapter<Theme, V
     private var selectedIndex: Int
 
     init {
-        data = Theme.values().toList()
+        data = Theme.available
         selectedVariant = currentThemeContainer.variant
         selectedIndex = data.indexOfFirst { it == currentThemeContainer.theme }
     }

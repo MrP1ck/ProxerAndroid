@@ -137,7 +137,7 @@
 
                             <Button
                                 android:id="@+id/unratedTags"
-                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                style="@style/Widget.Material3.Button.TextButton"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_gravity="center_vertical"
@@ -151,7 +151,7 @@
 
                             <Button
                                 android:id="@+id/spoilerTags"
-                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                style="@style/Widget.Material3.Button.TextButton"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_gravity="center_vertical"

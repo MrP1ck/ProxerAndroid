@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import kotterknife.bindView
 import me.proxer.app.R
+import me.proxer.app.settings.theme.applyThemeContainer
 import me.proxer.app.util.compat.TaskDescriptionCompat
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.extension.getSafeStringExtra
@@ -37,10 +38,10 @@ class WebViewActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
-        val theme = preferenceHelper.themeContainer.theme
+        val themeContainer = preferenceHelper.themeContainer
 
-        getTheme().applyStyle(theme.main, true)
-        TaskDescriptionCompat.setTaskDescription(this, theme.primaryColor(this))
+        applyThemeContainer(themeContainer)
+        TaskDescriptionCompat.setTaskDescription(this, themeContainer.theme.primaryColor(this))
 
         super.onCreate(savedInstanceState)
 

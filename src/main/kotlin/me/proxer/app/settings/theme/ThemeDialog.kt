@@ -2,6 +2,7 @@ package me.proxer.app.settings.theme
 
 import android.app.Dialog
 import android.os.Bundle
+import android.widget.CheckBox
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -25,6 +26,7 @@ class ThemeDialog : BaseDialog() {
 
     private val colorList by bindView<RecyclerView>(R.id.colorList)
     private val nightRadioGroup by bindView<RadioGroup>(R.id.nightRadioGroup)
+    private val amoledCheckBox by bindView<CheckBox>(R.id.amoledCheckBox)
 
     private var adapter by Delegates.notNull<ThemeAdapter>()
 
@@ -47,7 +49,7 @@ class ThemeDialog : BaseDialog() {
                 else -> error("Unknown radio button id: $id")
             }
 
-            preferenceHelper.themeContainer = ThemeContainer(theme, variant)
+            preferenceHelper.themeContainer = ThemeContainer(theme, variant, amoledCheckBox.isChecked)
 
             dismiss()
         }
@@ -68,5 +70,7 @@ class ThemeDialog : BaseDialog() {
                 ThemeVariant.SYSTEM -> R.id.systemButton
             }
         )
+
+        amoledCheckBox.isChecked = preferenceHelper.themeContainer.isAmoled
     }
 }

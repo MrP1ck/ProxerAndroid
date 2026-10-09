@@ -14,6 +14,9 @@ import androidx.core.content.getSystemService
 import androidx.work.Configuration
 import androidx.work.Logger
 import androidx.work.WorkManager
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.github.anrwatchdog.ANRWatchDog
 import com.google.android.gms.common.GoogleApiAvailability
@@ -33,6 +36,7 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import me.proxer.app.auth.LoginHandler
 import me.proxer.app.base.NetworkConnectedEvent
+import me.proxer.app.ui.image.ProxerImageLoader
 import me.proxer.app.util.GlideDrawerImageLoader
 import me.proxer.app.util.NotificationUtils
 import me.proxer.app.util.compat.isConnected
@@ -42,6 +46,8 @@ import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.app.util.logging.TimberFileTree
 import me.proxer.app.util.logging.WorkManagerTimberLogger
+import okhttp3.OkHttpClient
+import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
@@ -50,7 +56,7 @@ import java.util.concurrent.TimeUnit
 /**
  * @author Ruben Gees
  */
-class MainApplication : Application() {
+class MainApplication : Application(), SingletonImageLoader.Factory {
 
     companion object {
         const val USER_AGENT = "ProxerAndroid/${BuildConfig.VERSION_NAME}"
@@ -85,6 +91,10 @@ class MainApplication : Application() {
         initConnectionManager()
 
         loginHandler.listen(this)
+    }
+
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        return ProxerImageLoader.create(context, get<OkHttpClient>(), preferenceHelper)
     }
 
     private fun initConnectionManager() {

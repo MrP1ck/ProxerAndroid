@@ -3,6 +3,7 @@ package me.proxer.app.chat.pub.message
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -17,6 +18,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
@@ -35,7 +37,6 @@ import com.vanniktech.emoji.EmojiEditText
 import com.vanniktech.emoji.EmojiPopup
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotterknife.bindView
-import com.bumptech.glide.Glide
 import me.proxer.app.R
 import me.proxer.app.base.PagedContentFragment
 import me.proxer.app.profile.ProfileActivity
@@ -73,7 +74,7 @@ class ChatFragment : PagedContentFragment<ParsedChatMessage>(R.layout.fragment_c
 
     private val actionModeCallback: ActionMode.Callback = object : ActionMode.Callback {
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            requireActivity().window.statusBarColor = requireContext().resolveColor(R.attr.colorPrimary)
+            requireActivity().window.statusBarColor = requireContext().resolveColor(R.attr.colorSurfaceContainerHigh)
 
             innerAdapter.selectedMessages.let {
                 val user = storageHelper.user
@@ -108,7 +109,7 @@ class ChatFragment : PagedContentFragment<ParsedChatMessage>(R.layout.fragment_c
             innerAdapter.clearSelection()
             innerAdapter.notifyDataSetChanged()
 
-            requireActivity().window.statusBarColor = requireContext().resolveColor(R.attr.colorPrimaryDark)
+            requireActivity().window.statusBarColor = Color.TRANSPARENT
         }
     }
 

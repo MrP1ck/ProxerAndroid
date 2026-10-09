@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_open_in_other_app"
         android:title="@string/action_open_in_other_app"
-        app:ico_color="?attr/colorOnPrimary"
+        app:ico_color="?attr/colorToolbarIcon"
         app:ico_icon="cmd_open_in_new"
         app:ico_padding="2dp"
         app:ico_size="24dp"

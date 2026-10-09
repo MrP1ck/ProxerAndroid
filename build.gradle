@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 
     alias(libs.plugins.aboutlibraries)
@@ -8,6 +9,7 @@ plugins {
     alias(libs.plugins.versions)
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.roborazzi)
 }
 
 apply from: "${projectDir}/gradle/utils.gradle"
@@ -33,6 +35,13 @@ android {
 
     buildFeatures {
         buildConfig true
+        compose true
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
     }
 
     sourceSets {
@@ -46,6 +55,10 @@ android {
 
         release {
             java.srcDirs += "src/release/kotlin"
+        }
+
+        test {
+            java.srcDirs += "src/test/kotlin"
         }
 
         logRelease {
@@ -175,6 +188,25 @@ ksp {
 dependencies {
     implementation libs.kotlin.stdlib
     implementation libs.koin.android
+    implementation libs.koin.androidx.compose
+    implementation libs.kotlinx.coroutines.android
+
+    implementation platform(libs.compose.bom)
+    implementation libs.compose.ui
+    implementation libs.compose.ui.graphics
+    implementation libs.compose.ui.tooling.preview
+    implementation libs.compose.foundation
+    implementation libs.compose.material3
+    implementation libs.compose.material3.adaptive.navigation.suite
+    implementation libs.compose.runtime.livedata
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.lifecycle.runtime.compose
+    implementation libs.androidx.lifecycle.viewmodel.compose
+    implementation libs.androidx.fragment.compose
+    implementation libs.coil.compose
+    implementation libs.coil.network.okhttp
+    debugImplementation libs.compose.ui.tooling
+    debugImplementation libs.compose.ui.test.manifest
 
     implementation libs.play.app.update
     implementation libs.play.services.cast.framework
@@ -285,6 +317,14 @@ dependencies {
     ksp libs.moshi.codegen
 
     compileOnly libs.javax.annotation
+
+    testImplementation platform(libs.compose.bom)
+    testImplementation libs.junit
+    testImplementation libs.robolectric
+    testImplementation libs.compose.ui.test.junit4
+    testImplementation libs.roborazzi
+    testImplementation libs.roborazzi.compose
+    testImplementation libs.roborazzi.junit.rule
 }
 
 configurations.configureEach {

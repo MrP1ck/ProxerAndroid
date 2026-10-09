@@ -43,6 +43,9 @@
     <string name="theme_classic">Klassisch</string>
     <string name="theme_bg">Blau Grün</string>
     <string name="theme_gloomy">Düster</string>
+    <string name="action_navigate_up">Zurück</string>
+    <string name="theme_dynamic">Dynamisch (Hintergrundfarben)</string>
+    <string name="theme_amoled">Reines Schwarz im dunklen Modus</string>
 
     <string name="theme_variant_title">Variante</string>
     <string name="theme_variant_light">Hell</string>

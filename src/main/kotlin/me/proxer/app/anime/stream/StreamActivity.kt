@@ -175,6 +175,9 @@ class StreamActivity : BaseActivity() {
     private val hideControlHandler = Handler(Looper.getMainLooper())
     private val animationHandler = Handler(Looper.getMainLooper())
 
+    override val themeOverlay
+        get() = R.style.ThemeOverlay_App_OnImage
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

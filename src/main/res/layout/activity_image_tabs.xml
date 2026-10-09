@@ -19,14 +19,15 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/image_tabs_header_size"
             android:fitsSystemWindows="true"
-            android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
+            android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:id="@+id/collapsingToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:fitsSystemWindows="true"
-                app:contentScrim="?attr/colorPrimary"
+                app:contentScrim="?attr/colorOnPrimaryFixedVariant"
+                app:statusBarScrim="?attr/colorOnPrimaryFixedVariant"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
                 <ImageView
@@ -64,7 +65,7 @@
 
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tabs"
-                    style="@style/Widget.MaterialComponents.TabLayout.Colored"
+                    style="@style/Widget.App.TabLayout.OnImage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
