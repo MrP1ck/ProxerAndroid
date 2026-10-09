@@ -1,22 +1,31 @@
 package me.proxer.app.anime
 
-import android.app.Dialog
-import android.os.Bundle
-import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
-import kotterknife.bindView
 import me.proxer.app.R
-import me.proxer.app.base.BaseDialog
+import me.proxer.app.base.ComposeDialog
+import me.proxer.app.ui.components.DialogButton
+import me.proxer.app.ui.components.LabeledCheckbox
+import me.proxer.app.ui.components.ProxerDialogContent
 import me.proxer.app.util.extension.getSafeString
 
 /**
+ * Warns that a stream is about to be played over a cellular connection.
+ *
  * @author Ruben Gees
  */
-class NoWifiDialog : BaseDialog() {
+class NoWifiDialog : ComposeDialog() {
 
     companion object {
         const val STREAM_ID_RESULT = "stream_id"
@@ -28,19 +37,31 @@ class NoWifiDialog : BaseDialog() {
             .show(activity.supportFragmentManager, "no_wifi_dialog")
     }
 
-    private val remember by bindView<CheckBox>(R.id.remember)
-
     private val streamId: String
         get() = requireArguments().getSafeString(STREAM_ID_ARGUMENT)
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = MaterialDialog(requireContext())
-        .customView(R.layout.dialog_no_wifi, scrollable = true)
-        .positiveButton(R.string.dialog_no_wifi_positive) {
-            if (remember.isChecked) {
-                preferenceHelper.shouldCheckCellular = false
-            }
+    @Composable
+    override fun DialogContent() {
+        var remember by rememberSaveable { mutableStateOf(false) }
 
-            setFragmentResult(STREAM_ID_RESULT, bundleOf(STREAM_ID_RESULT to streamId))
+        ProxerDialogContent(
+            confirmButton = {
+                DialogButton(R.string.dialog_no_wifi_positive, onClick = {
+                    if (remember) {
+                        preferenceHelper.shouldCheckCellular = false
+                    }
+
+                    setFragmentResult(STREAM_ID_RESULT, bundleOf(STREAM_ID_RESULT to streamId))
+                    dismiss()
+                })
+            },
+            dismissButton = { DialogButton(R.string.cancel, onClick = ::dismiss) }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.dialog_no_wifi_content).trim())
+
+                LabeledCheckbox(remember, { remember = it }, stringResource(R.string.dialog_no_wifi_remember))
+            }
         }
-        .negativeButton(R.string.cancel)
+    }
 }

@@ -2,4 +2,6 @@
 <resources>
     <item name="ignore_tag" type="id" />
     <item name="error_tag" type="id" />
+    <!-- Used by BaseContentFragment until the remaining fragments are ported to Compose. -->
+    <item name="contentContainer" type="id" />
 </resources>

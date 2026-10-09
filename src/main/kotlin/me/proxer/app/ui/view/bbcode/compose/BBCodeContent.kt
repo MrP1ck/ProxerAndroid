@@ -69,7 +69,8 @@ class BBCodeEnvironment(
     val isAgeRestrictedMediaAllowed: Boolean,
     val onUrl: (HttpUrl) -> Unit,
     val onMention: (String) -> Unit,
-    val onImage: (HttpUrl) -> Unit
+    val onImage: (HttpUrl) -> Unit,
+    val expandSpoilers: Boolean = false
 )
 
 val LocalBBCodeEnvironment = staticCompositionLocalOf {
@@ -294,7 +295,8 @@ private fun BBImage(url: HttpUrl?, width: Int?) {
 
 @Composable
 private fun BBSpoiler(block: BBBlock.Spoiler, enableEmoticons: Boolean) {
-    var isExpanded by rememberSaveable(block) { mutableStateOf(false) }
+    val expandByDefault = LocalBBCodeEnvironment.current.expandSpoilers
+    var isExpanded by rememberSaveable(block) { mutableStateOf(expandByDefault) }
 
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHigh,

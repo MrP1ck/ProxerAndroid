@@ -40,7 +40,8 @@ import org.koin.core.context.GlobalContext
 /**
  * Renders parsed BBCode (posts, comments, messages).
  *
- * If [collapsedHeight] is set, content taller than it is cut off and can be expanded with a button.
+ * If [collapsedHeight] is set, content taller than it is cut off and can be expanded with a button. Spoilers are
+ * shown expanded if [expandSpoilers] is set, e.g. in previews.
  */
 @Composable
 fun BBCodeText(
@@ -49,9 +50,10 @@ fun BBCodeText(
     userId: String? = null,
     enableEmoticons: Boolean = false,
     collapsedHeight: Dp? = null,
-    key: String? = null
+    key: String? = null,
+    expandSpoilers: Boolean = false
 ) {
-    val environment = rememberBBCodeEnvironment()
+    val environment = rememberBBCodeEnvironment(expandSpoilers)
     val collapsedHeightPx = with(LocalDensity.current) { collapsedHeight?.roundToPx() }
 
     var isExpanded by rememberSaveable(key) { mutableStateOf(false) }
@@ -102,11 +104,11 @@ fun BBCodeText(
  * profiles. Without Koin (e.g. in previews), the content is shown as for a guest.
  */
 @Composable
-private fun rememberBBCodeEnvironment(): BBCodeEnvironment {
+private fun rememberBBCodeEnvironment(expandSpoilers: Boolean): BBCodeEnvironment {
     val context = LocalContext.current
     val koin = GlobalContext.getOrNull()
 
-    return remember(context, koin) {
+    return remember(context, koin, expandSpoilers) {
         val activity = BBUtils.findBaseActivity(context)
 
         BBCodeEnvironment(
@@ -114,7 +116,8 @@ private fun rememberBBCodeEnvironment(): BBCodeEnvironment {
             isAgeRestrictedMediaAllowed = koin?.getOrNull<PreferenceHelper>()?.isAgeRestrictedMediaAllowed == true,
             onUrl = { url -> activity?.showPage(url, forceBrowser = false, skipCheck = false) },
             onMention = { username -> activity?.let { ProfileActivity.navigateTo(it, null, username) } },
-            onImage = { url -> activity?.let { ImageDetailActivity.navigateTo(it, url) } }
+            onImage = { url -> activity?.let { ImageDetailActivity.navigateTo(it, url) } },
+            expandSpoilers = expandSpoilers
         )
     }
 }

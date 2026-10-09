@@ -72,7 +72,7 @@ preference = "1.2.1"
 supportPreference = "6d5ebc7934"
 iconics = "5.2.4"
 communityMaterialTypeface = "5.8.55.0-kotlin"
-aboutLibraries = "11.6.3"
+aboutLibraries = "14.2.1"
 materialAbout = "3.2.0-rc01"
 subsamplingScaleImageView = "90c6b27c13"
 subsamplingPdfDecoder = "ad07ddf671"
@@ -195,7 +195,7 @@ support-spinner = { module = "com.github.consp1racy.android-support-preference:s
 iconics-core = { module = "com.mikepenz:iconics-core", version.ref = "iconics" }
 iconics-views = { module = "com.mikepenz:iconics-views", version.ref = "iconics" }
 community-material-typeface = { module = "com.mikepenz:community-material-typeface", version.ref = "communityMaterialTypeface" }
-aboutlibraries = { module = "com.mikepenz:aboutlibraries", version.ref = "aboutLibraries" }
+aboutlibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
 material-about-library = { module = "com.github.daniel-stoneuk:material-about-library", version.ref = "materialAbout" }
 subsampling-scale-image-view = { module = "com.github.rubengees:subsampling-scale-image-view", version.ref = "subsamplingScaleImageView" }
 subsampling-pdf-decoder = { module = "com.github.num42:subsampling-pdf-decoder", version.ref = "subsamplingPdfDecoder" }
@@ -253,7 +253,7 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutLibraries" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versionsPlugin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }

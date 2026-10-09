@@ -15,7 +15,6 @@
         <item name="windowActionModeOverlay">true</item>
 
         <item name="autoCompleteTextViewStyle">@style/Widget.App.AutoCompleteTextView</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Material</item>
         <item name="appBarLayoutStyle">@style/Widget.App.AppBarLayout</item>
         <item name="materialCardViewStyle">@style/Widget.App.CardView</item>
         <item name="radioButtonStyle">@style/Widget.App.RadioButton</item>
@@ -24,8 +23,6 @@
         <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
         <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
 
-        <item name="asp_preferenceIconTint">?attr/colorPrimary</item>
-        <item name="asp_preferenceDialogIconTint">?asp_preferenceIconTint</item>
 
         <item name="md_color_button_text">?attr/colorPrimary</item>
 
@@ -141,5 +138,15 @@
         <item name="tabSelectedTextColor">@android:color/white</item>
         <item name="tabIndicatorColor">@android:color/white</item>
         <item name="tabRippleColor">#33FFFFFF</item>
+    </style>
+
+    <!-- A dialog window without decoration. The content draws the dialog surface itself (see ComposeDialog). -->
+    <style name="ThemeOverlay.App.ComposeDialog" parent="ThemeOverlay.Material3.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowMinWidthMajor">0dp</item>
+        <item name="android:windowMinWidthMinor">0dp</item>
+        <item name="android:windowElevation">0dp</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="windowNoTitle">true</item>
     </style>
 </resources>

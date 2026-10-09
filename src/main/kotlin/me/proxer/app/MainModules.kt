@@ -1,7 +1,7 @@
 package me.proxer.app
 
+import android.content.Context
 import android.content.res.Resources
-import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -92,7 +92,7 @@ import java.util.concurrent.TimeUnit
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
-private const val DEFAULT_PREFERENCES = "defaultPreferences"
+const val DEFAULT_PREFERENCES = "defaultPreferences"
 private const val STORAGE_PREFERENCES = "storagePreferences"
 
 private const val DEFAULT_RX_PREFERENCES = "defaultRxPreferences"
@@ -113,7 +113,10 @@ private val headersToRedact = listOf("proxer-api-key", "set-cookie")
 private val applicationModules = module {
     single { androidContext().packageManager }
 
-    single(named(DEFAULT_PREFERENCES)) { PreferenceManager.getDefaultSharedPreferences(androidContext()) }
+    single(named(DEFAULT_PREFERENCES)) {
+        // The file of PreferenceManager.getDefaultSharedPreferences, which the settings used before.
+        androidContext().getSharedPreferences("${androidContext().packageName}_preferences", Context.MODE_PRIVATE)
+    }
     single(named(STORAGE_PREFERENCES)) {
         val masterKey = MasterKey.Builder(androidContext())
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)

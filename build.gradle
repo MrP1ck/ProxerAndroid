@@ -262,23 +262,18 @@ dependencies {
     implementation libs.androidx.exifinterface
     implementation libs.androidx.constraintlayout
     implementation libs.material
-    implementation libs.androidx.preference
-    implementation libs.support.preference
     implementation libs.support.spinner
     implementation libs.iconics.core
     implementation libs.iconics.views
     implementation libs.community.material.typeface
-    implementation libs.aboutlibraries
-    implementation libs.material.about.library
+    implementation libs.aboutlibraries.compose
     implementation libs.subsampling.scale.image.view
     implementation libs.subsampling.pdf.decoder
     implementation libs.material.dialogs.core
     implementation libs.flexbox
     implementation libs.emoji.ios
     implementation libs.materialprogressbar
-    implementation libs.materialratingbar
     implementation libs.customtabshelper
-    implementation libs.introduction
     implementation libs.aspect.ratio.imageview
     implementation libs.gravitysnaphelper
     implementation libs.exoplayer

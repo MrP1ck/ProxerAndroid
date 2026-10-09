@@ -1,25 +1,34 @@
 package me.proxer.app.auth
 
-import android.app.Dialog
-import android.os.Bundle
-import android.widget.ProgressBar
-import android.widget.TextView
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
-import kotterknife.bindView
 import me.proxer.app.R
-import me.proxer.app.base.BaseDialog
+import me.proxer.app.base.ComposeDialog
+import me.proxer.app.ui.components.DialogButton
+import me.proxer.app.ui.components.ProxerDialogContent
 import me.proxer.app.util.extension.toast
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
+ * Asks the user to confirm logging out and logs out.
+ *
  * @author Ruben Gees
  */
-class LogoutDialog : BaseDialog() {
+class LogoutDialog : ComposeDialog() {
 
     companion object {
         fun show(activity: FragmentActivity) = LogoutDialog().show(activity.supportFragmentManager, "logout_dialog")
@@ -27,42 +36,36 @@ class LogoutDialog : BaseDialog() {
 
     private val viewModel by viewModel<LogoutViewModel>()
 
-    private val content: TextView by bindView(R.id.content)
-    private val progress: ProgressBar by bindView(R.id.progress)
+    @Composable
+    override fun DialogContent() {
+        val isLoading by viewModel.isLoading.observeAsState()
+        val success by viewModel.success.observeAsState()
+        val error by viewModel.error.observeAsState()
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = MaterialDialog(requireContext())
-        .noAutoDismiss()
-        .positiveButton(R.string.dialog_logout_positive) { viewModel.logout() }
-        .negativeButton(R.string.cancel) { dismiss() }
-        .customView(R.layout.dialog_logout, scrollable = true)
+        LaunchedEffect(success) { if (success != null) dismiss() }
 
-    override fun onDialogCreated(savedInstanceState: Bundle?) {
-        super.onDialogCreated(savedInstanceState)
+        LaunchedEffect(error) {
+            error?.let {
+                viewModel.error.value = null
 
-        viewModel.success.observe(
-            dialogLifecycleOwner,
-            Observer {
-                it?.let { dismiss() }
+                requireContext().toast(it.message)
             }
-        )
+        }
 
-        viewModel.error.observe(
-            dialogLifecycleOwner,
-            Observer {
-                it?.let {
-                    viewModel.error.value = null
-
-                    requireContext().toast(it.message)
+        ProxerDialogContent(
+            icon = { Icon(painterResource(R.drawable.ic_symbol_logout), contentDescription = null) },
+            confirmButton = {
+                DialogButton(R.string.dialog_logout_positive, onClick = viewModel::logout, enabled = isLoading != true)
+            },
+            dismissButton = { DialogButton(R.string.cancel, onClick = ::dismiss) }
+        ) {
+            if (isLoading == true) {
+                Box(Modifier.fillMaxWidth().height(64.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
+            } else {
+                Text(stringResource(R.string.dialog_logout_content).trim())
             }
-        )
-
-        viewModel.isLoading.observe(
-            dialogLifecycleOwner,
-            Observer {
-                content.isGone = it == true
-                progress.isVisible = it == true
-            }
-        )
+        }
     }
 }

@@ -75,6 +75,7 @@
     <string name="media_list_rating_content_description">Bewertung %s</string>
     <string name="theme_dynamic">Dynamisch</string>
     <string name="theme_amoled">Reines Schwarz im dunklen Modus</string>
+    <string name="theme_amoled_summary">Spart Akku auf OLED-Displays</string>
 
     <string name="theme_variant_title">Variante</string>
     <string name="theme_variant_light">Hell</string>
@@ -849,6 +850,8 @@
     <string name="preference_start_page_title">Startseite</string>
 
     <string name="preference_category_design_title">Design</string>
+    <string name="preference_notifications_permission_denied">Benachrichtigungen sind in den Systemeinstellungen deaktiviert</string>
+    <string name="preference_notifications_permission_action">Einstellungen</string>
 
     <string name="preference_category_notifications_title">Benachrichtigungen</string>
     <string name="preference_notifications_news_title">News</string>
