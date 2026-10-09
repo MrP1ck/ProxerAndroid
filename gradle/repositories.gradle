@@ -6,8 +6,24 @@ repositories {
             includeGroupByRegex "zipflinger.*"
             includeGroupByRegex "com\\.android.*"
             includeGroupByRegex "com\\.google\\.android.*"
+            includeGroupByRegex "com\\.google\\.ads.*"
             includeModuleByRegex "org\\.jetbrains\\.kotlin.*", "kotlin-symbol-processing-api"
         }
+    }
+
+    mavenCentral {
+        mavenContent { releasesOnly() }
+        content {
+            excludeGroupByRegex "androidx.*"
+            excludeGroupByRegex "com\\.android.*"
+        }
+    }
+
+    // jcenter is shut down. ExoPlayer < 2.13 is only available from a jcenter mirror.
+    maven {
+        url "https://maven.aliyun.com/repository/jcenter"
+        mavenContent { releasesOnly() }
+        content { includeGroup "com.google.android.exoplayer" }
     }
 
     jcenter {
