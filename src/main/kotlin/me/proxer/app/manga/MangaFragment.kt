@@ -329,7 +329,10 @@ class MangaFragment : BaseContentFragment<MangaChapterInfo>(R.layout.fragment_ma
 
         showHeaderAndFooter(data)
 
-        preloader.preload(data.chapter)
+        // The stored position includes the header, so subtract one to get the page.
+        val startPage = (storageHelper.getLastMangaPage(id, episode, language) ?: 0) - 1
+
+        preloader.preload(data.chapter, startPage)
         innerAdapter.setChapter(data.chapter)
 
         data.chapter.pages?.let { pages ->

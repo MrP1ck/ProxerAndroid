@@ -34,7 +34,7 @@ class ImageLibDecoder @JvmOverloads @Keep constructor(bitmapConfig: Bitmap.Confi
 
     override fun decode(context: Context?, uri: Uri): Bitmap {
         return uri.toFile().inputStream()
-            .use { BitmapDecoder.decode(it) }
+            .use { BitmapDecoder.decode(it, bitmapConfig) }
             .let { requireNotNull(it) }
     }
 }

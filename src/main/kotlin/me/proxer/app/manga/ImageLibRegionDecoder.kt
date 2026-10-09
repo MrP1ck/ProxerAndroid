@@ -38,9 +38,11 @@ class ImageLibRegionDecoder @JvmOverloads @Keep constructor(bitmapConfig: Bitmap
     override fun isReady() = decoder != null
 
     override fun init(context: Context?, uri: Uri): Point {
-        decoder = BitmapRegionDecoder.newInstance(uri.toFile().inputStream())
+        decoder = uri.toFile().inputStream().use { BitmapRegionDecoder.newInstance(it) }
 
-        return Point(decoder?.width ?: -1, decoder?.height ?: -1)
+        val safeDecoder = requireNotNull(decoder) { "Unsupported image format: $uri" }
+
+        return Point(safeDecoder.width, safeDecoder.height)
     }
 
     override fun decodeRegion(sRect: Rect, sampleSize: Int): Bitmap {

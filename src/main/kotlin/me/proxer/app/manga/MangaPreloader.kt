@@ -17,64 +17,78 @@ import java.io.File
  */
 class MangaPreloader {
 
+    private companion object {
+        private const val PARALLEL_DOWNLOADS = 2
+        private const val MAX_RETRIES = 3
+    }
+
     var glide: GlideRequests? = null
 
     private val preloadTargets = mutableListOf<Target<File>>()
+    private val pendingLinks = ArrayDeque<String>()
 
-    fun preload(chapter: Chapter) {
-        preloadTargets.forEach { glide?.clear(it) }
-        preloadTargets.clear()
+    /**
+     * Preloads all pages of the passed [chapter], beginning with the page at [startPosition] (as the user is most
+     * likely to read the pages after the current one next) and wrapping around to the pages before it.
+     */
+    fun preload(chapter: Chapter, startPosition: Int = 0) {
+        cancel()
 
         val preloadList = chapter.pages
             ?.map { ProxerUrls.mangaPageImage(chapter.server, chapter.entryId, chapter.id, it.decodedName).toString() }
             ?: emptyList()
 
-        if (preloadList.isNotEmpty()) {
-            val preloadMap = preloadList
-                .asSequence()
-                .mapIndexed { index, url -> url to preloadList.getOrNull(index + 1) }
-                .associate { it }
+        val safeStartPosition = startPosition.coerceIn(0, (preloadList.size - 1).coerceAtLeast(0))
 
-            recursivePreload(preloadMap, preloadList.first())
-        }
+        pendingLinks += preloadList.drop(safeStartPosition)
+        pendingLinks += preloadList.take(safeStartPosition)
+
+        repeat(PARALLEL_DOWNLOADS) { preloadNext() }
     }
 
     fun cancel() {
+        pendingLinks.clear()
+
         preloadTargets.forEach { glide?.clear(it) }
         preloadTargets.clear()
     }
 
-    private fun recursivePreload(links: Map<String, String?>, next: String, failures: Int = 0) {
-        Timber.d("Preloading $next")
+    private fun preloadNext() {
+        val next = pendingLinks.removeFirstOrNull()
 
-        val target = GlidePreloadTarget(links, next, failures)
+        if (next != null) {
+            preload(next)
+        }
+    }
+
+    private fun preload(link: String, failures: Int = 0) {
+        Timber.d("Preloading $link")
+
+        val target = GlidePreloadTarget(link, failures)
 
         preloadTargets += target
 
         glide
             ?.downloadOnly()
-            ?.load(next)
+            ?.load(link)
             ?.logErrors()
             ?.into(target)
     }
 
     internal inner class GlidePreloadTarget(
-        private val links: Map<String, String?>,
-        private val next: String,
+        private val link: String,
         private val failures: Int
     ) : OriginalSizeGlideTarget<File>() {
 
         override fun onResourceReady(resource: File, transition: Transition<in File>?) {
-            val afterNext = links[next]
-
-            if (afterNext != null) {
-                recursivePreload(links, afterNext)
-            }
+            preloadNext()
         }
 
         override fun onLoadFailed(errorDrawable: Drawable?) {
-            if (failures <= 2) {
-                recursivePreload(links, next, failures + 1)
+            if (failures < MAX_RETRIES) {
+                preload(link, failures + 1)
+            } else {
+                preloadNext()
             }
         }
     }

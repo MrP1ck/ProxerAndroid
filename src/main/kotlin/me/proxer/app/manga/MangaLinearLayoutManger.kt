@@ -18,7 +18,8 @@ class MangaLinearLayoutManger(
 ) {
 
     private val extraLayoutSpace = when (readerOrientation) {
-        MangaReaderOrientation.VERTICAL -> DeviceUtils.getScreenHeight(context) / 2
+        // Pages of webtoons are very tall and take a while to decode, so start loading the next one a bit earlier.
+        MangaReaderOrientation.VERTICAL -> DeviceUtils.getScreenHeight(context)
         else -> DeviceUtils.getScreenWidth(context) / 2
     }
 
