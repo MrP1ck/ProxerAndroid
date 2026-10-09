@@ -9,7 +9,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.autoDisposable
 import me.proxer.app.R
-import me.proxer.app.base.DrawerActivity
+import me.proxer.app.base.ToolbarActivity
 import me.proxer.app.util.extension.multilineSnackbar
 import me.proxer.app.util.extension.startActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -17,14 +17,11 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 /**
  * @author Ruben Gees
  */
-class ProfileSettingsActivity : DrawerActivity() {
+class ProfileSettingsActivity : ToolbarActivity() {
 
     companion object {
         fun navigateTo(context: Activity) = context.startActivity<ProfileSettingsActivity>()
     }
-
-    override val contentView: Int
-        get() = R.layout.activity_profile_settings
 
     private val viewModel by viewModel<ProfileSettingsViewModel>()
 

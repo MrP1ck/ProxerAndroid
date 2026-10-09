@@ -24,6 +24,7 @@ import com.mikepenz.iconics.utils.sizeDp
 import com.squareup.moshi.Moshi
 import me.proxer.app.BuildConfig
 import me.proxer.app.MainActivity
+import me.proxer.app.MainSection
 import me.proxer.app.R
 import me.proxer.app.forum.TopicActivity
 import me.proxer.app.util.ErrorUtils
@@ -33,7 +34,6 @@ import me.proxer.app.util.extension.intentFor
 import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toInstantBP
 import me.proxer.app.util.extension.unsafeLazy
-import me.proxer.app.util.wrapper.MaterialDrawerWrapper
 import me.proxer.library.ProxerApi
 import me.proxer.library.ProxerCall
 import timber.log.Timber
@@ -205,7 +205,7 @@ class NewsWidgetUpdateWorker(
     }
 
     private fun bindBaseLayout(id: Int, views: RemoteViews) {
-        val intent = MainActivity.getSectionIntent(applicationContext, MaterialDrawerWrapper.DrawerItem.NEWS)
+        val intent = MainActivity.getSectionIntent(applicationContext, MainSection.NEWS)
         val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
 
         val updateIntent = applicationContext.intentFor<NewsWidgetProvider>()

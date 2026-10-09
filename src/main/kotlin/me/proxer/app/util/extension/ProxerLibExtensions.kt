@@ -3,6 +3,7 @@
 package me.proxer.app.util.extension
 
 import android.content.Context
+import androidx.annotation.DrawableRes
 import android.content.res.Resources
 import androidx.appcompat.content.res.AppCompatResources
 import com.mikepenz.iconics.IconicsDrawable
@@ -135,14 +136,15 @@ fun AnimeLanguage.toMediaLanguage() = when (this) {
     AnimeLanguage.OTHER -> MediaLanguage.OTHER
 }
 
-fun Language.toAppDrawable(context: Context) = AppCompatResources.getDrawable(
-    context,
-    when (this) {
+val Language.flagDrawableRes
+    @DrawableRes get() = when (this) {
         Language.GERMAN -> R.drawable.ic_germany
         Language.ENGLISH -> R.drawable.ic_united_states
         Language.OTHER -> R.drawable.ic_united_nations
     }
-) ?: error("Could not resolve Drawable for language: $this")
+
+fun Language.toAppDrawable(context: Context) = AppCompatResources.getDrawable(context, flagDrawableRes)
+    ?: error("Could not resolve Drawable for language: $this")
 
 fun MediaLanguage.toAppString(context: Context): String = context.getString(
     when (this) {
@@ -306,9 +308,8 @@ fun FskConstraint.toAppStringDescription(context: Context): String = context.get
     }
 )
 
-fun FskConstraint.toAppDrawable(context: Context) = AppCompatResources.getDrawable(
-    context,
-    when (this) {
+val FskConstraint.drawableRes
+    @DrawableRes get() = when (this) {
         FskConstraint.FSK_0 -> R.drawable.ic_fsk_0
         FskConstraint.FSK_6 -> R.drawable.ic_fsk_6
         FskConstraint.FSK_12 -> R.drawable.ic_fsk_12
@@ -319,7 +320,9 @@ fun FskConstraint.toAppDrawable(context: Context) = AppCompatResources.getDrawab
         FskConstraint.SEX -> R.drawable.ic_fsk_sex
         FskConstraint.VIOLENCE -> R.drawable.ic_fsk_violence
     }
-) ?: error("Could not resolve Drawable for fsk constraint: $this")
+
+fun FskConstraint.toAppDrawable(context: Context) = AppCompatResources.getDrawable(context, drawableRes)
+    ?: error("Could not resolve Drawable for fskConstraint: $this")
 
 fun IndustryType.toAppString(context: Context): String = context.getString(
     when (this) {

@@ -5,6 +5,9 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import me.proxer.app.base.PagedContentViewModel
 import me.proxer.app.media.LocalTag
 import me.proxer.app.media.TagDao
@@ -27,62 +30,56 @@ import me.proxer.library.enums.TagSpoilerFilter
 import me.proxer.library.enums.TagType
 import org.threeten.bp.Instant
 import org.threeten.bp.LocalDate
-import java.util.EnumSet
-import kotlin.properties.Delegates
 
 /**
+ * The anime or manga search. The [filter] is applied with [updateFilter].
+ *
  * @author Ruben Gees
  */
-class MediaListViewModel(
-    sortCriteria: MediaSearchSortCriteria,
-    type: MediaType,
-    var searchQuery: String?,
-    var language: Language?,
-    var genres: List<LocalTag>,
-    var excludedGenres: List<LocalTag>,
-    var fskConstraints: EnumSet<FskConstraint>,
-    var tags: List<LocalTag>,
-    var excludedTags: List<LocalTag>,
-    var tagRateFilter: TagRateFilter?,
-    var tagSpoilerFilter: TagSpoilerFilter?,
-    var hideFinished: Boolean?
-) : PagedContentViewModel<MediaListEntry>() {
+class MediaListViewModel(initialFilter: MediaListFilter) : PagedContentViewModel<MediaListEntry>() {
 
     override val itemsOnPage = 30
 
     override val isLoginRequired: Boolean
-        get() = super.isLoginRequired || type.isAgeRestricted()
+        get() = super.isLoginRequired || filter.value.type.isAgeRestricted()
 
     override val isAgeConfirmationRequired: Boolean
         get() = isLoginRequired
 
     override val endpoint: PagingLimitEndpoint<List<MediaListEntry>>
-        get() = api.list.mediaSearch()
-            .sort(sortCriteria)
-            .name(searchQuery)
-            .language(language)
-            .genres(genres.asSequence().map { it.id }.toSet())
-            .excludedGenres(excludedGenres.asSequence().map { it.id }.toSet())
-            .fskConstraints(fskConstraints)
-            .tags(tags.asSequence().map { it.id }.toSet())
-            .excludedTags(excludedTags.asSequence().map { it.id }.toSet())
-            .tagRateFilter(tagRateFilter)
-            .tagSpoilerFilter(tagSpoilerFilter)
-            .hideFinished(hideFinished)
-            .type(type)
+        get() = filter.value.let { filter ->
+            api.list.mediaSearch()
+                .sort(filter.sortCriteria)
+                .name(filter.searchQuery?.takeIf { it.isNotBlank() })
+                .language(filter.language)
+                .genres(filter.genres.asSequence().map { it.id }.toSet())
+                .excludedGenres(filter.excludedGenres.asSequence().map { it.id }.toSet())
+                .fskConstraints(enumSetOf(filter.fskConstraints))
+                .tags(filter.tags.asSequence().map { it.id }.toSet())
+                .excludedTags(filter.excludedTags.asSequence().map { it.id }.toSet())
+                .tagRateFilter(if (filter.includeUnratedTags) TagRateFilter.ALL else TagRateFilter.RATED_ONLY)
+                .tagSpoilerFilter(if (filter.includeSpoilerTags) TagSpoilerFilter.ALL else TagSpoilerFilter.NO_SPOILERS)
+                .hideFinished(filter.hideFinished)
+                .type(filter.type)
+        }
 
-    var sortCriteria by Delegates.observable(sortCriteria) { _, old, new ->
-        if (old != new) reload()
-    }
+    private val mutableFilter = MutableStateFlow(initialFilter)
 
-    var type by Delegates.observable(type) { _, old, new ->
-        if (old != new) {
+    /** The current filter. Changes of the type and the sort criteria are applied immediately. */
+    val filter: StateFlow<MediaListFilter> = mutableFilter.asStateFlow()
+
+    /**
+     * Applies the [newFilter] and reloads the data if it changed.
+     */
+    fun updateFilter(newFilter: MediaListFilter) {
+        val oldFilter = mutableFilter.value
+
+        if (oldFilter != newFilter) {
+            mutableFilter.value = newFilter
+
             reload()
 
-            if (
-                old.isAgeRestricted() && new.isAgeRestricted().not() ||
-                old.isAgeRestricted().not() && new.isAgeRestricted()
-            ) {
+            if (oldFilter.type.isAgeRestricted() != newFilter.type.isAgeRestricted()) {
                 loadTags()
             }
         }
@@ -122,7 +119,7 @@ class MediaListViewModel(
                 }
             }
             .map {
-                val tagsToFilter = when (type) {
+                val tagsToFilter = when (filter.value.type) {
                     MediaType.HENTAI, MediaType.HMANGA -> enumSetOf(TagType.TAG, TagType.H_TAG)
                     else -> enumSetOf(TagType.TAG)
                 }

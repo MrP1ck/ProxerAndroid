@@ -27,9 +27,6 @@
         <item name="asp_preferenceIconTint">?attr/colorPrimary</item>
         <item name="asp_preferenceDialogIconTint">?asp_preferenceIconTint</item>
 
-        <item name="materialDrawerStyle">@style/Widget.App.MaterialDrawerStyle</item>
-        <item name="materialDrawerHeaderStyle">@style/Widget.App.MaterialDrawerHeaderStyle</item>
-
         <item name="md_color_button_text">?attr/colorPrimary</item>
 
         <item name="emojiIcons">?attr/colorIcon</item>
@@ -80,6 +77,13 @@
     <!-- For screens with a Toolbar over an image or video, which needs light icons. -->
     <style name="ThemeOverlay.App.OnImage" parent="">
         <item name="colorToolbarIcon">@android:color/white</item>
+    </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/preset_classic_surface</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/primary</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.App</item>
     </style>
 
     <style name="Theme.Placeholder.App.Splash" parent="Theme.App">
@@ -137,17 +141,5 @@
         <item name="tabSelectedTextColor">@android:color/white</item>
         <item name="tabIndicatorColor">@android:color/white</item>
         <item name="tabRippleColor">#33FFFFFF</item>
-    </style>
-
-    <style name="Widget.App.MaterialDrawerStyle" parent="Widget.MaterialDrawerStyle">
-        <item name="materialDrawerBackground">?attr/colorSurfaceContainerLow</item>
-        <item name="materialDrawerDividerColor">?attr/colorOutlineVariant</item>
-        <item name="materialDrawerSelectedBackgroundColor">?attr/colorSecondaryContainer</item>
-    </style>
-
-    <style name="Widget.App.MaterialDrawerHeaderStyle" parent="Widget.MaterialDrawerHeaderStyle">
-        <item name="materialDrawerCompactStyle">true</item>
-        <item name="materialDrawerHeaderSelectionText">?attr/colorOnPrimary</item>
-        <item name="materialDrawerHeaderSelectionSubtext">?attr/colorOnPrimary</item>
     </style>
 </resources>

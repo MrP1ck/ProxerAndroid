@@ -44,7 +44,26 @@
     <string name="theme_bg">Blau Grün</string>
     <string name="theme_gloomy">Düster</string>
     <string name="action_navigate_up">Zurück</string>
-    <string name="theme_dynamic">Dynamisch (Hintergrundfarben)</string>
+    <string name="action_reset">Zurücksetzen</string>
+    <string name="action_create_conference">Neue Unterhaltung</string>
+    <string name="chat_search_hint">Unterhaltungen durchsuchen</string>
+    <string name="chat_read_only">Nur lesen</string>
+    <string name="bookmark_available">Verfügbar</string>
+    <string name="bookmark_unavailable">Noch nicht verfügbar</string>
+    <string name="bookmark_filter_available">Nur verfügbare</string>
+    <string name="bookmark_search_hint">Lesezeichen durchsuchen</string>
+    <string name="bookmark_open_details">Details anzeigen</string>
+    <string name="action_clear_search">Suche leeren</string>
+    <string name="media_list_search_hint">Titel suchen</string>
+    <string name="media_list_genres">Genres</string>
+    <string name="media_list_tags">Tags</string>
+    <string name="media_list_tags_search_hint">Tags durchsuchen</string>
+    <string name="media_list_tri_state_hint">Einmal tippen zum Einschließen, nochmal zum Ausschließen</string>
+    <string name="media_list_tags_loading">Tags werden geladen…</string>
+    <string name="media_list_tags_more">%d weitere – suche, um sie zu finden</string>
+    <string name="media_list_options">Optionen</string>
+    <string name="media_list_rating_content_description">Bewertung %s</string>
+    <string name="theme_dynamic">Dynamisch</string>
     <string name="theme_amoled">Reines Schwarz im dunklen Modus</string>
 
     <string name="theme_variant_title">Variante</string>
@@ -198,7 +217,7 @@
     <string name="error_media_entry_deletion">Der Eintrag konnte nicht entfernt werden: %s</string>
     <string name="error_topten_entry_removal">Der Eintrag konnte nicht entfernt werden: %s</string>
     <string name="error_chat_send_message">Die Nachricht konnte nicht versandt werden: %s</string>
-    <string name="error_undo">Dia Aktion konnte nicht rückgängig gemacht werden: %s</string>
+    <string name="error_undo">Die Aktion konnte nicht rückgängig gemacht werden: %s</string>
 
     <string name="medium_anime_series">Animeserie</string>
     <string name="medium_hentai">Hentai</string>
@@ -322,6 +341,10 @@
     <plurals name="media_chapter_count">
         <item quantity="one">Ein Kapitel</item>
         <item quantity="other">%d Kapitel</item>
+    </plurals>
+    <plurals name="chat_unread_messages">
+        <item quantity="one">Eine ungelesene Nachricht</item>
+        <item quantity="other">%d ungelesene Nachrichten</item>
     </plurals>
     <plurals name="media_episode_count">
         <item quantity="one">Eine Episode</item>
@@ -909,6 +932,11 @@
         Verwende das dunkle Thema. Das kannst du jederzeit in den Einstellungen ändern
     </string>
     <string name="introduction_skip">Überspringen</string>
+    <string name="introduction_next">Weiter</string>
+    <string name="introduction_done">Los geht\'s</string>
+    <string name="introduction_notifications_switch">Benachrichtigungen aktivieren</string>
+    <string name="introduction_design_title">Design</string>
+    <string name="introduction_design_description">Wähle Farben und Helligkeit. Das kannst du jederzeit in den Einstellungen ändern</string>
 
     <string name="action_search">Suchen</string>
     <string name="action_filter">Filter</string>

@@ -83,3 +83,17 @@
     <init>(...);
     <fields>;
 }
+
+# R8 full mode (the default since AGP 8) removes generic signatures of classes which are not kept. ProxerLibJava uses
+# Moshi adapters with generic delegate parameters and Retrofit services returning ProxerCall, which both need them.
+-keepattributes Signature,RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,AnnotationDefault
+-keep class me.proxer.library.internal.adapter.** { *; }
+-keep,allowobfuscation,allowshrinking class me.proxer.library.ProxerCall
+-keep,allowobfuscation,allowshrinking class com.squareup.moshi.JsonAdapter
+-keepclassmembers class * {
+    @com.squareup.moshi.FromJson <methods>;
+    @com.squareup.moshi.ToJson <methods>;
+}
+# The Retrofit service interfaces of ProxerLibJava are instantiated through reflection (Proxy).
+-keep interface me.proxer.library.api.** { *; }
+-keep,allowobfuscation,allowshrinking class me.proxer.library.internal.ProxerResponse

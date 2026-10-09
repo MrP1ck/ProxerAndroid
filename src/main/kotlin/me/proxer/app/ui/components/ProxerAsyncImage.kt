@@ -38,7 +38,7 @@ fun ProxerAsyncImage(
             Box(
                 Modifier
                     .matchParentSize()
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 if (showErrorIcon && (url == null || state is AsyncImagePainter.State.Error)) {
@@ -46,7 +46,7 @@ fun ProxerAsyncImage(
                         painter = painterResource(R.drawable.ic_symbol_image),
                         contentDescription = null,
                         modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
             }

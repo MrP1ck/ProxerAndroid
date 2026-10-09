@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.commitNow
 import me.proxer.app.R
-import me.proxer.app.base.DrawerActivity
+import me.proxer.app.base.ToolbarActivity
 import me.proxer.app.chat.prv.Participant
 import me.proxer.app.util.extension.intentFor
 import me.proxer.app.util.extension.startActivity
@@ -13,7 +13,7 @@ import me.proxer.app.util.extension.startActivity
 /**
  * @author Ruben Gees
  */
-class CreateConferenceActivity : DrawerActivity() {
+class CreateConferenceActivity : ToolbarActivity() {
 
     companion object {
         private const val IS_GROUP_EXTRA = "is_group"

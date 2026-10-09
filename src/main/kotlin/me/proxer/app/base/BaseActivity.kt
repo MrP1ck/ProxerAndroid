@@ -15,6 +15,7 @@ import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.autoDisposable
 import kotterknife.bindView
 import me.proxer.app.R
+import me.proxer.app.settings.theme.ThemeContainer
 import me.proxer.app.settings.theme.applyThemeContainer
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.compat.TaskDescriptionCompat
@@ -73,7 +74,15 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
 
         preferenceHelper.themeObservable
             .autoDisposable(this.scope())
-            .subscribe { ActivityCompat.recreate(this) }
+            .subscribe { onThemeChanged(it) }
+    }
+
+    /**
+     * Called when the user changed the theme. Recreates the Activity by default, so the Views are inflated with the new
+     * colors. Changes of the light/dark variant also recreate the Activity through AppCompat.
+     */
+    protected open fun onThemeChanged(themeContainer: ThemeContainer) {
+        ActivityCompat.recreate(this)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

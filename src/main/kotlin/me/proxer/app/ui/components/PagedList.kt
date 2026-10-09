@@ -16,6 +16,12 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridItemScope
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
@@ -127,6 +133,53 @@ fun <T> PagedGrid(
             }
 
             item(key = "footer", span = { GridItemSpan(maxLineSpan) }, contentType = "footer") {
+                PagedFooter(state, onErrorAction)
+            }
+        }
+    }
+}
+
+/**
+ * Like [PagedList], but lays out the items in a staggered grid with columns of at least [minColumnWidth], for items of
+ * different heights like news.
+ */
+@Composable
+fun <T> PagedStaggeredGrid(
+    state: ContentState<List<T>>,
+    onLoadMore: () -> Unit,
+    onRefresh: () -> Unit,
+    onErrorAction: (ErrorAction) -> Unit,
+    minColumnWidth: Dp,
+    modifier: Modifier = Modifier,
+    gridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+    contentPadding: PaddingValues = PaddingValues(),
+    spacing: Dp = 8.dp,
+    @StringRes emptyMessage: Int = R.string.error_no_data,
+    key: ((T) -> Any)? = null,
+    itemContent: @Composable LazyStaggeredGridItemScope.(T) -> Unit
+) {
+    val isAtEnd by remember(gridState) {
+        derivedStateOf {
+            val lastVisible = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+
+            lastVisible >= gridState.layoutInfo.totalItemsCount - DEFAULT_PAGING_THRESHOLD
+        }
+    }
+
+    PagedContainer(state, isAtEnd, onLoadMore, onRefresh, onErrorAction, modifier, contentPadding, emptyMessage) {
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Adaptive(minColumnWidth),
+            state = gridState,
+            contentPadding = contentPadding,
+            horizontalArrangement = Arrangement.spacedBy(spacing),
+            verticalItemSpacing = spacing,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(it.size, key = key?.let { keyOf -> { index -> keyOf(it[index]) } }) { index ->
+                itemContent(it[index])
+            }
+
+            item(key = "footer", span = StaggeredGridItemSpan.FullLine, contentType = "footer") {
                 PagedFooter(state, onErrorAction)
             }
         }

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import me.proxer.app.manga.MangaReaderOrientation
 import me.proxer.app.settings.theme.ThemeContainer
 import me.proxer.app.util.extension.getSafeString
-import me.proxer.app.util.wrapper.MaterialDrawerWrapper.DrawerItem
+import me.proxer.app.MainSection
 import okhttp3.logging.HttpLoggingInterceptor
 import org.threeten.bp.Instant
 
@@ -121,7 +121,7 @@ class PreferenceHelper(
         }
 
     val startPage
-        get() = DrawerItem.fromIdOrDefault(
+        get() = MainSection.fromIdOrDefault(
             sharedPreferences.getSafeString(START_PAGE, "0").toLongOrNull()
         )
 

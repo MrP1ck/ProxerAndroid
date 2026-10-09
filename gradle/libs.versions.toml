@@ -40,6 +40,9 @@ cast = "21.5.0"
 composeBom = "2026.06.01"
 coil = "3.5.0"
 coroutines = "1.10.2"
+navigation = "2.9.6"
+serialization = "1.9.0"
+splashscreen = "1.2.0"
 
 # Testing
 junit = "4.13.2"
@@ -68,9 +71,7 @@ preference = "1.2.1"
 supportPreference = "6d5ebc7934"
 iconics = "5.2.4"
 communityMaterialTypeface = "5.8.55.0-kotlin"
-materialDrawer = "8.3.1"
 aboutLibraries = "11.6.3"
-crossfader = "1.6.0"
 materialAbout = "3.2.0-rc01"
 subsamplingScaleImageView = "90c6b27c13"
 subsamplingPdfDecoder = "ad07ddf671"
@@ -131,6 +132,9 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "fragment" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 
@@ -188,10 +192,7 @@ support-spinner = { module = "com.github.consp1racy.android-support-preference:s
 iconics-core = { module = "com.mikepenz:iconics-core", version.ref = "iconics" }
 iconics-views = { module = "com.mikepenz:iconics-views", version.ref = "iconics" }
 community-material-typeface = { module = "com.mikepenz:community-material-typeface", version.ref = "communityMaterialTypeface" }
-materialdrawer = { module = "com.mikepenz:materialdrawer", version.ref = "materialDrawer" }
-materialdrawer-iconics = { module = "com.mikepenz:materialdrawer-iconics", version.ref = "materialDrawer" }
 aboutlibraries = { module = "com.mikepenz:aboutlibraries", version.ref = "aboutLibraries" }
-crossfader = { module = "com.mikepenz:crossfader", version.ref = "crossfader" }
 material-about-library = { module = "com.github.daniel-stoneuk:material-about-library", version.ref = "materialAbout" }
 subsampling-scale-image-view = { module = "com.github.rubengees:subsampling-scale-image-view", version.ref = "subsamplingScaleImageView" }
 subsampling-pdf-decoder = { module = "com.github.num42:subsampling-pdf-decoder", version.ref = "subsamplingPdfDecoder" }
@@ -246,6 +247,7 @@ customactivityoncrash = { module = "cat.ereza:customactivityoncrash", version.re
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }

@@ -11,7 +11,7 @@ import com.uber.autodispose.autoDisposable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import me.proxer.app.R
-import me.proxer.app.base.DrawerActivity
+import me.proxer.app.base.ToolbarActivity
 import me.proxer.app.chat.prv.conference.ConferenceFragment
 import me.proxer.app.chat.prv.message.MessengerFragment
 import me.proxer.app.chat.prv.sync.MessengerDao
@@ -23,7 +23,7 @@ import timber.log.Timber
 /**
  * @author Ruben Gees
  */
-class PrvMessengerActivity : DrawerActivity() {
+class PrvMessengerActivity : ToolbarActivity() {
 
     companion object {
         private const val CONFERENCE_EXTRA = "conference"

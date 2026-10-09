@@ -7,7 +7,7 @@ import com.jakewharton.rxbinding3.view.clicks
 import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.autoDisposable
 import me.proxer.app.R
-import me.proxer.app.base.DrawerActivity
+import me.proxer.app.base.ToolbarActivity
 import me.proxer.app.chat.pub.room.info.ChatRoomInfoActivity
 import me.proxer.app.util.extension.getSafeStringExtra
 import me.proxer.app.util.extension.startActivity
@@ -15,7 +15,7 @@ import me.proxer.app.util.extension.startActivity
 /**
  * @author Ruben Gees
  */
-class ChatActivity : DrawerActivity() {
+class ChatActivity : ToolbarActivity() {
 
     companion object {
         private const val CHAT_ROOM_ID_EXTRA = "chat_room_id"

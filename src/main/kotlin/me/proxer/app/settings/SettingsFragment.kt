@@ -11,7 +11,6 @@ import androidx.core.os.bundleOf
 import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.autoDisposable
 import me.proxer.app.BuildConfig
-import me.proxer.app.MainActivity
 import me.proxer.app.R
 import me.proxer.app.base.BaseActivity
 import me.proxer.app.chat.prv.sync.MessengerWorker
@@ -55,7 +54,7 @@ class SettingsFragment : XpPreferenceFragment(), OnSharedPreferenceChangeListene
     }
 
     private val hostingActivity: BaseActivity
-        get() = activity as MainActivity
+        get() = activity as BaseActivity
 
     private val packageManager by safeInject<PackageManager>()
     private val preferenceHelper by safeInject<PreferenceHelper>()

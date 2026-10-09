@@ -32,7 +32,7 @@ import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.LocalConferenceMap
 import me.proxer.app.util.extension.getQuantityString
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.wrapper.MaterialDrawerWrapper.DrawerItem
+import me.proxer.app.MainSection
 import me.proxer.library.enums.Device
 import me.proxer.library.util.ProxerUrls
 
@@ -101,7 +101,7 @@ object MessengerNotifications {
             .setStyle(style)
             .setContentIntent(
                 TaskStackBuilder.create(context)
-                    .addNextIntent(MainActivity.getSectionIntent(context, DrawerItem.MESSENGER))
+                    .addNextIntent(MainActivity.getSectionIntent(context, MainSection.MESSENGER))
                     .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             )
             .setDefaults(Notification.DEFAULT_ALL)
@@ -160,7 +160,7 @@ object MessengerNotifications {
         val conferenceIcon = buildConferenceIcon(context, conference)
         val style = buildIndividualStyle(context, messages, conference, user, conferenceIcon)
         val intent = TaskStackBuilder.create(context)
-            .addNextIntent(MainActivity.getSectionIntent(context, DrawerItem.MESSENGER))
+            .addNextIntent(MainActivity.getSectionIntent(context, MainSection.MESSENGER))
             .addNextIntent(PrvMessengerActivity.getIntent(context, conference))
             .getPendingIntent(conference.id.toInt(), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 

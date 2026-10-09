@@ -51,7 +51,9 @@
 
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:enableOnBackInvokedCallback="true"
+            android:exported="true"
+            android:theme="@style/Theme.App.Starting">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -342,6 +344,10 @@
         </activity>
 
         <activity android:name=".settings.ProxerLibsActivity" />
+
+        <activity android:name=".settings.SettingsActivity" />
+
+        <activity android:name=".settings.AboutActivity" />
 
         <activity android:name=".ui.WebViewActivity" />
 

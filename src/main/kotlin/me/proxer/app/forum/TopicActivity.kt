@@ -13,7 +13,7 @@ import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.autoDisposable
 import me.proxer.app.R
-import me.proxer.app.base.DrawerActivity
+import me.proxer.app.base.ToolbarActivity
 import me.proxer.app.util.extension.getSafeStringExtra
 import me.proxer.app.util.extension.intentFor
 import me.proxer.app.util.extension.multilineSnackbar
@@ -24,7 +24,7 @@ import me.proxer.library.util.ProxerUrls
 /**
  * @author Ruben Gees
  */
-class TopicActivity : DrawerActivity() {
+class TopicActivity : ToolbarActivity() {
 
     companion object {
         private const val ID_EXTRA = "id"

@@ -4,14 +4,14 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.fragment.app.commitNow
 import me.proxer.app.R
-import me.proxer.app.base.DrawerActivity
+import me.proxer.app.base.ToolbarActivity
 import me.proxer.app.util.extension.getSafeStringExtra
 import me.proxer.app.util.extension.startActivity
 
 /**
  * @author Ruben Gees
  */
-class ChatRoomInfoActivity : DrawerActivity() {
+class ChatRoomInfoActivity : ToolbarActivity() {
 
     companion object {
         private const val CHAT_ROOM_ID_EXTRA = "chat_room_id"

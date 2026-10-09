@@ -27,6 +27,7 @@ import com.mikepenz.iconics.utils.sizeDp
 import com.squareup.moshi.Moshi
 import me.proxer.app.BuildConfig
 import me.proxer.app.MainActivity
+import me.proxer.app.MainSection
 import me.proxer.app.R
 import me.proxer.app.media.MediaActivity
 import me.proxer.app.util.ErrorUtils
@@ -37,7 +38,6 @@ import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toInstantBP
 import me.proxer.app.util.extension.toLocalDateTimeBP
 import me.proxer.app.util.extension.unsafeLazy
-import me.proxer.app.util.wrapper.MaterialDrawerWrapper
 import me.proxer.library.ProxerApi
 import me.proxer.library.ProxerCall
 import org.threeten.bp.Instant
@@ -255,7 +255,7 @@ class ScheduleWidgetUpdateWorker(
     }
 
     private fun bindBaseLayout(id: Int, views: RemoteViews) {
-        val intent = MainActivity.getSectionIntent(applicationContext, MaterialDrawerWrapper.DrawerItem.SCHEDULE)
+        val intent = MainActivity.getSectionIntent(applicationContext, MainSection.SCHEDULE)
         val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
 
         val updateIntent = applicationContext.intentFor<ScheduleWidgetProvider>()

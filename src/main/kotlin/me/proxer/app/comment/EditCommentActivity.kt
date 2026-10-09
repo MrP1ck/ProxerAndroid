@@ -49,7 +49,7 @@ class EditCommentActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_no_drawer)
+        setContentView(R.layout.activity_default)
         setSupportActionBar(toolbar)
         setupToolbar()
 

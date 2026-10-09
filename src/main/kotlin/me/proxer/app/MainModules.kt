@@ -40,6 +40,7 @@ import me.proxer.app.media.TagDatabase
 import me.proxer.app.media.comments.CommentsViewModel
 import me.proxer.app.media.discussion.DiscussionViewModel
 import me.proxer.app.media.episode.EpisodeViewModel
+import me.proxer.app.media.list.MediaListFilter
 import me.proxer.app.media.list.MediaListViewModel
 import me.proxer.app.media.recommendation.RecommendationViewModel
 import me.proxer.app.media.relation.RelationViewModel
@@ -258,13 +259,7 @@ private val viewModelModule = module {
         BookmarkViewModel(searchQuery, category, filterAvailable)
     }
 
-    viewModel { parameterList ->
-        MediaListViewModel(
-            parameterList[0], parameterList[1], parameterList[2], parameterList[3], parameterList[4],
-            parameterList[5], parameterList[6], parameterList[7], parameterList[8], parameterList[9],
-            parameterList[10], parameterList[11]
-        )
-    }
+    viewModel { (initialFilter: MediaListFilter) -> MediaListViewModel(initialFilter) }
 
     viewModel { ScheduleViewModel() }
 

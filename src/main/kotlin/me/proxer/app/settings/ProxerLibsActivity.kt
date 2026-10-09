@@ -5,10 +5,10 @@ import android.os.Bundle
 import androidx.fragment.app.commitNow
 import com.mikepenz.aboutlibraries.LibsBuilder
 import me.proxer.app.R
-import me.proxer.app.base.DrawerActivity
+import me.proxer.app.base.ToolbarActivity
 import me.proxer.app.util.extension.startActivity
 
-class ProxerLibsActivity : DrawerActivity() {
+class ProxerLibsActivity : ToolbarActivity() {
 
     companion object {
         fun navigateTo(context: Activity) = context.startActivity<ProxerLibsActivity>()

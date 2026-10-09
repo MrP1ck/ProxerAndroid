@@ -4,20 +4,29 @@
 #
 # Usage: scripts/import_material_symbols.sh <name> [<name>...]
 # Names are the snake_case icon names from https://fonts.google.com/icons, e.g. "bookmark" or "arrow_back".
+# Append ":filled" to import the filled variant as ic_symbol_<name>_filled.xml, e.g. "bookmark:filled".
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 base="https://raw.githubusercontent.com/google/material-design-icons/master/symbols/android"
 
-for name in "$@"; do
-    target="src/main/res/drawable/ic_symbol_${name}.xml"
+for arg in "$@"; do
+    name="${arg%%:*}"
+
+    if [[ "$arg" == *":filled" ]]; then
+        target="src/main/res/drawable/ic_symbol_${name}_filled.xml"
+        styles=("materialsymbolsrounded/${name}_fill1_24px.xml")
+    else
+        target="src/main/res/drawable/ic_symbol_${name}.xml"
+        styles=("materialsymbolsrounded/${name}_24px.xml" "materialsymbolsrounded/${name}_fill1_24px.xml")
+    fi
 
     if [[ -f "$target" ]]; then
         continue
     fi
 
-    for style in "materialsymbolsrounded/${name}_24px.xml" "materialsymbolsrounded/${name}_fill1_24px.xml"; do
+    for style in "${styles[@]}"; do
         if curl -sf "$base/$name/$style" -o "$target.tmp"; then
             break
         fi
@@ -25,11 +34,11 @@ for name in "$@"; do
 
     if [[ ! -s "$target.tmp" ]]; then
         rm -f "$target.tmp"
-        echo "Icon not found: $name" >&2
+        echo "Icon not found: $arg" >&2
         exit 1
     fi
 
     perl -0pe 's/\s*android:tint="[^"]*"//' "$target.tmp" > "$target"
     rm "$target.tmp"
-    echo "Imported $name"
+    echo "Imported $arg"
 done

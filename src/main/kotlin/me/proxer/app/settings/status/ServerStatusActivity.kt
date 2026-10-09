@@ -4,13 +4,13 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.fragment.app.commitNow
 import me.proxer.app.R
-import me.proxer.app.base.DrawerActivity
+import me.proxer.app.base.ToolbarActivity
 import me.proxer.app.util.extension.startActivity
 
 /**
  * @author Ruben Gees
  */
-class ServerStatusActivity : DrawerActivity() {
+class ServerStatusActivity : ToolbarActivity() {
 
     companion object {
         fun navigateTo(context: Activity) = context.startActivity<ServerStatusActivity>()

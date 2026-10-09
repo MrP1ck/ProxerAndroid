@@ -25,8 +25,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import me.proxer.app.R
 
 /**
- * The scaffold of a screen: an edge-to-edge [TopAppBar] which collapses on scroll, a snackbar host (exposed through
- * [LocalSnackbarHostState]) and an optional floating action button.
+ * The scaffold of a screen with a [TopAppBar] showing [title], which collapses on scroll. See the other overload for
+ * the details.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,27 +35,49 @@ fun ProxerScaffold(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     onNavigateUp: (() -> Unit)? = null,
-    navigationIcon: @Composable () -> Unit = { onNavigateUp?.let { UpButton(it) } },
     actions: @Composable RowScope.() -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = TopAppBarDefaults.enterAlwaysScrollBehavior(),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable (PaddingValues) -> Unit
 ) {
+    ProxerScaffold(
+        topBar = {
+            TopAppBar(
+                title = { TopAppBarTitle(title, subtitle) },
+                navigationIcon = { onNavigateUp?.let { UpButton(it) } },
+                actions = actions,
+                scrollBehavior = scrollBehavior
+            )
+        },
+        modifier = modifier,
+        floatingActionButton = floatingActionButton,
+        scrollBehavior = scrollBehavior,
+        content = content
+    )
+}
+
+/**
+ * The scaffold of a screen: an edge-to-edge [topBar], a snackbar host (exposed through [LocalSnackbarHostState], the
+ * one of the app is used if there is one) and an optional floating action button.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProxerScaffold(
+    topBar: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    floatingActionButton: @Composable () -> Unit = {},
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    content: @Composable (PaddingValues) -> Unit
+) {
+    val snackbarHostState = LocalSnackbarHostState.current ?: remember { SnackbarHostState() }
+
     CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
         Scaffold(
             modifier = when (scrollBehavior) {
                 null -> modifier
                 else -> modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
             },
-            topBar = {
-                TopAppBar(
-                    title = { TopAppBarTitle(title, subtitle) },
-                    navigationIcon = navigationIcon,
-                    actions = actions,
-                    scrollBehavior = scrollBehavior
-                )
-            },
+            topBar = topBar,
             snackbarHost = { SnackbarHost(snackbarHostState) },
             floatingActionButton = floatingActionButton,
             content = content
@@ -83,6 +105,9 @@ fun TopAppBarTitle(title: String, subtitle: String? = null) {
 @Composable
 fun UpButton(onClick: () -> Unit) {
     IconButton(onClick = onClick) {
-        Icon(painterResource(R.drawable.ic_symbol_arrow_back), contentDescription = stringResource(R.string.action_navigate_up))
+        Icon(
+            painter = painterResource(R.drawable.ic_symbol_arrow_back),
+            contentDescription = stringResource(R.string.action_navigate_up)
+        )
     }
 }

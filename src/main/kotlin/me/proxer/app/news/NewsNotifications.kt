@@ -14,7 +14,7 @@ import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.extension.getQuantityString
 import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toInstantBP
-import me.proxer.app.util.wrapper.MaterialDrawerWrapper.DrawerItem
+import me.proxer.app.MainSection
 import me.proxer.library.entity.notifications.NewsArticle
 
 /**
@@ -71,7 +71,7 @@ object NewsNotifications {
                 intent = PendingIntent.getActivity(
                     context,
                     ID,
-                    MainActivity.getSectionIntent(context, DrawerItem.NEWS),
+                    MainActivity.getSectionIntent(context, MainSection.NEWS),
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
