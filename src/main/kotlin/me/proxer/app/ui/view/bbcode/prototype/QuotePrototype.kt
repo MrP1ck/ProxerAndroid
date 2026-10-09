@@ -33,6 +33,9 @@ object QuotePrototype : AutoClosingPrototype {
         return BBTree(this, parent, args = BBArgs(custom = arrayOf(QUOTE_ARGUMENT to quote)))
     }
 
+    /** The name of the quoted user, if any. */
+    fun quotedUser(args: BBArgs) = args[QUOTE_ARGUMENT] as String?
+
     override fun makeViews(parent: BBCodeView, children: List<BBTree>, args: BBArgs): List<View> {
         val childViews = super.makeViews(parent, children, args)
         val quote = args[QUOTE_ARGUMENT] as String?

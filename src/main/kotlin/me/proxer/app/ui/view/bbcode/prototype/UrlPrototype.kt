@@ -38,6 +38,9 @@ object UrlPrototype : ConditionalTextMutatorPrototype, AutoClosingPrototype {
         return BBTree(this, parent, args = BBArgs(custom = arrayOf(URL_ARGUMENT to parsedUrl)))
     }
 
+    /** The target of the link. */
+    fun url(args: BBArgs) = args[URL_ARGUMENT] as HttpUrl
+
     override fun makeViews(parent: BBCodeView, children: List<BBTree>, args: BBArgs): List<View> {
         val childViews = children.flatMap { it.makeViews(parent, args) }
         val url = args[URL_ARGUMENT] as HttpUrl

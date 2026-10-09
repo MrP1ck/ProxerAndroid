@@ -1,10 +1,13 @@
 package me.proxer.app.ui.image
 
 import android.content.Context
+import android.os.Build
 import android.os.Environment
 import coil3.ImageLoader
 import coil3.disk.DiskCache
 import coil3.disk.directory
+import coil3.gif.AnimatedImageDecoder
+import coil3.gif.GifDecoder
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
 import me.proxer.app.BuildConfig
@@ -27,7 +30,15 @@ object ProxerImageLoader {
         }
 
         return ImageLoader.Builder(context)
-            .components { add(OkHttpNetworkFetcherFactory(callFactory = { client })) }
+            .components {
+                add(OkHttpNetworkFetcherFactory(callFactory = { client }))
+
+                // Emoticons in forum posts and some images are animated GIFs.
+                when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    true -> add(AnimatedImageDecoder.Factory())
+                    false -> add(GifDecoder.Factory())
+                }
+            }
             .diskCache {
                 DiskCache.Builder()
                     .directory(cacheDir.resolve(CACHE_DIR))

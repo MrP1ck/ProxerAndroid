@@ -29,6 +29,9 @@ object SpoilerPrototype : AutoClosingPrototype {
         return BBTree(this, parent, args = BBArgs(custom = arrayOf(TITLE_ARGUMENT to title)))
     }
 
+    /** The title of the spoiler, if any. */
+    fun title(args: BBArgs) = args[TITLE_ARGUMENT] as String?
+
     override fun makeViews(parent: BBCodeView, children: List<BBTree>, args: BBArgs): List<View> {
         val childViews = super.makeViews(parent, children, args)
         val title = args[TITLE_ARGUMENT] as String?

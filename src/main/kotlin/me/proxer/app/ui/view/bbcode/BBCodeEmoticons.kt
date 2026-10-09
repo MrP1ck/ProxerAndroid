@@ -89,6 +89,13 @@ object BBCodeEmoticons {
         }
     }
 
+    /**
+     * Finds the emoticon codes in [text] and returns their ranges and drawable resources.
+     */
+    fun find(text: CharSequence): List<Pair<IntRange, Int>> = emoticonRegex.findAll(text).mapNotNull { match ->
+        emoticons.find { it.pattern == match.value }?.let { match.range to it.id }
+    }.toList()
+
     private data class BBCodeEmoticon(val pattern: String, val id: Int)
 
     private class GifGlideTarget(

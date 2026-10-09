@@ -56,6 +56,9 @@ object ImagePrototype : AutoClosingPrototype {
         return BBTree(this, parent, args = BBArgs(custom = arrayOf(WIDTH_ARGUMENT to width)))
     }
 
+    /** The width in pixels set with the size attribute, if any. */
+    fun width(args: BBArgs) = args[WIDTH_ARGUMENT] as Int?
+
     override fun makeViews(parent: BBCodeView, children: List<BBTree>, args: BBArgs): List<View> {
         val childViews = children.flatMap { it.makeViews(parent, args) }
 

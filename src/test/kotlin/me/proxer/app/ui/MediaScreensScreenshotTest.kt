@@ -11,7 +11,6 @@ import me.proxer.app.comment.CommentCardData
 import me.proxer.app.media.info.MediaInfoActions
 import me.proxer.app.media.info.MediaInfoContent
 import me.proxer.app.ui.preview.PreviewData
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,8 +40,6 @@ class MediaScreensScreenshotTest(private val isDark: Boolean) {
         MediaInfoContent(PreviewData.entry, PreviewData.mediaUserInfo, true, MediaInfoActions(), PaddingValues())
     }
 
-    // The BBCode renderer is still View based and initializes Glide, which needs Koin. Enabled with the Compose renderer.
-    @Ignore("Needs the Compose BBCode renderer")
     @Test
     fun comment() = composeRule.captureScreen("screens", "comment", isDark) {
         val comment = PreviewData.comments.first()
