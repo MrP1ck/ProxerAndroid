@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Priority
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.target.ImageViewTarget
 import com.bumptech.glide.request.transition.Transition
@@ -16,6 +17,8 @@ import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView.PAN_LIMIT_INSIDE
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView.ZOOM_FOCUS_CENTER
+import com.davemorrissey.labs.subscaleview.decoder.SkiaImageDecoder
+import com.davemorrissey.labs.subscaleview.decoder.SkiaPooledImageRegionDecoder
 import com.gojuno.koptional.rxjava2.filterSome
 import com.gojuno.koptional.toOptional
 import com.jakewharton.rxbinding3.view.clicks
@@ -69,6 +72,9 @@ class MangaAdapter(var isVertical: Boolean) : BaseAdapter<Page, MangaViewHolder>
     var id by Delegates.notNull<String>()
 
     private var lastTouchCoordinates: Pair<Float, Float>? = null
+
+    // Pages which could not be decoded by the platform decoder. These are retried with the ImageLib decoder.
+    private val fallbackPages = mutableSetOf<String>()
 
     init {
         setHasStableIds(true)
@@ -147,7 +153,7 @@ class MangaAdapter(var isVertical: Boolean) : BaseAdapter<Page, MangaViewHolder>
             image.isVisible = true
         }
 
-        protected fun handleImageLoadError(error: Exception) {
+        protected open fun handleImageLoadError(error: Exception) {
             Timber.e(error)
 
             when {
@@ -205,9 +211,6 @@ class MangaAdapter(var isVertical: Boolean) : BaseAdapter<Page, MangaViewHolder>
             image.setPanLimit(PAN_LIMIT_INSIDE)
             image.setMinimumTileDpi(196)
             image.setMinimumDpi(90)
-
-            image.setBitmapDecoderFactory { ImageLibDecoder() }
-            image.setRegionDecoderFactory { ImageLibRegionDecoder() }
         }
 
         override fun bind(item: Page) {
@@ -217,6 +220,16 @@ class MangaAdapter(var isVertical: Boolean) : BaseAdapter<Page, MangaViewHolder>
 
             initListeners()
 
+            // The platform decoders support all common formats (including WebP) and do not need to decode the whole
+            // image up front. The ImageLib decoder is only used as a fallback for images the platform fails on.
+            if (item.url() in fallbackPages) {
+                image.setBitmapDecoderFactory { ImageLibDecoder() }
+                image.setRegionDecoderFactory { ImageLibRegionDecoder() }
+            } else {
+                image.setBitmapDecoderFactory { SkiaImageDecoder() }
+                image.setRegionDecoderFactory { SkiaPooledImageRegionDecoder() }
+            }
+
             glide?.clear(glideTarget)
             glideTarget = GlideFileTarget()
 
@@ -224,8 +237,22 @@ class MangaAdapter(var isVertical: Boolean) : BaseAdapter<Page, MangaViewHolder>
                 glide
                     ?.downloadOnly()
                     ?.load(item.url())
+                    ?.priority(Priority.IMMEDIATE)
                     ?.logErrors()
                     ?.into(target)
+            }
+        }
+
+        override fun handleImageLoadError(error: Exception) {
+            val isOutOfMemory = error is OutOfMemoryError || error.cause is OutOfMemoryError
+            val item = positionResolver.resolve(bindingAdapterPosition).let { data.getOrNull(it) }
+
+            if (!isOutOfMemory && item != null && fallbackPages.add(item.url())) {
+                Timber.w(error, "Falling back to ImageLib decoder for ${item.decodedName}")
+
+                bind(item)
+            } else {
+                super.handleImageLoadError(error)
             }
         }
 

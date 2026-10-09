@@ -112,7 +112,15 @@ dependencies {
 
 configurations.all {
     resolutionStrategy.dependencySubstitution {
-        substitute module("com.squareup.moshi:moshi") with module("com.github.square.moshi:moshi:dd8611a1d9")
-        substitute module("com.squareup.moshi:moshi-kotlin-codegen") with module("com.github.square.moshi:moshi-kotlin-codegen:dd8611a1d9")
+        // The jitpack builds of moshi and the jcenter artifacts below are no longer available.
+        substitute module("com.squareup.moshi:moshi") with module("com.squareup.moshi:moshi:$moshiVersion")
+        substitute module("com.squareup.moshi:moshi-kotlin-codegen") with module("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
+        substitute module("com.mikepenz:aboutlibraries-core") with module("com.mikepenz:aboutlibraries-core:8.6.8")
+        substitute module("org.koin:koin-androidx-viewmodel") with module("io.insert-koin:koin-androidx-viewmodel:$koinVersion")
+        substitute module("org.koin:koin-androidx-workmanager") with module("io.insert-koin:koin-androidx-workmanager:$koinVersion")
+        substitute module("com.github.pengrad:jdk9-deps") with module("javax.annotation:javax.annotation-api:1.3.2")
+        substitute module("com.google.android:flexbox") with module("com.google.android.flexbox:flexbox:3.0.0")
+        substitute module("com.gojuno.koptional:koptional") with module("com.github.gojuno.koptional:koptional:$kOptionalVersion")
+        substitute module("com.gojuno.koptional:koptional-rxjava2-extensions") with module("com.github.gojuno.koptional:koptional-rxjava2-extensions:$kOptionalVersion")
     }
 }
