@@ -101,21 +101,17 @@ repository, Maven Central and JitPack (see `settings.gradle`).
 
 ### Screenshots
 
-| News                         | Anime List                         | Manga Reader                         |
+| News                         | Anime List                         | Media Detail                         |
 |------------------------------|------------------------------------|--------------------------------------|
-| ![](art/screenshot/news.png) | ![](art/screenshot/anime-list.png) | ![](art/screenshot/manga-reader.png) |
+| ![](art/screenshot/news.png) | ![](art/screenshot/anime-list.png) | ![](art/screenshot/media-detail.png) |
 
-| Media Detail                         | Instant Chat                            | Public Chat                         |
-|--------------------------------------|-----------------------------------------|-------------------------------------|
-| ![](art/screenshot/media-detail.png) | ![](art/screenshot/conference-list.png) | ![](art/screenshot/public-chat.png) |
+| Anime Schedule                   | Anime Stream List                     | Manga Reader                         |
+|----------------------------------|---------------------------------------|--------------------------------------|
+| ![](art/screenshot/schedule.png) | ![](art/screenshot/anime-streams.png) | ![](art/screenshot/manga-reader.png) |
 
-| Anime Stream List                     | Anime Player                       |
-|---------------------------------------|------------------------------------|
-| ![](art/screenshot/anime-streams.png) | ![](art/screenshot/anime-play.png) |
-
-| Profile Overview                | Profile Top Ten                    | Profile Media List               |
-|---------------------------------|------------------------------------|----------------------------------|
-| ![](art/screenshot/profile.png) | ![](art/screenshot/ucp-topten.png) | ![](art/screenshot/ucp-list.png) |
+| Anime Player                       | Design Settings                           |
+|------------------------------------|-------------------------------------------|
+| ![](art/screenshot/anime-play.png) | ![](art/screenshot/settings-design.png) |
 
 ### Contributions and contributors
 
