@@ -37,13 +37,6 @@ dependencyResolutionManagement {
             }
         }
 
-        // jcenter is shut down. ExoPlayer < 2.13 is only available from a jcenter mirror.
-        maven {
-            url "https://maven.aliyun.com/repository/jcenter"
-            mavenContent { releasesOnly() }
-            content { includeGroup "com.google.android.exoplayer" }
-        }
-
         maven {
             url "https://jitpack.io"
             mavenContent { releasesOnly() }

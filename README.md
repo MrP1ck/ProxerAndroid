@@ -96,9 +96,8 @@ If you want to build the app for testing purposes in the `debug` variant, run:
 gradlew.bat assembleDebug
 ```
 
-Some dependencies were only published on jcenter, which is shut down. Most of them are replaced with artifacts from
-Maven Central (see `gradle/dependencies.gradle`). ExoPlayer 2.11.8 is not available anywhere else, so it is downloaded
-from the [Aliyun jcenter mirror](https://maven.aliyun.com/repository/jcenter) (see `gradle/repositories.gradle`).
+The dependencies are declared in the version catalog `gradle/libs.versions.toml` and come from Google's Maven
+repository, Maven Central and JitPack (see `settings.gradle`).
 
 ### Screenshots
 
