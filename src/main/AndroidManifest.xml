@@ -31,6 +31,7 @@
         android:appCategory="social"
         android:fullBackupContent="@xml/backup_config"
         android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:networkSecurityConfig="@xml/network_security_config"
@@ -351,22 +352,6 @@
 
         <activity android:name=".ui.WebViewActivity" />
 
-        <service
-            android:name=".news.widget.NewsWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-
-        <service
-            android:name=".news.widget.NewsWidgetDarkService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-
-        <service
-            android:name=".anime.schedule.widget.ScheduleWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-
-        <service
-            android:name=".anime.schedule.widget.ScheduleWidgetDarkService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-
         <receiver
             android:name=".news.widget.NewsWidgetProvider"
             android:exported="true"
@@ -386,7 +371,7 @@
             android:name=".news.widget.NewsWidgetDarkProvider"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
-            android:label="@string/widget_news_label">
+            android:label="@string/widget_news_dark_label">
 
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -416,7 +401,7 @@
             android:name=".anime.schedule.widget.ScheduleWidgetDarkProvider"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
-            android:label="@string/widget_schedule_label">
+            android:label="@string/widget_schedule_dark_label">
 
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

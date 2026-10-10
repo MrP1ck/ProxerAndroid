@@ -1,51 +1,38 @@
 package me.proxer.app.news.widget
 
-import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_IMMUTABLE
-import android.app.PendingIntent.FLAG_UPDATE_CURRENT
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Context
-import android.view.View
-import android.widget.RemoteViews
+import androidx.glance.appwidget.updateAll
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
+import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorRes
-import com.mikepenz.iconics.utils.paddingDp
-import com.mikepenz.iconics.utils.sizeDp
-import com.squareup.moshi.Moshi
-import me.proxer.app.BuildConfig
-import me.proxer.app.MainActivity
-import me.proxer.app.MainSection
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.proxer.app.R
-import me.proxer.app.forum.TopicActivity
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction
-import me.proxer.app.util.extension.PENDING_INTENT_FLAG_MUTABLE
-import me.proxer.app.util.extension.intentFor
 import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toInstantBP
-import me.proxer.app.util.extension.unsafeLazy
+import me.proxer.app.widget.WidgetError
+import me.proxer.app.widget.WidgetState
 import me.proxer.library.ProxerApi
-import me.proxer.library.ProxerCall
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
+ * Loads the news for the [NewsWidget]s and updates them.
+ *
  * @author Ruben Gees
  */
 class NewsWidgetUpdateWorker(
     context: Context,
     workerParams: WorkerParameters
-) : Worker(context, workerParams) {
+) : CoroutineWorker(context, workerParams) {
 
     companion object {
         private const val NAME = "NewsWidgetUpdateWorker"
@@ -67,163 +54,43 @@ class NewsWidgetUpdateWorker(
     }
 
     private val api by safeInject<ProxerApi>()
-    private val moshi by safeInject<Moshi>()
 
-    private val appWidgetManager by unsafeLazy { AppWidgetManager.getInstance(applicationContext) }
+    override suspend fun doWork(): Result {
+        val previous = newsWidgetStore.read(applicationContext)
 
-    private val widgetIds by unsafeLazy {
-        appWidgetManager.getAppWidgetIds(ComponentName(applicationContext, NewsWidgetProvider::class.java))
-    }
-
-    private val darkWidgetIds by unsafeLazy {
-        appWidgetManager.getAppWidgetIds(ComponentName(applicationContext, NewsWidgetDarkProvider::class.java))
-    }
-
-    private var currentCall: ProxerCall<*>? = null
-
-    override fun doWork(): Result {
-        widgetIds.forEach { id -> bindLoadingLayout(appWidgetManager, id, false) }
-        darkWidgetIds.forEach { id -> bindLoadingLayout(appWidgetManager, id, true) }
+        update(WidgetState(items = previous?.items.orEmpty(), isLoading = true))
 
         return try {
-            val news = if (!isStopped) {
+            val news = withContext(Dispatchers.IO) {
                 api.notifications.news()
                     .build()
-                    .also { currentCall = it }
                     .safeExecute()
-                    .map {
-                        SimpleNews(it.id, it.threadId, it.categoryId, it.subject, it.category, it.date.toInstantBP())
-                    }
-            } else {
-                emptyList()
+                    .map { SimpleNews(it.id, it.threadId, it.categoryId, it.subject, it.category, it.date.toInstantBP()) }
             }
 
-            if (!isStopped) {
-                if (news.isEmpty()) {
-                    val noDataAction = ErrorAction(R.string.error_no_data_news)
-
-                    widgetIds.forEach { id -> bindErrorLayout(appWidgetManager, id, noDataAction, false) }
-                    darkWidgetIds.forEach { id -> bindErrorLayout(appWidgetManager, id, noDataAction, true) }
-                } else {
-                    widgetIds.forEach { id -> bindListLayout(appWidgetManager, id, news, false) }
-                    darkWidgetIds.forEach { id -> bindListLayout(appWidgetManager, id, news, true) }
+            update(
+                when (news.isEmpty()) {
+                    true -> WidgetState(error = WidgetError.from(applicationContext, ErrorAction(R.string.error_no_data_news)))
+                    false -> WidgetState(items = news)
                 }
-            }
+            )
 
             Result.success()
-        } catch (error: Throwable) {
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
             Timber.e(error)
 
-            if (!isStopped) {
-                val action = ErrorUtils.handle(error)
+            update(WidgetState(error = WidgetError.from(applicationContext, ErrorUtils.handle(error))))
 
-                widgetIds.forEach { id -> bindErrorLayout(appWidgetManager, id, action, false) }
-                darkWidgetIds.forEach { id -> bindErrorLayout(appWidgetManager, id, action, true) }
-            }
-
-            return Result.failure()
+            Result.failure()
         }
     }
 
-    override fun onStopped() {
-        currentCall?.cancel()
-        currentCall = null
-    }
+    private suspend fun update(state: WidgetState<SimpleNews>) {
+        newsWidgetStore.write(applicationContext, state)
 
-    private fun bindListLayout(appWidgetManager: AppWidgetManager, id: Int, news: List<SimpleNews>, dark: Boolean) {
-        val views = RemoteViews(
-            BuildConfig.APPLICATION_ID,
-            when (dark) {
-                true -> R.layout.layout_widget_news_dark_list
-                false -> R.layout.layout_widget_news_list
-            }
-        )
-
-        val serializedNews = news
-            .map { moshi.adapter(SimpleNews::class.java).toJson(it) }
-            .toTypedArray()
-
-        val intent = when (dark) {
-            true -> applicationContext.intentFor<NewsWidgetDarkService>(
-                NewsWidgetDarkService.ARGUMENT_NEWS to serializedNews
-            )
-            false -> applicationContext.intentFor<NewsWidgetService>(
-                NewsWidgetService.ARGUMENT_NEWS to serializedNews
-            )
-        }
-
-        val detailIntent = applicationContext.intentFor<TopicActivity>()
-        val detailPendingIntent = PendingIntent.getActivity(applicationContext, 0, detailIntent, FLAG_UPDATE_CURRENT or PENDING_INTENT_FLAG_MUTABLE)
-
-        bindBaseLayout(id, views)
-
-        views.setPendingIntentTemplate(R.id.list, detailPendingIntent)
-        views.setRemoteAdapter(R.id.list, intent)
-
-        appWidgetManager.updateAppWidget(id, views)
-    }
-
-    private fun bindErrorLayout(appWidgetManager: AppWidgetManager, id: Int, errorAction: ErrorAction, dark: Boolean) {
-        val views = RemoteViews(
-            BuildConfig.APPLICATION_ID,
-            when (dark) {
-                true -> R.layout.layout_widget_news_dark_error
-                false -> R.layout.layout_widget_news_error
-            }
-        )
-
-        val errorIntent = errorAction.toIntent()
-
-        bindBaseLayout(id, views)
-
-        views.setTextViewText(R.id.errorText, applicationContext.getString(errorAction.message))
-
-        if (errorIntent != null) {
-            val errorPendingIntent = PendingIntent.getActivity(applicationContext, 0, errorIntent, FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
-
-            views.setTextViewText(R.id.errorButton, applicationContext.getString(errorAction.buttonMessage))
-            views.setOnClickPendingIntent(R.id.errorButton, errorPendingIntent)
-        } else {
-            views.setViewVisibility(R.id.errorButton, View.GONE)
-        }
-
-        appWidgetManager.updateAppWidget(id, views)
-    }
-
-    private fun bindLoadingLayout(appWidgetManager: AppWidgetManager, id: Int, dark: Boolean) {
-        val views = RemoteViews(
-            BuildConfig.APPLICATION_ID,
-            when (dark) {
-                true -> R.layout.layout_widget_news_dark_loading
-                false -> R.layout.layout_widget_news_loading
-            }
-        )
-
-        bindBaseLayout(id, views)
-
-        appWidgetManager.updateAppWidget(id, views)
-    }
-
-    private fun bindBaseLayout(id: Int, views: RemoteViews) {
-        val intent = MainActivity.getSectionIntent(applicationContext, MainSection.NEWS)
-        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
-
-        val updateIntent = applicationContext.intentFor<NewsWidgetProvider>()
-            .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(id))
-
-        val updatePendingIntent = PendingIntent.getBroadcast(applicationContext, 0, updateIntent, FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
-
-        views.setOnClickPendingIntent(R.id.title, pendingIntent)
-        views.setOnClickPendingIntent(R.id.refresh, updatePendingIntent)
-
-        views.setImageViewBitmap(
-            R.id.refresh,
-            IconicsDrawable(applicationContext, CommunityMaterial.Icon3.cmd_refresh).apply {
-                colorRes = android.R.color.white
-                paddingDp = 8
-                sizeDp = 32
-            }.toBitmap()
-        )
+        NewsWidget().updateAll(applicationContext)
+        NewsDarkWidget().updateAll(applicationContext)
     }
 }

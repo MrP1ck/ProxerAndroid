@@ -776,10 +776,14 @@
     <string name="exoplayer_seek_indicator">%d Sek.</string>
 
     <string name="widget_news_label">Proxer.Me News</string>
+    <string name="widget_news_dark_label">Proxer.Me News (dunkel)</string>
+    <string name="widget_news_description">Die neuesten News von Proxer.Me</string>
     <string name="widget_news_title">News</string>
     <string name="widget_news_info">%1$s in %2$s</string>
 
     <string name="widget_schedule_label">Proxer.Me Tagesplan</string>
+    <string name="widget_schedule_dark_label">Proxer.Me Tagesplan (dunkel)</string>
+    <string name="widget_schedule_description">Die heute erscheinenden Anime-Episoden</string>
     <string name="widget_schedule_title">Tagesplan</string>
 
     <string name="notification_channel_news">News</string>

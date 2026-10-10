@@ -277,6 +277,8 @@ dependencies {
     implementation libs.customtabshelper
     implementation libs.aspect.ratio.imageview
     implementation libs.gravitysnaphelper
+    implementation libs.glance.appwidget
+    implementation libs.glance.material3
     implementation libs.media3.exoplayer
     implementation libs.media3.exoplayer.hls
     implementation libs.media3.exoplayer.dash
