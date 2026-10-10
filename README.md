@@ -22,14 +22,8 @@ The downloads below are the official releases and do not include these fixes. To
 
 ### What is this?
 
-Proxer.Me Android is the official mobile client for the german Anime & Manga page [Proxer.Me](https://proxer.me).<br>
+Proxer.Me Android is a modern mobile client for the german Anime & Manga page [Proxer.Me](https://proxer.me).<br>
 It features major functionalities including an anime player for various hosters and languages, a mobile-friendly manga reader, offline synchronized chat and much more.
-
-### Downloads
-
-| ![](art/logo/play-logo.png) Google Play Store                           | ![](art/logo/proxer-logo.png) Proxer App Store | ![](art/logo/github-logo.png) Github                                |
-|-------------------------------------------------------------------------|------------------------------------------------|---------------------------------------------------------------------|
-| [Download](https://play.google.com/store/apps/details?id=me.proxer.app) | [Download](https://proxer.me/apps/info/3)      | [Download](https://github.com/proxer/ProxerAndroid/releases/latest) |
 
 #### Building yourself
 
@@ -118,3 +112,4 @@ repository, Maven Central and JitPack (see `settings.gradle`).
 A guide for contribution can be found [here](.github/CONTRIBUTING.md).
 
 - [@InfiniteSoul](https://github.com/InfiniteSoul) for implementing a persistent Navigation Drawer for tablets and UI improvements.
+- [MrP1ck]{https://github.com/MrP1ck} for UI redesign.
