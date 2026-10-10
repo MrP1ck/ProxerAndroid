@@ -309,6 +309,15 @@ configurations.configureEach {
     }
 }
 
+androidComponents {
+    beforeVariants(selector().all()) { variantBuilder ->
+        // The Compose tests need the activity of ui-test-manifest, which is only added to debug builds.
+        if (variantBuilder.buildType != "debug") {
+            variantBuilder.enableUnitTest = false
+        }
+    }
+}
+
 detekt {
     toolVersion = libs.versions.detekt.get()
     buildUponDefaultConfig = true
