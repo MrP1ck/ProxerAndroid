@@ -18,7 +18,8 @@ This fork contains fixes on top of the last official release (1.11.5):
 - The toolchain is current: Gradle 8, the Android Gradle Plugin 8, Kotlin 2 and KSP. Android 6.0 or newer is
   required.
 
-The downloads below are the official releases and do not include these fixes. To use them, build the app yourself.
+Download the app from the [releases of this fork](https://github.com/MrP1ck/ProxerAndroid/releases/latest) or build it
+yourself. The official releases on Google Play and in the Proxer App Store are the old version 1.11.5.
 
 ### What is this?
 
@@ -112,4 +113,4 @@ repository, Maven Central and JitPack (see `settings.gradle`).
 A guide for contribution can be found [here](.github/CONTRIBUTING.md).
 
 - [@InfiniteSoul](https://github.com/InfiniteSoul) for implementing a persistent Navigation Drawer for tablets and UI improvements.
-- [MrP1ck]{https://github.com/MrP1ck} for UI redesign.
+- [@MrP1ck](https://github.com/MrP1ck) for the UI redesign.
