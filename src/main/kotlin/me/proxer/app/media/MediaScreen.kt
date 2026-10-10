@@ -15,9 +15,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -109,7 +107,9 @@ fun MediaScreen(
                         if (name != null) {
                             IconButton(
                                 onClick = {
-                                    navigator.share(context.getString(R.string.share_media, name, ProxerUrls.infoWeb(entryId)))
+                                    navigator.share(
+                                        context.getString(R.string.share_media, name, ProxerUrls.infoWeb(entryId))
+                                    )
                                 }
                             ) {
                                 Icon(

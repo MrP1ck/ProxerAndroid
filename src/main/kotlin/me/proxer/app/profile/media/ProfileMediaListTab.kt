@@ -61,7 +61,9 @@ fun ProfileMediaListTab(
 
     LaunchedEffect(deletionError) {
         deletionError?.let {
-            snackbarHostState?.showSnackbar(context.getString(R.string.error_media_entry_deletion, context.getString(it.message)))
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.error_media_entry_deletion, context.getString(it.message))
+            )
         }
     }
 
@@ -72,9 +74,15 @@ fun ProfileMediaListTab(
     ) {
         val filters = listOf(
             null to R.string.media_filter_all,
-            UserMediaListFilterType.WATCHING to if (category == Category.ANIME) R.string.media_filter_watching else R.string.media_filter_reading,
+            UserMediaListFilterType.WATCHING to when (category == Category.ANIME) {
+                true -> R.string.media_filter_watching
+                false -> R.string.media_filter_reading
+            },
             UserMediaListFilterType.WATCHED to R.string.media_filter_finished,
-            UserMediaListFilterType.WILL_WATCH to if (category == Category.ANIME) R.string.media_filter_will_watch else R.string.media_filter_will_read,
+            UserMediaListFilterType.WILL_WATCH to when (category == Category.ANIME) {
+                true -> R.string.media_filter_will_watch
+                false -> R.string.media_filter_will_read
+            },
             UserMediaListFilterType.CANCELLED to R.string.media_filter_cancelled
         )
 

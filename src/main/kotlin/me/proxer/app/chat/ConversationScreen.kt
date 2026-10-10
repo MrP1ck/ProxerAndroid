@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -63,10 +61,10 @@ import me.proxer.app.R
 import me.proxer.app.ui.components.BBCodeText
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.ContentStateHost
-import me.proxer.app.ui.components.UserAvatar
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.TopAppBarTitle
 import me.proxer.app.ui.components.UpButton
+import me.proxer.app.ui.components.UserAvatar
 import me.proxer.app.ui.view.bbcode.BBTree
 import me.proxer.app.util.ErrorUtils.ErrorAction
 import me.proxer.app.util.extension.distanceInWordsToNow
@@ -130,7 +128,12 @@ fun ConversationScreen(
     var draft by remember { mutableStateOf(TextFieldValue(initialDraft ?: "")) }
 
     LaunchedEffect(initialDraft) {
-        if (initialDraft != null && draft.text.isBlank()) draft = TextFieldValue(initialDraft, TextRange(initialDraft.length))
+        if (initialDraft != null && draft.text.isBlank()) {
+            draft = TextFieldValue(
+                initialDraft,
+                TextRange(initialDraft.length)
+            )
+        }
     }
 
     val selectedMessages = messages.filter { it.id in selectedIds }.sortedBy { it.date }
@@ -166,7 +169,7 @@ fun ConversationScreen(
 
                         selectedIds = emptySet()
                     },
-                    onReply = selectedMessages.singleOrNull()?.takeIf { !it.isSelf && input.isEnabled }?.let { message ->
+                    onReply = replyableMessage(selectedMessages, input.isEnabled)?.let { message ->
                         {
                             val reply = context.getString(R.string.fragment_messenger_reply, message.username)
 
@@ -228,10 +231,15 @@ fun ConversationScreen(
                                 isSelected = message.id in selectedIds,
                                 onClick = {
                                     if (isSelecting) {
-                                        selectedIds = if (message.id in selectedIds) selectedIds - message.id else selectedIds + message.id
+                                        selectedIds = when (message.id in selectedIds) {
+                                            true -> selectedIds - message.id
+                                            false -> selectedIds + message.id
+                                        }
                                     }
                                 },
-                                onLongClick = { if (message.actionText == null) selectedIds = selectedIds + message.id },
+                                onLongClick = {
+                                    if (message.actionText == null) selectedIds = selectedIds + message.id
+                                },
                                 onAuthorClick = { onAuthorClick(message) }
                             )
                         }
@@ -298,17 +306,26 @@ private fun SelectionTopBar(
         actions = {
             if (onReply != null) {
                 IconButton(onClick = onReply) {
-                    Icon(painterResource(R.drawable.ic_symbol_reply), contentDescription = stringResource(R.string.action_reply))
+                    Icon(
+                        painterResource(R.drawable.ic_symbol_reply),
+                        contentDescription = stringResource(R.string.action_reply)
+                    )
                 }
             }
 
             IconButton(onClick = onCopy) {
-                Icon(painterResource(R.drawable.ic_symbol_content_copy), contentDescription = stringResource(R.string.action_copy))
+                Icon(
+                    painterResource(R.drawable.ic_symbol_content_copy),
+                    contentDescription = stringResource(R.string.action_copy)
+                )
             }
 
             if (onReport != null) {
                 IconButton(onClick = onReport) {
-                    Icon(painterResource(R.drawable.ic_symbol_flag), contentDescription = stringResource(R.string.action_report))
+                    Icon(
+                        painterResource(R.drawable.ic_symbol_flag),
+                        contentDescription = stringResource(R.string.action_report)
+                    )
                 }
             }
         },
@@ -477,3 +494,9 @@ private fun InputBar(
         }
     }
 }
+
+/**
+ * The message which can be replied to: a single selected message of another user, if the input is enabled.
+ */
+private fun replyableMessage(selectedMessages: List<ConversationMessage>, isInputEnabled: Boolean) =
+    selectedMessages.singleOrNull()?.takeIf { !it.isSelf && isInputEnabled }

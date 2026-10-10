@@ -63,7 +63,9 @@ abstract class BaseNewsWidget(private val isDark: Boolean) : GlanceAppWidget() {
                     news.date.toLocalDateTime().distanceInWordsToNow(context),
                     news.category
                 ),
-                onClick = actionStartActivity(TopicActivity.getIntent(context, news.threadId, news.categoryId, news.subject))
+                onClick = actionStartActivity(
+                    TopicActivity.getIntent(context, news.threadId, news.categoryId, news.subject)
+                )
             )
         }
     }

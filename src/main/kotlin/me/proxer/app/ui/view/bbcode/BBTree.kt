@@ -19,8 +19,6 @@ class BBTree(
 
     fun endsWith(code: String) = prototype.endRegex.matches(code)
 
-    fun makeViews(parent: BBCodeView, args: BBArgs) = prototype.makeViews(parent, children, args + this.args)
-
     fun optimize(args: BBArgs = BBArgs()) = recursiveOptimize(args).first()
 
     fun isBlank(): Boolean {

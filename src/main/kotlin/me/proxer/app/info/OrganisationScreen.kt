@@ -113,7 +113,10 @@ fun OrganisationScreen(
                 )
 
                 PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
-                    listOf(R.string.section_industry_info, R.string.section_industry_projects).forEachIndexed { index, title ->
+                    listOf(
+                        R.string.section_industry_info,
+                        R.string.section_industry_projects
+                    ).forEachIndexed { index, title ->
                         Tab(
                             selected = pagerState.currentPage == index,
                             onClick = { scope.launch { pagerState.animateScrollToPage(index) } },

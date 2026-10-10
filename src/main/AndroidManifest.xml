@@ -29,6 +29,7 @@
         android:name=".MainApplication"
         android:allowBackup="true"
         android:appCategory="social"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_config"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"

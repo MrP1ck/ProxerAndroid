@@ -77,6 +77,7 @@ class InAppUpdateFlow {
             when (it.installStatus()) {
                 InstallStatus.DOWNLOADED -> callbacks.onUpdateDownloaded { appUpdateManager.completeUpdate() }
                 InstallStatus.CANCELED -> callbacks.onUpdateCancelled()
+                else -> Unit
             }
         }
 

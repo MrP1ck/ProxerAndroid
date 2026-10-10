@@ -106,17 +106,36 @@ fun ProfileInfoContent(
                             modifier = Modifier.size(64.dp)
                         )
                     } else {
-                        ProxerAsyncImage(ProxerUrls.userImage(image), null, Modifier.size(112.dp), showErrorIcon = false)
+                        ProxerAsyncImage(
+                            ProxerUrls.userImage(image),
+                            null,
+                            Modifier.size(112.dp),
+                            showErrorIcon = false
+                        )
                     }
                 }
 
-                Text(info.username, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 12.dp))
+                Text(
+                    info.username,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
 
                 ChipRow(Modifier.padding(top = 8.dp)) {
                     AssistChip(onClick = onRankClick, label = { Text(rankName(totalPoints)) })
 
-                    if (info.isTeamMember) AssistChip(onClick = {}, label = { Text(stringResource(R.string.profile_team)) })
-                    if (info.isDonator) AssistChip(onClick = {}, label = { Text(stringResource(R.string.profile_donator)) })
+                    if (info.isTeamMember) {
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(stringResource(R.string.profile_team)) }
+                        )
+                    }
+                    if (info.isDonator) {
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(stringResource(R.string.profile_donator)) }
+                        )
+                    }
                 }
             }
         }
@@ -127,7 +146,10 @@ fun ProfileInfoContent(
 
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp)) {
-                        Text(rememberLinkifiedText(info.status, onLinkClick), style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            rememberLinkifiedText(info.status, onLinkClick),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                         Text(
                             info.lastStatusChange.distanceInWordsToNow(context),
                             style = MaterialTheme.typography.bodySmall,
@@ -166,8 +188,14 @@ fun ProfileInfoContent(
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         StatRow(R.string.fragment_profile_epsiode_counter_episodes, watchedEpisodes.toString())
                         StatRow(R.string.fragment_profile_epsiode_counter_minutes, minutes.toString())
-                        StatRow(R.string.fragment_profile_epsiode_counter_hours, String.format(Locale.GERMANY, "%.1f", hours))
-                        StatRow(R.string.fragment_profile_epsiode_counter_days, String.format(Locale.GERMANY, "%.1f", days))
+                        StatRow(
+                            R.string.fragment_profile_epsiode_counter_hours,
+                            String.format(Locale.GERMANY, "%.1f", hours)
+                        )
+                        StatRow(
+                            R.string.fragment_profile_epsiode_counter_days,
+                            String.format(Locale.GERMANY, "%.1f", days)
+                        )
                     }
                 }
             }
@@ -183,7 +211,10 @@ private fun StatRow(@StringRes title: Int, value: String, isEmphasized: Boolean 
             style = if (isEmphasized) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f)
         )
-        Text(value, style = if (isEmphasized) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium)
+        Text(
+            value,
+            style = if (isEmphasized) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium
+        )
     }
 }
 

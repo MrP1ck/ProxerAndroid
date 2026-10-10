@@ -40,7 +40,12 @@ fun UserListItem(
     ListItem(
         headlineContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(username, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                Text(
+                    username,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
 
                 if (badge != null) {
                     Spacer(Modifier.width(4.dp))
@@ -56,7 +61,11 @@ fun UserListItem(
         },
         supportingContent = status.trim().takeIf { it.isNotEmpty() }?.let {
             {
-                Text(rememberLinkifiedText(it) { url -> navigator.showPage(url) }, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Text(
+                    rememberLinkifiedText(it) { url -> navigator.showPage(url) },
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         },
         leadingContent = { UserAvatar(userImageUrl(image)) },

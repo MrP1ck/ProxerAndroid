@@ -294,7 +294,9 @@ class EditCommentActivity : ComposeActivity() {
                 IconButton(onClick = { isExpanded = !isExpanded }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_symbol_expand_more),
-                        contentDescription = stringResource(R.string.fragment_edit_comment_rules_expand_content_description),
+                        contentDescription = stringResource(
+                            R.string.fragment_edit_comment_rules_expand_content_description
+                        ),
                         modifier = Modifier.rotate(if (isExpanded) 180f else 0f)
                     )
                 }
@@ -308,7 +310,10 @@ class EditCommentActivity : ComposeActivity() {
                     rules.forEach { rule ->
                         Row {
                             Text("•", modifier = Modifier.padding(end = 8.dp))
-                            Text(remember(rule) { AnnotatedString.fromHtml(rule.trim()) }, style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                remember(rule) { AnnotatedString.fromHtml(rule.trim()) },
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
                 }
@@ -376,7 +381,9 @@ private fun RatingInput(rating: Int, onRatingChange: (Int) -> Unit) {
                 IconButton(onClick = { onRatingChange(0) }) {
                     Icon(
                         painterResource(R.drawable.ic_symbol_close),
-                        contentDescription = stringResource(R.string.fragment_edit_comment_rating_clear_content_description)
+                        contentDescription = stringResource(
+                            R.string.fragment_edit_comment_rating_clear_content_description
+                        )
                     )
                 }
             }
@@ -399,8 +406,14 @@ private fun FormattingBar(onInsertTag: (tag: String, value: String) -> Unit) {
                     .horizontalScroll(rememberScrollState())
                     .padding(horizontal = 4.dp)
             ) {
-                FormatButton(R.drawable.ic_symbol_format_bold, R.string.fragment_edit_comment_bold) { onInsertTag("b", "") }
-                FormatButton(R.drawable.ic_symbol_format_italic, R.string.fragment_edit_comment_italic) { onInsertTag("i", "") }
+                FormatButton(
+                    R.drawable.ic_symbol_format_bold,
+                    R.string.fragment_edit_comment_bold
+                ) { onInsertTag("b", "") }
+                FormatButton(
+                    R.drawable.ic_symbol_format_italic,
+                    R.string.fragment_edit_comment_italic
+                ) { onInsertTag("i", "") }
                 FormatButton(R.drawable.ic_symbol_format_underlined, R.string.fragment_edit_comment_underline) {
                     onInsertTag("u", "")
                 }

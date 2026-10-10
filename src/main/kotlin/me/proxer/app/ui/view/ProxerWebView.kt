@@ -9,23 +9,18 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.bumptech.glide.load.engine.GlideException
 import io.reactivex.subjects.PublishSubject
-import com.bumptech.glide.Glide
 import me.proxer.app.MainApplication.Companion.USER_AGENT
 import me.proxer.app.R
 import me.proxer.app.util.extension.proxyIfRequired
 import me.proxer.app.util.extension.resolveColor
 import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toPrefixedUrlOrNull
-import me.proxer.app.util.wrapper.SimpleGlideRequestListener
 import me.proxer.library.util.ProxerUrls
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
-import java.io.File
-import java.io.FileInputStream
 import java.math.BigDecimal
 import java.math.MathContext
 import java.util.Locale
@@ -95,7 +90,7 @@ class ProxerWebView @JvmOverloads constructor(
 
     private fun constructHtmlSkeleton(content: String): String {
         val secondaryColor = context.resolveColor(android.R.attr.textColorSecondary).toHtmlColor()
-        val linkColor = context.resolveColor(R.attr.colorLink).toHtmlColor()
+        val linkColor = context.resolveColor(R.attr.colorPrimary).toHtmlColor()
 
         return """
             <html>
@@ -162,7 +157,7 @@ class ProxerWebView @JvmOverloads constructor(
                     fileExtension == "png" ||
                     fileExtension == "gif"
                 ) {
-                    loadImage(view, url, fileExtension)
+                    loadImage(url, fileExtension)
                 } else {
                     loadResource(request)
                 }
@@ -172,27 +167,22 @@ class ProxerWebView @JvmOverloads constructor(
         }
 
         private fun loadImage(
-            view: WebView,
             url: HttpUrl,
             fileExtension: String
         ): WebResourceResponse? {
             return try {
-                val imageFile = Glide.with(view)
-                    .download(url.proxyIfRequired().toString())
-                    .listener(
-                        object : SimpleGlideRequestListener<File> {
-                            override fun onLoadFailed(error: GlideException?): Boolean {
-                                Timber.e(error)
+                val response = client.newCall(Request.Builder().url(url.proxyIfRequired()).build()).execute()
+                val body = response.body
 
-                                return false
-                            }
-                        }
-                    )
-                    .submit().get()
+                if (!response.isSuccessful || body == null) {
+                    response.close()
+
+                    return null
+                }
 
                 val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension)
 
-                WebResourceResponse(mimeType, "", FileInputStream(imageFile))
+                WebResourceResponse(mimeType, "", body.byteStream())
             } catch (error: Throwable) {
                 Timber.e(error)
 

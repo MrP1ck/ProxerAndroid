@@ -129,7 +129,14 @@ object PreviewData {
         mediaListEntry("1", "Shingeki no Kyojin", Medium.ANIMESERIES, 25, MediaState.FINISHED, 9.1f),
         mediaListEntry("2", "Sousou no Frieren", Medium.ANIMESERIES, 28, MediaState.AIRING, 9.4f),
         mediaListEntry("3", "Kimi no Na wa.", Medium.MOVIE, 1, MediaState.FINISHED, 8.8f),
-        mediaListEntry("4", "Ein sehr langer Titel, der nicht in eine Zeile passt", Medium.OVA, 2, MediaState.FINISHED, 0f)
+        mediaListEntry(
+            "4",
+            "Ein sehr langer Titel, der nicht in eine Zeile passt",
+            Medium.OVA,
+            2,
+            MediaState.FINISHED,
+            0f
+        )
     )
 
     val bookmarks = listOf(

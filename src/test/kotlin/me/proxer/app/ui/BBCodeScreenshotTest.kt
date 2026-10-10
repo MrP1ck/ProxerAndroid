@@ -61,7 +61,9 @@ class BBCodeScreenshotTest(private val isDark: Boolean) {
 
     @Test
     fun post() = composeRule.captureScreen("screens", "bbcode", isDark) {
-        val tree = POST.toBBTree(BBArgs(resources = ApplicationProvider.getApplicationContext<TestApplication>().resources, userId = "1"))
+        val tree = POST.toBBTree(
+            BBArgs(resources = ApplicationProvider.getApplicationContext<TestApplication>().resources, userId = "1")
+        )
 
         CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyMedium) {
             BBCodeContent(tree, Modifier.padding(16.dp), userId = "1")

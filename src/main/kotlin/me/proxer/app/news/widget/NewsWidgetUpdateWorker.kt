@@ -65,12 +65,23 @@ class NewsWidgetUpdateWorker(
                 api.notifications.news()
                     .build()
                     .safeExecute()
-                    .map { SimpleNews(it.id, it.threadId, it.categoryId, it.subject, it.category, it.date.toInstantBP()) }
+                    .map {
+                        SimpleNews(
+                            it.id,
+                            it.threadId,
+                            it.categoryId,
+                            it.subject,
+                            it.category,
+                            it.date.toInstantBP()
+                        )
+                    }
             }
 
             update(
                 when (news.isEmpty()) {
-                    true -> WidgetState(error = WidgetError.from(applicationContext, ErrorAction(R.string.error_no_data_news)))
+                    true -> WidgetState(
+                        error = WidgetError.from(applicationContext, ErrorAction(R.string.error_no_data_news))
+                    )
                     false -> WidgetState(items = news)
                 }
             )

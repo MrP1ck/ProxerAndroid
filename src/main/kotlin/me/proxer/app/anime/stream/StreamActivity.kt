@@ -1,6 +1,7 @@
 package me.proxer.app.anime.stream
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.PictureInPictureParams
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -15,6 +16,7 @@ import android.util.Rational
 import android.view.ContextThemeWrapper
 import android.view.WindowManager
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -206,7 +208,13 @@ class StreamActivity : ComposeActivity() {
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
 
-        if (playerManager.currentPlayer.isPlaying && playerManager.currentPlayer !is CastPlayer) {
+        // Starting with Android 12, the system enters picture-in-picture automatically, see
+        // updatePictureInPictureParams.
+        if (
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+            playerManager.currentPlayer.isPlaying &&
+            playerManager.currentPlayer !is CastPlayer
+        ) {
             enterPictureInPicture()
         }
     }
@@ -252,6 +260,7 @@ class StreamActivity : ComposeActivity() {
 
         LaunchedEffect(showControls) { setSystemBarsVisible(showControls) }
         LaunchedEffect(state.isPlaying, state.isLoading) { setKeepScreenOn(state.isPlaying || state.isLoading) }
+        LaunchedEffect(state.isPlaying, isCasting) { updatePictureInPictureParams(state.isPlaying && !isCasting) }
 
         LaunchedEffect(seekIndicator) {
             if (seekIndicator != null) {
@@ -438,7 +447,7 @@ class StreamActivity : ComposeActivity() {
 
         controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-        if (isVisible || isInMultiWindowMode) {
+        if (isVisible || isInMultiWindowModeCompat) {
             controller.show(WindowInsetsCompat.Type.systemBars())
         } else {
             controller.hide(WindowInsetsCompat.Type.systemBars())
@@ -456,12 +465,29 @@ class StreamActivity : ComposeActivity() {
     private fun enterPictureInPicture() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
-                enterPictureInPictureMode(PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build())
+                enterPictureInPictureMode(pictureInPictureParams(isAutoEnterEnabled = false))
             } catch (error: IllegalStateException) {
                 Timber.w(error)
             }
         }
     }
+
+    private fun updatePictureInPictureParams(isAutoEnterEnabled: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setPictureInPictureParams(pictureInPictureParams(isAutoEnterEnabled))
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun pictureInPictureParams(isAutoEnterEnabled: Boolean) = PictureInPictureParams.Builder()
+        .setAspectRatio(Rational(16, 9))
+        .apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                setAutoEnterEnabled(isAutoEnterEnabled)
+                setSeamlessResizeEnabled(true)
+            }
+        }
+        .build()
 
     /**
      * The current volume or brightness from 0 to 1.
@@ -526,3 +552,6 @@ class StreamActivity : ComposeActivity() {
         }
     }
 }
+
+private val Activity.isInMultiWindowModeCompat
+    get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode

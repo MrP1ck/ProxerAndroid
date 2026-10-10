@@ -136,7 +136,12 @@ fun CommentCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .let { if (hasRatingDetails) it.clickable { areRatingDetailsVisible = !areRatingDetailsVisible } else it }
+                    .let {
+                        when (hasRatingDetails) {
+                            true -> it.clickable { areRatingDetailsVisible = !areRatingDetailsVisible }
+                            false -> it
+                        }
+                    }
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -181,7 +186,11 @@ fun CommentCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Icon(painterResource(R.drawable.ic_symbol_thumb_up), contentDescription = null, modifier = Modifier.size(16.dp))
+            Icon(
+                painterResource(R.drawable.ic_symbol_thumb_up),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
+            )
 
             Text(comment.helpfulVotes.toString(), style = MaterialTheme.typography.labelMedium)
         }
@@ -210,7 +219,10 @@ private fun OwnCommentMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
 
     Box {
         IconButton(onClick = { isMenuVisible = true }) {
-            Icon(painterResource(R.drawable.ic_symbol_more_vert), contentDescription = stringResource(R.string.media_list_options))
+            Icon(
+                painterResource(R.drawable.ic_symbol_more_vert),
+                contentDescription = stringResource(R.string.media_list_options)
+            )
         }
 
         DropdownMenu(expanded = isMenuVisible, onDismissRequest = { isMenuVisible = false }) {

@@ -52,7 +52,14 @@ class WebViewActivity : ComposeActivity() {
 
         BackHandler(enabled = canGoBack) { webView?.goBack() }
 
-        ProxerScaffold(title = title, subtitle = url.takeIf { it != title }, onNavigateUp = ::finish, scrollBehavior = null) { padding ->
+        ProxerScaffold(
+            title = title,
+            subtitle = url.takeIf {
+                it != title
+            },
+            onNavigateUp = ::finish,
+            scrollBehavior = null
+        ) { padding ->
             Box(
                 Modifier
                     .fillMaxSize()
@@ -92,7 +99,10 @@ class WebViewActivity : ComposeActivity() {
                 )
 
                 if (progress < MAX_PROGRESS) {
-                    LinearProgressIndicator(progress = { progress / MAX_PROGRESS.toFloat() }, modifier = Modifier.fillMaxWidth())
+                    LinearProgressIndicator(
+                        progress = { progress / MAX_PROGRESS.toFloat() },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }

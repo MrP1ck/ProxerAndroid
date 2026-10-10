@@ -178,7 +178,10 @@ private fun Block(block: BBBlock, enableEmoticons: Boolean) {
             val columnCount = block.rows.maxOfOrNull { it.size } ?: 1
 
             block.rows.forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     row.forEach { cell -> Blocks(cell, enableEmoticons, Modifier.weight(1f)) }
 
                     repeat(columnCount - row.size) { Box(Modifier.weight(1f)) }
@@ -221,7 +224,7 @@ private fun BBText(text: CharSequence, enableEmoticons: Boolean) {
             onClickableSpan = { span: ClickableSpan ->
                 try {
                     span.onClick(view)
-                } catch (error: ActivityNotFoundException) {
+                } catch (ignored: ActivityNotFoundException) {
                     context.toast(R.string.view_bbcode_map_no_activity_error)
                 }
             }
@@ -241,7 +244,12 @@ private fun BBText(text: CharSequence, enableEmoticons: Boolean) {
     }
 
     if (emoticons.isEmpty()) {
-        Text(annotated, style = style, textAlign = text.textAlign() ?: TextAlign.Start, modifier = Modifier.fillMaxWidth())
+        Text(
+            annotated,
+            style = style,
+            textAlign = text.textAlign() ?: TextAlign.Start,
+            modifier = Modifier.fillMaxWidth()
+        )
     } else {
         val withEmoticons = remember(annotated, emoticons) { annotated.replaceEmoticons(emoticons) }
         val inlineContent = emoticons.associate { (_, drawable) ->

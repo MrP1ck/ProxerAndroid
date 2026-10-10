@@ -43,7 +43,6 @@ import me.proxer.app.chat.prv.message.MessengerReportViewModel
 import me.proxer.app.chat.prv.message.MessengerViewModel
 import me.proxer.app.chat.prv.sync.MessengerDao
 import me.proxer.app.chat.prv.sync.MessengerNotifications
-import me.proxer.app.comment.userImageUrl
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.RegisterWhileResumed
 import me.proxer.app.ui.components.collectContentState
@@ -110,7 +109,10 @@ class PrvMessengerActivity : ComposeActivity() {
                 }
 
                 when (val safeConference = conference) {
-                    null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                    null -> Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) { CircularProgressIndicator() }
                     else -> MessengerScreen(safeConference, initialMessage)
                 }
             }
@@ -178,7 +180,10 @@ class PrvMessengerActivity : ComposeActivity() {
             input = ConversationInput(
                 isEnabled = state.data != null && user != null,
                 hint = stringResource(
-                    if (state.data == null) R.string.fragment_chat_loading_message else R.string.fragment_messenger_message
+                    when (state.data == null) {
+                        true -> R.string.fragment_chat_loading_message
+                        false -> R.string.fragment_messenger_message
+                    }
                 )
             ),
             initialDraft = initialMessage ?: draft,
@@ -194,7 +199,10 @@ class PrvMessengerActivity : ComposeActivity() {
             onTitleClick = openInfo,
             actions = {
                 IconButton(onClick = openInfo) {
-                    Icon(painterResource(R.drawable.ic_symbol_info), contentDescription = stringResource(R.string.section_info))
+                    Icon(
+                        painterResource(R.drawable.ic_symbol_info),
+                        contentDescription = stringResource(R.string.section_info)
+                    )
                 }
 
                 OverflowMenu(onReport = { isReportDialogVisible = true })
@@ -241,7 +249,10 @@ private fun OverflowMenu(onReport: () -> Unit) {
 
     Box {
         IconButton(onClick = { isExpanded = true }) {
-            Icon(painterResource(R.drawable.ic_symbol_more_vert), contentDescription = stringResource(R.string.media_list_options))
+            Icon(
+                painterResource(R.drawable.ic_symbol_more_vert),
+                contentDescription = stringResource(R.string.media_list_options)
+            )
         }
 
         DropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {

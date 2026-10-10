@@ -11,6 +11,12 @@ This fork contains fixes on top of the last official release (1.11.5):
 - The manga reader shows WebP pages, which are used by many newer webtoon uploads. Previously these pages stayed
   blank forever ([#1](https://github.com/MrP1ck/ProxerAndroid/pull/1)).
 - The project builds again after the shutdown of jcenter.
+- The UI is rewritten with Jetpack Compose and Material 3: Material You colors (with the previous color schemes as
+  presets and a pure black option), a bottom navigation bar on phones and a navigation rail on tablets, edge-to-edge
+  screens, Glance widgets and a themed launcher icon. The stream player uses Media3 and supports
+  picture-in-picture.
+- The toolchain is current: Gradle 8, the Android Gradle Plugin 8, Kotlin 2 and KSP. Android 6.0 or newer is
+  required.
 
 The downloads below are the official releases and do not include these fixes. To use them, build the app yourself.
 

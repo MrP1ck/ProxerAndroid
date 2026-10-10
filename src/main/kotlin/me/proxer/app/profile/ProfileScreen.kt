@@ -100,7 +100,10 @@ fun ProfileScreen(
                                         }
 
                                         when (existing) {
-                                            null -> navigator.openCreateConference(false, Participant(name, image ?: ""))
+                                            null -> navigator.openCreateConference(
+                                                false,
+                                                Participant(name, image ?: "")
+                                            )
                                             else -> navigator.openConference(existing)
                                         }
                                     }
@@ -134,8 +137,20 @@ fun ProfileScreen(
                 ProfileTab.INFO -> ProfileInfoTab(viewModel, state, image, padding)
                 ProfileTab.ABOUT -> ProfileAboutTab(resolvedUserId, resolvedUsername, padding)
                 ProfileTab.TOP_TEN -> TopTenTab(resolvedUserId, resolvedUsername, isOwnProfile, padding)
-                ProfileTab.ANIME -> ProfileMediaListTab(resolvedUserId, resolvedUsername, Category.ANIME, isOwnProfile, padding)
-                ProfileTab.MANGA -> ProfileMediaListTab(resolvedUserId, resolvedUsername, Category.MANGA, isOwnProfile, padding)
+                ProfileTab.ANIME -> ProfileMediaListTab(
+                    resolvedUserId,
+                    resolvedUsername,
+                    Category.ANIME,
+                    isOwnProfile,
+                    padding
+                )
+                ProfileTab.MANGA -> ProfileMediaListTab(
+                    resolvedUserId,
+                    resolvedUsername,
+                    Category.MANGA,
+                    isOwnProfile,
+                    padding
+                )
                 ProfileTab.COMMENTS -> ProfileCommentsTab(resolvedUserId, resolvedUsername, padding)
                 ProfileTab.HISTORY -> HistoryTab(resolvedUserId, resolvedUsername, padding)
             }
@@ -149,7 +164,10 @@ private fun ChatMenu(onCreateChat: () -> Unit, onCreateGroup: () -> Unit) {
 
     Box {
         IconButton(onClick = { isMenuVisible = true }) {
-            Icon(painterResource(R.drawable.ic_symbol_chat), contentDescription = stringResource(R.string.action_create_chat))
+            Icon(
+                painterResource(R.drawable.ic_symbol_chat),
+                contentDescription = stringResource(R.string.action_create_chat)
+            )
         }
 
         DropdownMenu(expanded = isMenuVisible, onDismissRequest = { isMenuVisible = false }) {

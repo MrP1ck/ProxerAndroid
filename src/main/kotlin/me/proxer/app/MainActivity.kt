@@ -146,8 +146,8 @@ class MainActivity : BaseActivity() {
     }
 
     /**
-     * The Compose UI follows the theme without recreating the Activity. The View theme is updated for the dialogs, which
-     * are still View based.
+     * The Compose UI follows the theme without recreating the Activity. The View theme is updated for the dialogs,
+     * which are still View based.
      */
     override fun onThemeChanged(themeContainer: ThemeContainer) {
         applyThemeContainer(themeContainer)

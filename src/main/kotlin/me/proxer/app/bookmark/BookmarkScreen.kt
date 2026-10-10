@@ -122,7 +122,9 @@ fun BookmarkScreen(
 
     LaunchedEffect(itemDeletionError) {
         itemDeletionError?.let {
-            snackbarHostState?.showSnackbar(context.getString(R.string.error_bookmark_deletion, context.getString(it.message)))
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.error_bookmark_deletion, context.getString(it.message))
+            )
         }
     }
 
@@ -357,7 +359,10 @@ private fun BookmarkCard(bookmark: Bookmark, onClick: () -> Unit, onLongClick: (
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     LanguageFlag(bookmark.language.toGeneralLanguage())
 
                     Text(
@@ -390,7 +395,9 @@ private fun AvailabilityIndicator(isAvailable: Boolean) {
         Modifier
             .size(8.dp)
             .clip(CircleShape)
-            .background(if (isAvailable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
+            .background(
+                if (isAvailable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+            )
             .semanticsDescription(description)
     )
 }

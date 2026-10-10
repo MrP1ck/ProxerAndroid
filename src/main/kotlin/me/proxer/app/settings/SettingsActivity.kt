@@ -183,7 +183,10 @@ class SettingsActivity : ComposeActivity() {
             onCheckedChange = { preferences.edit { putBoolean(LINK_CHECK, it) } }
         )
 
-        if (!Environment.isExternalStorageEmulated() && Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
+        val hasRemovableStorage = !Environment.isExternalStorageEmulated() &&
+            Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
+
+        if (hasRemovableStorage) {
             SwitchPreference(
                 title = stringResource(R.string.preference_external_cache_title),
                 summary = summaryOf(
@@ -222,7 +225,9 @@ class SettingsActivity : ComposeActivity() {
         val snackbarHostState = LocalSnackbarHostState.current
         val scope = rememberCoroutineScope()
 
-        val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        val permissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { granted ->
             if (!granted) {
                 scope.launch {
                     val result = snackbarHostState?.showSnackbar(
@@ -231,7 +236,7 @@ class SettingsActivity : ComposeActivity() {
                         duration = SnackbarDuration.Long
                     )
 
-                    if (result == SnackbarResult.ActionPerformed) {
+                    if (result == SnackbarResult.ActionPerformed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         startActivity(
                             Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                                 .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)

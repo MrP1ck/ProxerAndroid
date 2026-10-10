@@ -115,7 +115,11 @@ private fun ComponentsSample() {
 
         Row(Modifier.height(320.dp)) {
             ErrorState(
-                ErrorAction(R.string.error_no_network, R.string.error_action_network_settings, ButtonAction.NETWORK_SETTINGS),
+                ErrorAction(
+                    R.string.error_no_network,
+                    R.string.error_action_network_settings,
+                    ButtonAction.NETWORK_SETTINGS
+                ),
                 onAction = {},
                 modifier = Modifier.weight(1f)
             )

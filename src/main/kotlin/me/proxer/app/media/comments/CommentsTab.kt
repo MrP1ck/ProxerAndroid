@@ -73,7 +73,9 @@ fun CommentsTab(
 
     LaunchedEffect(deletionError) {
         deletionError?.let {
-            snackbarHostState?.showSnackbar(context.getString(R.string.error_comment_deletion, context.getString(it.message)))
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.error_comment_deletion, context.getString(it.message))
+            )
         }
     }
 
@@ -133,7 +135,11 @@ fun CommentsTab(
                         isOwn = comment.authorId == user?.id
                     ),
                     onHeaderClick = { navigator.openProfile(comment.authorId, comment.author, comment.image) },
-                    onEdit = { editComment.launch(EditCommentActivity.Contract.Input(comment.id, comment.entryId, name)) },
+                    onEdit = {
+                        editComment.launch(
+                            EditCommentActivity.Contract.Input(comment.id, comment.entryId, name)
+                        )
+                    },
                     onDelete = { commentToDelete = comment.id }
                 )
             }

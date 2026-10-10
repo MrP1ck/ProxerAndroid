@@ -162,7 +162,10 @@ private fun OnboardingPage(
                     .size(120.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isLogo) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
+                        when (isLogo) {
+                            true -> MaterialTheme.colorScheme.primaryContainer
+                            false -> MaterialTheme.colorScheme.secondaryContainer
+                        }
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -211,7 +214,10 @@ private fun PageIndicator(current: Int, count: Int, modifier: Modifier = Modifie
                     .size(8.dp)
                     .clip(CircleShape)
                     .background(
-                        if (index == current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                        when (index == current) {
+                            true -> MaterialTheme.colorScheme.primary
+                            false -> MaterialTheme.colorScheme.outlineVariant
+                        }
                     )
             )
         }

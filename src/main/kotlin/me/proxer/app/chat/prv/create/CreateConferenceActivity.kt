@@ -175,8 +175,12 @@ class CreateConferenceActivity : ComposeActivity() {
 
                 when {
                     isGroup && trimmedTopic.isBlank() -> topicError = R.string.error_input_empty
-                    trimmedMessage.isBlank() -> showError(ErrorUtils.ErrorAction(R.string.error_missing_message, ACTION_MESSAGE_HIDE))
-                    participants.isEmpty() -> showError(ErrorUtils.ErrorAction(R.string.error_missing_participants, ACTION_MESSAGE_HIDE))
+                    trimmedMessage.isBlank() -> showError(
+                        ErrorUtils.ErrorAction(R.string.error_missing_message, ACTION_MESSAGE_HIDE)
+                    )
+                    participants.isEmpty() -> showError(
+                        ErrorUtils.ErrorAction(R.string.error_missing_participants, ACTION_MESSAGE_HIDE)
+                    )
                     isGroup -> viewModel.createGroup(trimmedTopic, trimmedMessage, participants)
                     else -> viewModel.createChat(trimmedMessage, participants.first())
                 }
@@ -229,7 +233,10 @@ class CreateConferenceActivity : ComposeActivity() {
                                 ),
                                 keyboardActions = KeyboardActions(
                                     onNext = {
-                                        if (participants.isEmpty()) participantFocus.requestFocus() else messageFocus.requestFocus()
+                                        when (participants.isEmpty()) {
+                                            true -> participantFocus.requestFocus()
+                                            false -> messageFocus.requestFocus()
+                                        }
                                     }
                                 ),
                                 modifier = Modifier
@@ -271,10 +278,16 @@ class CreateConferenceActivity : ComposeActivity() {
                                     participantError = null
                                 },
                                 label = { Text(stringResource(R.string.fragment_create_conference_add_participant)) },
-                                placeholder = { Text(stringResource(R.string.fragment_create_conference_add_participant_hint)) },
+                                placeholder = {
+                                    Text(
+                                        stringResource(R.string.fragment_create_conference_add_participant_hint)
+                                    )
+                                },
                                 leadingIcon = { Icon(painterResource(R.drawable.ic_symbol_person_add), null) },
                                 trailingIcon = {
-                                    IconButton(onClick = { if (addParticipant() && !isGroup) messageFocus.requestFocus() }) {
+                                    IconButton(
+                                        onClick = { if (addParticipant() && !isGroup) messageFocus.requestFocus() }
+                                    ) {
                                         Icon(
                                             painterResource(R.drawable.ic_symbol_check),
                                             contentDescription = stringResource(

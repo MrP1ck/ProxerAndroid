@@ -14,6 +14,7 @@ import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.ProxerNotification
 import me.proxer.app.util.extension.androidUri
 import me.proxer.app.util.extension.getQuantityString
+import me.proxer.app.util.extension.notifyIfPermitted
 import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toInstantBP
 
@@ -29,7 +30,7 @@ object AccountNotifications {
     fun showOrUpdate(context: Context, notifications: Collection<ProxerNotification>) {
         when (val notification = buildNotification(context, notifications)) {
             null -> NotificationManagerCompat.from(context).cancel(ID)
-            else -> NotificationManagerCompat.from(context).notify(ID, notification)
+            else -> context.notifyIfPermitted(ID, notification)
         }
     }
 

@@ -6,10 +6,10 @@ import com.f2prateek.rx.preferences2.RxSharedPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import me.proxer.app.MainSection
 import me.proxer.app.manga.MangaReaderOrientation
 import me.proxer.app.settings.theme.ThemeContainer
 import me.proxer.app.util.extension.getSafeString
-import me.proxer.app.MainSection
 import okhttp3.logging.HttpLoggingInterceptor
 import org.threeten.bp.Instant
 

@@ -63,7 +63,9 @@ class LinkCheckDialog : ComposeDialog() {
         var remember by rememberSaveable { mutableStateOf(false) }
         val message = stringResource(R.string.dialog_link_check_message, link.toString()).trim()
 
-        LaunchedEffect(Unit) { if (viewModel.data.value == null && viewModel.isLoading.value != true) viewModel.check(link) }
+        LaunchedEffect(
+            Unit
+        ) { if (viewModel.data.value == null && viewModel.isLoading.value != true) viewModel.check(link) }
 
         ProxerDialogContent(
             confirmButton = {
@@ -107,7 +109,10 @@ class LinkCheckDialog : ComposeDialog() {
                             }
                         ),
                         style = MaterialTheme.typography.labelLarge,
-                        color = if (isSecure == false) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                        color = when (isSecure == false) {
+                            true -> MaterialTheme.colorScheme.error
+                            false -> MaterialTheme.colorScheme.onSurface
+                        }
                     )
                 }
 

@@ -24,4 +24,7 @@
     <exclude
         domain="sharedpref"
         path="me.proxer.encrypted_preferences.xml" />
+    <exclude
+        domain="sharedpref"
+        path="widgets.xml" />
 </full-backup-content>

@@ -45,8 +45,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -141,12 +141,17 @@ fun SeekIndicator(seconds: Int?, isForward: Boolean, modifier: Modifier = Modifi
         Surface(shape = CircleShape, color = ScrimColor, contentColor = Color.White) {
             Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
-                    painterResource(if (isForward) R.drawable.ic_symbol_fast_forward else R.drawable.ic_symbol_fast_rewind),
+                    painterResource(
+                        if (isForward) R.drawable.ic_symbol_fast_forward else R.drawable.ic_symbol_fast_rewind
+                    ),
                     contentDescription = null,
                     modifier = Modifier.size(32.dp)
                 )
 
-                Text(stringResource(R.string.exoplayer_seek_indicator, seconds ?: 0), style = MaterialTheme.typography.labelLarge)
+                Text(
+                    stringResource(R.string.exoplayer_seek_indicator, seconds ?: 0),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
     }
@@ -225,10 +230,21 @@ fun StreamControls(
             }
 
             Column(Modifier.weight(1f).padding(horizontal = 8.dp)) {
-                Text(title, color = Color.White, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    title,
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
 
                 if (subtitle != null) {
-                    Text(subtitle, color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+                    Text(
+                        subtitle,
+                        color = Color.White.copy(alpha = 0.8f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1
+                    )
                 }
             }
 
@@ -240,7 +256,12 @@ fun StreamControls(
             horizontalArrangement = Arrangement.spacedBy(32.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ControlButton(R.drawable.ic_symbol_replay_10, R.string.exoplayer_rewind_description, state.isSeekable, state::rewind)
+            ControlButton(
+                R.drawable.ic_symbol_replay_10,
+                R.string.exoplayer_rewind_description,
+                state.isSeekable,
+                state::rewind
+            )
 
             Box(Modifier.size(72.dp), contentAlignment = Alignment.Center) {
                 if (state.isLoading) {
@@ -256,10 +277,16 @@ fun StreamControls(
                     ) {
                         Icon(
                             painter = painterResource(
-                                if (state.isPlaying) R.drawable.ic_symbol_pause_filled else R.drawable.ic_symbol_play_arrow_filled
+                                when (state.isPlaying) {
+                                    true -> R.drawable.ic_symbol_pause_filled
+                                    false -> R.drawable.ic_symbol_play_arrow_filled
+                                }
                             ),
                             contentDescription = stringResource(
-                                if (state.isPlaying) R.string.exoplayer_pause_description else R.string.exoplayer_play_description
+                                when (state.isPlaying) {
+                                    true -> R.string.exoplayer_pause_description
+                                    false -> R.string.exoplayer_play_description
+                                }
                             ),
                             modifier = Modifier.size(44.dp)
                         )
@@ -284,7 +311,11 @@ fun StreamControls(
             SeekPreview(seekPosition, state.duration, loadPreview)
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(formatTime(seekPosition ?: state.position), color = Color.White, style = MaterialTheme.typography.labelMedium)
+                Text(
+                    formatTime(seekPosition ?: state.position),
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelMedium
+                )
 
                 Slider(
                     value = (seekPosition ?: state.position).toFloat(),
@@ -315,7 +346,9 @@ fun StreamControls(
 
                 IconButton(onClick = onToggleOrientation, colors = whiteIconButtonColors()) {
                     Icon(
-                        painterResource(if (isLandscape) R.drawable.ic_symbol_fullscreen_exit else R.drawable.ic_symbol_fullscreen),
+                        painterResource(
+                            if (isLandscape) R.drawable.ic_symbol_fullscreen_exit else R.drawable.ic_symbol_fullscreen
+                        ),
                         stringResource(R.string.exoplayer_fullscreen_description)
                     )
                 }
@@ -392,7 +425,12 @@ private fun SeekPreview(
 
 @Composable
 private fun ControlButton(@DrawableRes icon: Int, description: Int, enabled: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick, enabled = enabled, colors = whiteIconButtonColors(), modifier = Modifier.size(56.dp)) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
+        colors = whiteIconButtonColors(),
+        modifier = Modifier.size(56.dp)
+    ) {
         Icon(painterResource(icon), contentDescription = stringResource(description), modifier = Modifier.size(36.dp))
     }
 }

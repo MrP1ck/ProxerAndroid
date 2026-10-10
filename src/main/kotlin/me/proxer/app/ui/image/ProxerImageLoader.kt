@@ -34,9 +34,10 @@ object ProxerImageLoader {
                 add(OkHttpNetworkFetcherFactory(callFactory = { client }))
 
                 // Emoticons in forum posts and some images are animated GIFs.
-                when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    true -> add(AnimatedImageDecoder.Factory())
-                    false -> add(GifDecoder.Factory())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    add(AnimatedImageDecoder.Factory())
+                } else {
+                    add(GifDecoder.Factory())
                 }
             }
             .diskCache {

@@ -79,7 +79,9 @@ private fun blocks(node: BBTree, args: BBArgs): List<BBBlock> {
     return when (val prototype = node.prototype) {
         TextPrototype -> listOf(BBBlock.Text(args.safeText))
         DividerPrototype -> listOf(BBBlock.Divider)
-        ImagePrototype -> listOf(BBBlock.Image(firstText(node)?.toPrefixedUrlOrNull()?.proxyIfRequired(), ImagePrototype.width(args)))
+        ImagePrototype -> listOf(
+            BBBlock.Image(firstText(node)?.toPrefixedUrlOrNull()?.proxyIfRequired(), ImagePrototype.width(args))
+        )
         PdfPrototype -> listOf(BBBlock.Pdf(firstText(node)?.toPrefixedUrlOrNull(), PdfPrototype.width(args)))
         WikiPrototype -> firstText(node)?.takeIf { it.isNotBlank() }?.let { listOf(BBBlock.Wiki(it)) } ?: emptyList()
         SpoilerPrototype -> children().ifNotEmpty { listOf(BBBlock.Spoiler(SpoilerPrototype.title(args), merge(it))) }
@@ -195,7 +197,12 @@ private fun SpannableStringBuilder.trimmed(): CharSequence {
 private fun center(block: BBBlock): BBBlock = when (block) {
     is BBBlock.Text -> BBBlock.Text(
         SpannableStringBuilder(block.text).apply {
-            setSpan(AlignmentSpan.Standard(android.text.Layout.Alignment.ALIGN_CENTER), 0, length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+            setSpan(
+                AlignmentSpan.Standard(android.text.Layout.Alignment.ALIGN_CENTER),
+                0,
+                length,
+                Spannable.SPAN_INCLUSIVE_INCLUSIVE
+            )
         }
     )
     else -> BBBlock.Aligned(BBBlock.Alignment.CENTER, listOf(block))
@@ -210,4 +217,10 @@ private fun firstText(node: BBTree): String? {
     }
 }
 
-private inline fun List<BBBlock>.ifNotEmpty(block: (List<BBBlock>) -> List<BBBlock>) = if (isEmpty()) this else block(this)
+private inline fun List<BBBlock>.ifNotEmpty(block: (List<BBBlock>) -> List<BBBlock>) = if (isEmpty()) {
+    this
+} else {
+    block(
+        this
+    )
+}

@@ -2,78 +2,31 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--
+    The XML themes are only used for the window (background, system bars, splash screen) and by framework and library
+    Views like the dialogs of the Cast button; the UI itself is Compose (see ProxerTheme).
+
     The color roles of the presets are generated into themes_presets.xml (Theme.App, Theme.App.BG and
     Theme.App.Gloomy) by scripts/generate_color_schemes.py. The Dynamic preset uses Theme.App with the system
-    colors applied on top (see BaseActivity).
+    colors applied on top (see ThemeExtensions).
     -->
     <style name="Base.Theme.App" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">?attr/colorSurfaceContainer</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">@bool/is_light_theme</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">@bool/is_light_theme</item>
-
-        <item name="windowActionModeOverlay">true</item>
-
-        <item name="autoCompleteTextViewStyle">@style/Widget.App.AutoCompleteTextView</item>
-        <item name="appBarLayoutStyle">@style/Widget.App.AppBarLayout</item>
-        <item name="materialCardViewStyle">@style/Widget.App.CardView</item>
-        <item name="radioButtonStyle">@style/Widget.App.RadioButton</item>
-        <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
-        <item name="checkboxStyle">@style/Widget.App.CheckBox</item>
-        <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
-        <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
-
-
-        <item name="md_color_button_text">?attr/colorPrimary</item>
-
-        <item name="emojiIcons">?attr/colorIcon</item>
-        <item name="emojiDivider">?attr/colorDivider</item>
-        <item name="emojiBackground">?attr/colorSurfaceContainer</item>
     </style>
 
-    <!-- Maps the app specific color attributes, which are still used by the View based screens, to Material 3 roles. -->
     <style name="Base.Theme.App.DayNight" parent="Base.Theme.App">
         <item name="android:windowBackground">?android:attr/colorBackground</item>
-
-        <item name="colorPrimaryLight">?attr/colorPrimaryContainer</item>
-        <item name="colorSelectedSurface">?attr/colorSurfaceContainerHighest</item>
-        <item name="colorDivider">?attr/colorOutlineVariant</item>
-        <item name="colorIcon">?attr/colorOnSurfaceVariant</item>
-        <item name="colorIconDisabled">@color/icon_disabled_m3</item>
-        <item name="colorToolbarIcon">?attr/colorOnSurfaceVariant</item>
-        <item name="colorLink">?attr/colorPrimary</item>
-
-        <item name="colorFastscrollTrack">?attr/colorSurfaceContainerHighest</item>
-        <item name="colorFastscrollThumb">?attr/colorOutline</item>
-    </style>
-
-    <style name="Theme.App.NoBackground" parent="Theme.App">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:backgroundDimEnabled">false</item>
-    </style>
-
-    <style name="Theme.App.BG.NoBackground" parent="Theme.App.BG">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:backgroundDimEnabled">false</item>
-    </style>
-
-    <style name="Theme.App.Gloomy.NoBackground" parent="Theme.App.Gloomy">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
     <!-- Pure black surfaces for AMOLED displays. Only has an effect in dark mode (see values-night). -->
     <style name="ThemeOverlay.App.Amoled" parent="" />
 
-    <!-- For screens with a Toolbar over an image or video, which needs light icons. -->
+    <!-- For Views over an image or video, which need light icons (e.g. the Cast button of the player). -->
     <style name="ThemeOverlay.App.OnImage" parent="">
-        <item name="colorToolbarIcon">@android:color/white</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorOnSurface">@android:color/white</item>
     </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen.IconBackground">
@@ -85,59 +38,6 @@
 
     <style name="Theme.Placeholder.App.Splash" parent="Theme.App">
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-    </style>
-
-    <style name="Theme.Placeholder.App.Splash.NoBackground" parent="Theme.Placeholder.App.Splash">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">false</item>
-    </style>
-
-    <style name="Widget.App.AutoCompleteTextView" parent="Widget.AppCompat.AutoCompleteTextView">
-        <item name="android:textCursorDrawable">@drawable/cursor</item>
-    </style>
-
-    <style name="Widget.App.CheckBox" parent="Widget.Material3.CompoundButton.CheckBox">
-        <item name="android:minHeight">32dp</item>
-        <item name="android:minWidth">32dp</item>
-    </style>
-
-    <style name="Widget.App.RadioButton" parent="Widget.Material3.CompoundButton.RadioButton">
-        <item name="android:minHeight">32dp</item>
-        <item name="android:minWidth">32dp</item>
-    </style>
-
-    <style name="Widget.App.AppBarLayout" parent="Widget.Material3.AppBarLayout" />
-
-    <style name="Widget.App.Toolbar" parent="Widget.Material3.Toolbar">
-        <item name="colorControlNormal">?attr/colorOnSurface</item>
-    </style>
-
-    <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardUseCompatPadding">true</item>
-    </style>
-
-    <style name="Widget.App.TextInputLayout" parent="Widget.Material3.TextInputLayout.FilledBox">
-        <item name="materialThemeOverlay">@style/Widget.App.TextInputLayout.Theme</item>
-        <item name="boxBackgroundMode">none</item>
-        <item name="errorIconDrawable">@null</item>
-    </style>
-
-    <style name="Widget.App.TextInputLayout.Theme" parent="">
-        <item name="colorControlNormal">?attr/colorOnSurfaceVariant</item>
-    </style>
-
-    <style name="Widget.App.ActionMode" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">?attr/colorSurfaceContainerHigh</item>
-    </style>
-
-    <style name="Widget.App.TabLayout.OnImage" parent="Widget.Material3.TabLayout">
-        <item name="android:background">@android:color/transparent</item>
-        <item name="tabTextColor">#B3FFFFFF</item>
-        <item name="tabSelectedTextColor">@android:color/white</item>
-        <item name="tabIndicatorColor">@android:color/white</item>
-        <item name="tabRippleColor">#33FFFFFF</item>
     </style>
 
     <!-- A dialog window without decoration. The content draws the dialog surface itself (see ComposeDialog). -->

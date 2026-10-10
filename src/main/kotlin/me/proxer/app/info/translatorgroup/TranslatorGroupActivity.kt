@@ -57,7 +57,11 @@ class TranslatorGroupActivity : ComposeActivity() {
                     name = info.name,
                     imageUrl = if (info.image.isBlank()) null else ProxerUrls.translatorGroupImage(id),
                     rows = listOfNotNull(
-                        info.country.displayName()?.let { context.getString(R.string.fragment_translator_group_language) to it }
+                        info.country.displayName()?.let {
+                            context.getString(
+                                R.string.fragment_translator_group_language
+                            ) to it
+                        }
                     ),
                     link = info.link,
                     description = info.description

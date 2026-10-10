@@ -110,7 +110,13 @@ class LoginDialog : ComposeDialog() {
 
         ProxerDialogContent(
             title = stringResource(R.string.dialog_login_title),
-            confirmButton = { DialogButton(R.string.dialog_login_positive, onClick = ::login, enabled = isLoading != true) },
+            confirmButton = {
+                DialogButton(
+                    R.string.dialog_login_positive,
+                    onClick = ::login,
+                    enabled = isLoading != true
+                )
+            },
             dismissButton = { DialogButton(R.string.cancel, onClick = ::dismiss) }
         ) {
             if (isLoading == true) {
@@ -159,7 +165,10 @@ class LoginDialog : ComposeDialog() {
                             IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                                 Icon(
                                     painter = painterResource(
-                                        if (isPasswordVisible) R.drawable.ic_symbol_visibility_off else R.drawable.ic_symbol_visibility
+                                        when (isPasswordVisible) {
+                                            true -> R.drawable.ic_symbol_visibility_off
+                                            false -> R.drawable.ic_symbol_visibility
+                                        }
                                     ),
                                     contentDescription = null
                                 )

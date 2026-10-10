@@ -123,7 +123,9 @@ private fun OverallStatus(isOnline: Boolean) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(if (isOnline) R.drawable.ic_symbol_cloud_done else R.drawable.ic_symbol_cloud_off),
+                painter = painterResource(
+                    if (isOnline) R.drawable.ic_symbol_cloud_done else R.drawable.ic_symbol_cloud_off
+                ),
                 contentDescription = null,
                 modifier = Modifier.size(40.dp)
             )
@@ -170,7 +172,12 @@ private fun ServerCard(server: ServerStatus) {
                 )
             }
 
-            Text(server.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                server.name,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

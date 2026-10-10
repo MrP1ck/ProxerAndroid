@@ -29,7 +29,11 @@ fun UserAvatar(url: HttpUrl?, modifier: Modifier = Modifier, size: Dp = 40.dp) {
         contentAlignment = Alignment.Center
     ) {
         if (url == null) {
-            Icon(painterResource(R.drawable.ic_symbol_person), null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
+            Icon(
+                painterResource(R.drawable.ic_symbol_person),
+                null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         } else {
             ProxerAsyncImage(url, null, Modifier.size(size), showErrorIcon = false)
         }

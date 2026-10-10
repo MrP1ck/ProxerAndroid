@@ -32,11 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import me.proxer.app.R
 import me.proxer.app.ui.components.ContentState
-import me.proxer.app.ui.components.plus
 import me.proxer.app.ui.components.PagedStaggeredGrid
 import me.proxer.app.ui.components.ProxerAsyncImage
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.collectContentState
+import me.proxer.app.ui.components.plus
 import me.proxer.app.ui.components.rememberErrorActionHandler
 import me.proxer.app.ui.preview.PreviewData
 import me.proxer.app.ui.preview.PreviewSurface

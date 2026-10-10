@@ -66,7 +66,6 @@ import coil3.SingletonImageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.size.Size
-import kotlin.math.roundToInt
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -104,6 +103,7 @@ import me.proxer.library.util.ProxerUtils
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
+import kotlin.math.roundToInt
 
 /**
  * The reader for a chapter of a manga. While reading, the system bars and the controls are hidden; tapping the center
@@ -171,7 +171,8 @@ class MangaActivity : ComposeActivity() {
         super.onCreate(savedInstanceState)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            window.attributes.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
     }
 
@@ -298,7 +299,11 @@ class MangaActivity : ComposeActivity() {
                 ) {
                     TopAppBar(
                         title = {
-                            Column(Modifier.clickable(enabled = name != null) { navigator.openMedia(id, name, Category.MANGA) }) {
+                            Column(
+                                Modifier.clickable(
+                                    enabled = name != null
+                                ) { navigator.openMedia(id, name, Category.MANGA) }
+                            ) {
                                 val subtitle = chapterTitle ?: Category.MANGA.toEpisodeAppString(context, episode)
 
                                 if (name == null) TopAppBarTitle(subtitle) else TopAppBarTitle(name, subtitle)
@@ -482,7 +487,7 @@ class MangaActivity : ComposeActivity() {
 
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-            if (isImmersive && !isInMultiWindowMode) {
+            if (isImmersive && !isInMultiWindowModeCompat) {
                 controller.hide(WindowInsetsCompat.Type.systemBars())
             } else {
                 controller.show(WindowInsetsCompat.Type.systemBars())
@@ -492,7 +497,10 @@ class MangaActivity : ComposeActivity() {
 }
 
 @Composable
-private fun OrientationMenu(orientation: MangaReaderOrientation, onOrientationChange: (MangaReaderOrientation) -> Unit) {
+private fun OrientationMenu(
+    orientation: MangaReaderOrientation,
+    onOrientationChange: (MangaReaderOrientation) -> Unit
+) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Box {
@@ -555,3 +563,6 @@ private fun PageSlider(page: Int, pageCount: Int, isRightToLeft: Boolean, onPage
         }
     }
 }
+
+private val Activity.isInMultiWindowModeCompat
+    get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode

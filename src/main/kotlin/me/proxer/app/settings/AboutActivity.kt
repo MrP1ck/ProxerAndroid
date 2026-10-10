@@ -49,8 +49,8 @@ class AboutActivity : ComposeActivity() {
         private val discordLink = "https://discord.gg/XwrEDmA".toPrefixedHttpUrl()
         private val repositoryLink = "https://github.com/proxer/ProxerAndroid".toPrefixedHttpUrl()
 
-        private const val supportProxerMail = "appsupport@proxer.de"
-        private const val developerGithubName = "rubengees"
+        private const val SUPPORT_MAIL = "appsupport@proxer.de"
+        private const val DEVELOPER_GITHUB_NAME = "rubengees"
 
         fun navigateTo(context: Activity) = context.startActivity<AboutActivity>()
     }
@@ -155,8 +155,8 @@ class AboutActivity : ComposeActivity() {
                 item {
                     PreferenceCategory(stringResource(R.string.about_developer_title))
 
-                    AboutItem(R.drawable.ic_symbol_code, R.string.about_developer_github_title, developerGithubName) {
-                        openLink("https://github.com/$developerGithubName".toPrefixedHttpUrl())
+                    AboutItem(R.drawable.ic_symbol_code, R.string.about_developer_github_title, DEVELOPER_GITHUB_NAME) {
+                        openLink("https://github.com/$DEVELOPER_GITHUB_NAME".toPrefixedHttpUrl())
                     }
                 }
             }
@@ -197,13 +197,13 @@ class AboutActivity : ComposeActivity() {
     private fun sendSupportMail() {
         val intent = Intent(Intent.ACTION_SENDTO).apply {
             data = "mailto:".toUri()
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(supportProxerMail))
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(SUPPORT_MAIL))
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.about_support_mail_subject))
         }
 
         try {
             startActivity(intent)
-        } catch (error: ActivityNotFoundException) {
+        } catch (ignored: ActivityNotFoundException) {
             toast(R.string.about_error_mail_no_activity)
         }
     }

@@ -97,22 +97,38 @@ private fun BoxScope.RecommendationOverlay(recommendation: Recommendation) {
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Icon(
-                painterResource(if (recommendation.userVote == true) R.drawable.ic_symbol_thumb_up_filled else R.drawable.ic_symbol_thumb_up),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(14.dp)
-            )
-            Text(recommendation.positiveVotes.toString(), style = MaterialTheme.typography.labelMedium, color = Color.White)
-
-            Icon(
                 painterResource(
-                    if (recommendation.userVote == false) R.drawable.ic_symbol_thumb_down_filled else R.drawable.ic_symbol_thumb_down
+                    when (recommendation.userVote == true) {
+                        true -> R.drawable.ic_symbol_thumb_up_filled
+                        false -> R.drawable.ic_symbol_thumb_up
+                    }
                 ),
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.size(14.dp)
             )
-            Text(recommendation.negativeVotes.toString(), style = MaterialTheme.typography.labelMedium, color = Color.White)
+            Text(
+                recommendation.positiveVotes.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White
+            )
+
+            Icon(
+                painterResource(
+                    when (recommendation.userVote == false) {
+                        true -> R.drawable.ic_symbol_thumb_down_filled
+                        false -> R.drawable.ic_symbol_thumb_down
+                    }
+                ),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                recommendation.negativeVotes.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White
+            )
         }
     }
 }

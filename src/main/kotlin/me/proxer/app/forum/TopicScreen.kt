@@ -143,7 +143,12 @@ private fun PostCard(post: ParsedPost, onAuthorClick: () -> Unit) {
                         tint = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 } else {
-                    ProxerAsyncImage(ProxerUrls.userImage(post.image), null, Modifier.size(40.dp), showErrorIcon = false)
+                    ProxerAsyncImage(
+                        ProxerUrls.userImage(post.image),
+                        null,
+                        Modifier.size(40.dp),
+                        showErrorIcon = false
+                    )
                 }
             }
 
@@ -152,7 +157,12 @@ private fun PostCard(post: ParsedPost, onAuthorClick: () -> Unit) {
                     .weight(1f)
                     .padding(start = 12.dp)
             ) {
-                Text(post.username, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    post.username,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Text(
                     post.date.distanceInWordsToNow(context),
                     style = MaterialTheme.typography.bodySmall,
@@ -161,8 +171,15 @@ private fun PostCard(post: ParsedPost, onAuthorClick: () -> Unit) {
             }
 
             if (post.thankYouAmount > 0) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Icon(painterResource(R.drawable.ic_symbol_thumb_up), contentDescription = null, modifier = Modifier.size(16.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        painterResource(R.drawable.ic_symbol_thumb_up),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
                     Text(post.thankYouAmount.toString(), style = MaterialTheme.typography.labelMedium)
                 }
             }

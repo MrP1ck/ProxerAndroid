@@ -94,7 +94,11 @@ fun LoadingState(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun EmptyState(@StringRes message: Int, modifier: Modifier = Modifier, @DrawableRes icon: Int = R.drawable.ic_symbol_search_off) {
+fun EmptyState(
+    @StringRes message: Int,
+    modifier: Modifier = Modifier,
+    @DrawableRes icon: Int = R.drawable.ic_symbol_search_off
+) {
     MessageState(icon = icon, message = stringResource(message), modifier = modifier)
 }
 

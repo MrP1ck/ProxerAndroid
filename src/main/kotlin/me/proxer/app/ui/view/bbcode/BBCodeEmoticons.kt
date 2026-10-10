@@ -1,18 +1,6 @@
 package me.proxer.app.ui.view.bbcode
 
-import android.graphics.drawable.Drawable
-import android.text.Spannable
-import android.text.style.ImageSpan
-import android.widget.TextView
-import androidx.core.text.set
-import com.bumptech.glide.load.resource.gif.GifDrawable
-import com.bumptech.glide.load.resource.gif.GifDrawable.LOOP_FOREVER
-import com.bumptech.glide.request.transition.Transition
-import com.bumptech.glide.RequestManager
 import me.proxer.app.R
-import me.proxer.app.ui.view.BetterLinkGifAwareEmojiTextView
-import me.proxer.app.util.extension.dip
-import me.proxer.app.util.wrapper.OriginalSizeGlideTarget
 import java.util.regex.Pattern.quote
 
 /**
@@ -74,21 +62,6 @@ object BBCodeEmoticons {
 
     private val emoticonRegex = Regex(emoticons.joinToString(separator = "|") { quote(it.pattern) })
 
-    fun replaceWithGifs(view: BetterLinkGifAwareEmojiTextView, glide: RequestManager) {
-        val text = view.text.toSpannableStringBuilder()
-        val foundEmoticons = emoticonRegex.findAll(text).toList()
-
-        foundEmoticons.forEach { emoticon ->
-            val id = emoticons.find { it.pattern == emoticon.value }?.id
-            val spanStart = emoticon.range.first
-            val spanEnd = emoticon.range.last + 1
-
-            glide.asGif()
-                .load(id)
-                .into(GifGlideTarget(view, text, spanStart, spanEnd))
-        }
-    }
-
     /**
      * Finds the emoticon codes in [text] and returns their ranges and drawable resources.
      */
@@ -97,35 +70,4 @@ object BBCodeEmoticons {
     }.toList()
 
     private data class BBCodeEmoticon(val pattern: String, val id: Int)
-
-    private class GifGlideTarget(
-        view: TextView,
-        private val text: Spannable,
-        private val spanStart: Int,
-        private val spanEnd: Int
-    ) : OriginalSizeGlideTarget<GifDrawable>() {
-
-        private var view: TextView? = view
-
-        override fun onResourceReady(
-            resource: GifDrawable,
-            transition: Transition<in GifDrawable>?
-        ) {
-            view?.also { safeView ->
-                resource.callback = safeView
-
-                resource.setBounds(0, 0, safeView.context.dip(24), safeView.context.dip(24))
-                resource.setLoopCount(LOOP_FOREVER)
-                resource.start()
-
-                safeView.text = text.also {
-                    it[spanStart..spanEnd] = ImageSpan(resource)
-                }
-            }
-        }
-
-        override fun onLoadCleared(placeholder: Drawable?) {
-            view = null
-        }
-    }
 }

@@ -69,7 +69,9 @@ abstract class BaseScheduleWidget(private val isDark: Boolean) : GlanceAppWidget
                 overline = entry.date.toLocalDateTime().format(timeFormatter),
                 title = entry.name,
                 subtitle = context.getString(R.string.fragment_schedule_episode, entry.episode.toString()),
-                onClick = actionStartActivity(MediaActivity.getIntent(context, entry.entryId, entry.name, Category.ANIME))
+                onClick = actionStartActivity(
+                    MediaActivity.getIntent(context, entry.entryId, entry.name, Category.ANIME)
+                )
             )
         }
     }

@@ -49,7 +49,9 @@ fun TopTenTab(
 
     LaunchedEffect(deletionError) {
         deletionError?.let {
-            snackbarHostState?.showSnackbar(context.getString(R.string.error_topten_entry_removal, context.getString(it.message)))
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.error_topten_entry_removal, context.getString(it.message))
+            )
         }
     }
 

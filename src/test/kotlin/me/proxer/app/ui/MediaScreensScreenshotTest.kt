@@ -8,11 +8,11 @@ import androidx.compose.ui.unit.dp
 import me.proxer.app.TestApplication
 import me.proxer.app.anime.AnimeContent
 import me.proxer.app.anime.StreamActions
-import me.proxer.app.ui.components.ContentState
 import me.proxer.app.comment.CommentCard
 import me.proxer.app.comment.CommentCardData
 import me.proxer.app.media.info.MediaInfoActions
 import me.proxer.app.media.info.MediaInfoContent
+import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.preview.PreviewData
 import org.junit.Rule
 import org.junit.Test

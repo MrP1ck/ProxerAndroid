@@ -119,7 +119,11 @@ fun MangaReader(
                             val isForward = if (isRightToLeft) isStart else isEnd
                             val target = pagerState.currentPage + if (isForward) 1 else -1
 
-                            scope.launch { pagerState.animateScrollToPage(target.coerceIn(0, pagerState.pageCount - 1)) }
+                            scope.launch {
+                                pagerState.animateScrollToPage(
+                                    target.coerceIn(0, pagerState.pageCount - 1)
+                                )
+                            }
                         }
                         else -> onToggleControls()
                     }
@@ -134,7 +138,10 @@ fun MangaReader(
                 ) { index ->
                     when (index) {
                         0 -> ControlsPage(isFullHeight = true, contentPadding = contentPadding) { header() }
-                        pages.size + 1 -> ControlsPage(isFullHeight = true, contentPadding = contentPadding) { footer() }
+                        pages.size + 1 -> ControlsPage(
+                            isFullHeight = true,
+                            contentPadding = contentPadding
+                        ) { footer() }
                         else -> MangaPage(
                             url = pageUrl(pages[index - 1]),
                             isVertical = false,

@@ -5,6 +5,15 @@ exceptions:
   TooGenericExceptionCaught:
     active: false
 
+naming:
+  # Composables are named in PascalCase.
+  FunctionNaming:
+    ignoreAnnotated:
+      - Composable
+  # Files with composables are named after the main composable, not after a class they also declare.
+  MatchingDeclarationName:
+    active: false
+
 performance:
   SpreadOperator:
     active: false
@@ -14,3 +23,11 @@ style:
     active: false
   ForbiddenComment:
     active: false
+  # Previews are used by the IDE.
+  UnusedPrivateMember:
+    ignoreAnnotated:
+      - Preview
+      - ThemePreviews
+      - ScreenSizePreviews
+  DestructuringDeclarationWithTooManyEntries:
+    maxDestructuringEntries: 5

@@ -42,7 +42,7 @@ internal val ClassicLightColorScheme = lightColorScheme(
     surfaceContainerLow = Color(0xFFFFF0EE),
     surfaceContainer = Color(0xFFFFE9E6),
     surfaceContainerHigh = Color(0xFFFCE2DF),
-    surfaceContainerHighest = Color(0xFFF6DDD9),
+    surfaceContainerHighest = Color(0xFFF6DDD9)
 )
 
 internal val ClassicDarkColorScheme = darkColorScheme(
@@ -81,7 +81,7 @@ internal val ClassicDarkColorScheme = darkColorScheme(
     surfaceContainerLow = Color(0xFF261816),
     surfaceContainer = Color(0xFF2A1C1A),
     surfaceContainerHigh = Color(0xFF352624),
-    surfaceContainerHighest = Color(0xFF41312F),
+    surfaceContainerHighest = Color(0xFF41312F)
 )
 
 internal val BlueGreenLightColorScheme = lightColorScheme(
@@ -120,7 +120,7 @@ internal val BlueGreenLightColorScheme = lightColorScheme(
     surfaceContainerLow = Color(0xFFF2F3FB),
     surfaceContainer = Color(0xFFECEDF6),
     surfaceContainerHigh = Color(0xFFE7E8F0),
-    surfaceContainerHighest = Color(0xFFE1E2EA),
+    surfaceContainerHighest = Color(0xFFE1E2EA)
 )
 
 internal val BlueGreenDarkColorScheme = darkColorScheme(
@@ -159,7 +159,7 @@ internal val BlueGreenDarkColorScheme = darkColorScheme(
     surfaceContainerLow = Color(0xFF191C21),
     surfaceContainer = Color(0xFF1D2025),
     surfaceContainerHigh = Color(0xFF272A30),
-    surfaceContainerHighest = Color(0xFF32353B),
+    surfaceContainerHighest = Color(0xFF32353B)
 )
 
 internal val GloomyLightColorScheme = lightColorScheme(
@@ -198,7 +198,7 @@ internal val GloomyLightColorScheme = lightColorScheme(
     surfaceContainerLow = Color(0xFFF5F3F4),
     surfaceContainer = Color(0xFFEFEDEE),
     surfaceContainerHigh = Color(0xFFE9E8E8),
-    surfaceContainerHighest = Color(0xFFE3E2E3),
+    surfaceContainerHighest = Color(0xFFE3E2E3)
 )
 
 internal val GloomyDarkColorScheme = darkColorScheme(
@@ -237,5 +237,5 @@ internal val GloomyDarkColorScheme = darkColorScheme(
     surfaceContainerLow = Color(0xFF1B1C1C),
     surfaceContainer = Color(0xFF1F2020),
     surfaceContainerHigh = Color(0xFF292A2B),
-    surfaceContainerHighest = Color(0xFF343535),
+    surfaceContainerHighest = Color(0xFF343535)
 )

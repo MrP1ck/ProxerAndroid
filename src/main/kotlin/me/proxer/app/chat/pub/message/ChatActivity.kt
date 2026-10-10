@@ -87,7 +87,9 @@ class ChatActivity : ComposeActivity() {
 
         LaunchedEffect(sendError) {
             sendError?.let {
-                snackbarHostState?.showSnackbar(context.getString(R.string.error_chat_send_message, context.getString(it.message)))
+                snackbarHostState?.showSnackbar(
+                    context.getString(R.string.error_chat_send_message, context.getString(it.message))
+                )
             }
         }
 
@@ -133,11 +135,18 @@ class ChatActivity : ComposeActivity() {
             onDraftChange = viewModel::updateDraft,
             onSend = viewModel::sendMessage,
             onAuthorClick = { navigator.openProfile(it.userId, it.username) },
-            onReport = if (user != null) { { messageToReport = it.id } } else null,
+            onReport = if (user != null) {
+                { messageToReport = it.id }
+            } else {
+                null
+            },
             onTitleClick = { ChatRoomInfoActivity.navigateTo(this, chatRoomId, chatRoomName) },
             actions = {
                 IconButton(onClick = { ChatRoomInfoActivity.navigateTo(this@ChatActivity, chatRoomId, chatRoomName) }) {
-                    Icon(painterResource(R.drawable.ic_symbol_info), contentDescription = stringResource(R.string.section_info))
+                    Icon(
+                        painterResource(R.drawable.ic_symbol_info),
+                        contentDescription = stringResource(R.string.section_info)
+                    )
                 }
             }
         )

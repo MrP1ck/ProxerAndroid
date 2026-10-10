@@ -89,12 +89,18 @@ fun EpisodeTab(
     var isLanguagePickerVisible by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(bookmarkData) {
-        if (bookmarkData != null) snackbarHostState?.showSnackbar(context.getString(R.string.fragment_set_user_info_success))
+        if (bookmarkData != null) {
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.fragment_set_user_info_success)
+            )
+        }
     }
 
     LaunchedEffect(bookmarkError) {
         bookmarkError?.let {
-            snackbarHostState?.showSnackbar(context.getString(R.string.error_set_user_info, context.getString(it.message)))
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.error_set_user_info, context.getString(it.message))
+            )
         }
     }
 
@@ -127,7 +133,11 @@ fun EpisodeTab(
         else -> state
     }
 
-    ContentStateHost(state = displayedState, onErrorAction = onErrorAction, contentPadding = contentPadding) { episodes ->
+    ContentStateHost(
+        state = displayedState,
+        onErrorAction = onErrorAction,
+        contentPadding = contentPadding
+    ) { episodes ->
         val listState = rememberLazyListState()
         var expandedEpisodes by rememberSaveable { mutableStateOf(emptySet<Int>()) }
         val isAtEnd by remember { derivedStateOf { !listState.canScrollForward } }

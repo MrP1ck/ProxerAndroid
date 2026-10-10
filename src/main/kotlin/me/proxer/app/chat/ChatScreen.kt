@@ -261,7 +261,13 @@ fun ChatRoomList(
                                 painter = painterResource(
                                     if (room.isReadOnly) R.drawable.ic_symbol_visibility else R.drawable.ic_symbol_forum
                                 ),
-                                contentDescription = if (room.isReadOnly) stringResource(R.string.chat_read_only) else null,
+                                contentDescription = if (room.isReadOnly) {
+                                    stringResource(
+                                        R.string.chat_read_only
+                                    )
+                                } else {
+                                    null
+                                },
                                 tint = MaterialTheme.colorScheme.onSecondaryContainer
                             )
                         }
@@ -318,7 +324,10 @@ private fun ConferenceItem(item: ConferenceWithMessage, onClick: () -> Unit) {
                 Text(
                     text = conference.date.toLocalDateTime().distanceInWordsToNow(context),
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (isUnread) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = when (isUnread) {
+                        true -> MaterialTheme.colorScheme.primary
+                        false -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
                 )
             }
         },
@@ -329,7 +338,10 @@ private fun ConferenceItem(item: ConferenceWithMessage, onClick: () -> Unit) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = if (isUnread) FontWeight.Medium else null,
-                    color = if (isUnread) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = when (isUnread) {
+                        true -> MaterialTheme.colorScheme.onSurface
+                        false -> MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -366,7 +378,9 @@ private fun ConferenceAvatar(item: ConferenceWithMessage) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(if (conference.isGroup) R.drawable.ic_symbol_group else R.drawable.ic_symbol_person),
+                painter = painterResource(
+                    if (conference.isGroup) R.drawable.ic_symbol_group else R.drawable.ic_symbol_person
+                ),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )

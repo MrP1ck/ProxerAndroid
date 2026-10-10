@@ -148,5 +148,4 @@
         <item name="colorSurfaceContainerHigh">@color/preset_gloomy_surface_container_high</item>
         <item name="colorSurfaceContainerHighest">@color/preset_gloomy_surface_container_highest</item>
     </style>
-
 </resources>

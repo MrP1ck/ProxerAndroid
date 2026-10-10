@@ -148,7 +148,10 @@ private fun NotificationItem(
         leadingContent = { Icon(painterResource(notification.type.icon()), contentDescription = null) },
         trailingContent = {
             IconButton(onClick = onDelete) {
-                Icon(painterResource(R.drawable.ic_symbol_close), contentDescription = stringResource(R.string.fragment_notification_delete_content_description))
+                Icon(
+                    painterResource(R.drawable.ic_symbol_close),
+                    contentDescription = stringResource(R.string.fragment_notification_delete_content_description)
+                )
             }
         },
         modifier = modifier.clickable(onClick = onClick)

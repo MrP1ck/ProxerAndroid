@@ -37,9 +37,6 @@
     <string name="section_industry_info">Info</string>
     <string name="section_industry_projects">Projekte</string>
 
-    <string name="section_translator_group_info">Info</string>
-    <string name="section_translator_group_projects">Projekte</string>
-
     <string name="theme_classic">Klassisch</string>
     <string name="theme_bg">Blau Grün</string>
     <string name="theme_gloomy">Düster</string>
@@ -72,12 +69,10 @@
     <string name="media_list_tags_loading">Tags werden geladen…</string>
     <string name="media_list_tags_more">%d weitere – suche, um sie zu finden</string>
     <string name="media_list_options">Optionen</string>
-    <string name="media_list_rating_content_description">Bewertung %s</string>
     <string name="theme_dynamic">Dynamisch</string>
     <string name="theme_amoled">Reines Schwarz im dunklen Modus</string>
     <string name="theme_amoled_summary">Spart Akku auf OLED-Displays</string>
 
-    <string name="theme_variant_title">Variante</string>
     <string name="theme_variant_light">Hell</string>
     <string name="theme_variant_dark">Dunkel</string>
     <string name="theme_variant_system">Standard</string>
@@ -362,8 +357,6 @@
         <item quantity="other">%d Episoden</item>
     </plurals>
 
-    <string name="scroll_to_bottom_content_description">Nach unten scrollen</string>
-
     <string name="cancel">Abbrechen</string>
 
     <string name="activity_update_available">Ein Update ist verfügbar</string>
@@ -373,7 +366,6 @@
 
     <string name="activity_prv_messenger_send_to">Senden an…</string>
 
-    <string name="activity_stream_cast_introduction">Tippe hier, um auf dein Google Cast Gerät zu streamen</string>
     <string name="activity_stream_open_no_app">Es ist keine App installiert die dieses Video abspielen kann</string>
 
     <string name="dialog_login_title">Anmelden</string>
@@ -391,9 +383,6 @@
         Bereiche.
     </string>
     <string name="dialog_logout_positive">Abmelden</string>
-
-    <string name="dialog_theme_title">Thema auswählen</string>
-    <string name="dialog_theme_positive">Anwenden</string>
 
     <string name="dialog_age_confirmation_content">
         Dieser Bereich darf nur von Benutzern über 18 Jahren betreten werden!
@@ -500,14 +489,9 @@
     <string name="fragment_settings_restart_message">Diese Einstellung wird erst nach einem Neustart aktiv</string>
     <string name="fragment_settings_restart_action">Neustart</string>
 
-    <string name="fragment_media_list_extended_criteria">Erweiterte Kriterien</string>
     <string name="fragment_media_list_search">Suchen</string>
     <string name="fragment_media_list_language">Sprache</string>
-    <string name="fragment_media_list_genres">Enthaltene Genre</string>
-    <string name="fragment_media_list_excluded_genres">Nicht enthaltene Genre</string>
     <string name="fragment_media_list_fsk">Enthaltene FSK</string>
-    <string name="fragment_media_list_tags">Enthaltene Tags</string>
-    <string name="fragment_media_list_excluded_tags">Nicht enthaltene Tags</string>
     <string name="fragment_media_list_all_languages">Alle</string>
     <string name="fragment_media_list_include_unrated_tags">Unbestimmte Tags einbeziehen</string>
     <string name="fragment_media_list_include_spoiler_tags">Spoiler Tags einbeziehen</string>
@@ -529,10 +513,6 @@
     <string name="fragment_media_info_finish">Abgeschlossen</string>
     <string name="fragment_media_info_subscribe">Abonnieren</string>
     <string name="fragment_media_info_bookmark">Lesezeichen setzen</string>
-    <string name="fragment_media_info_tags_spoiler_hide">Spoiler Tags verstecken</string>
-    <string name="fragment_media_info_tags_spoiler_show">Spoiler Tags anzeigen</string>
-    <string name="fragment_media_info_tags_unrated_hide">Unbewertete Tags verstecken</string>
-    <string name="fragment_media_info_tags_unrated_show">Unbewertete Tags anzeigen</string>
     <string name="fragment_media_info_show_all">Alle anzeigen</string>
 
     <plurals name="fragment_media_info_rate_count">
@@ -549,20 +529,6 @@
     <string name="fragment_schedule_uploaded">Auf Proxer (geschätzt)</string>
     <string name="fragment_schedule_remaining_time">Ausstrahlung in %s</string>
     <string name="fragment_schedule_aired_remaining_time">Auf Proxer in %s (geschätzt)</string>
-    <string name="fragment_schedule_airing">Ausstrahlung: %s</string>
-    <string name="fragment_schedule_airing_upload">Ausstrahlung: %1$s
-        \nAuf Proxer: %2$s
-    </string>
-
-    <string name="fragment_topten_anime">Anime</string>
-    <string name="fragment_topten_manga">Manga</string>
-    <string name="fragment_topten_delete_content_description">Löschen</string>
-
-    <string name="fragment_history_entry_status_anime">Folge %d</string>
-    <string name="fragment_history_entry_status_manga">Kapitel %d</string>
-
-    <string name="fragment_history_entry_ucp_status_anime">Folge %1$d - %2$s</string>
-    <string name="fragment_history_entry_ucp_status_manga">Kapitel %1$d - %2$s</string>
 
     <string name="fragment_anime_empty_subgroup">Keine angegeben</string>
     <string name="fragment_anime_next_episode">Nächste Episode</string>
@@ -595,21 +561,12 @@
     <string name="fragment_manga_right_to_left">Von rechts nach links lesen</string>
     <string name="fragment_manga_vertical">Von oben nach unten lesen</string>
     <string name="fragment_manga_page">Seite %1$d von %2$d</string>
-    <string name="fragment_manga_low_memory">
-        Dein Gerät hat zu wenig Speicher. Eventuell werden Seiten nicht korrekt angezeigt
-    </string>
 
-    <string name="fragment_translator_group_description">Beschreibung</string>
     <string name="fragment_translator_group_language">Sprache</string>
-    <string name="fragment_translator_group_link">Link</string>
 
     <string name="fragment_industry_type">Typ</string>
     <string name="fragment_industry_language">Sprache</string>
-    <string name="fragment_industry_link">Link</string>
-    <string name="fragment_industry_description">Beschreibung</string>
 
-    <string name="fragment_edit_comment">Bearbeiten</string>
-    <string name="fragment_edit_comment_delete">Löschen</string>
     <string name="fragment_edit_comment_preview">Vorschau</string>
 
     <string name="fragment_edit_comment_rules_title">Regeln</string>
@@ -703,7 +660,6 @@
     <string name="fragment_comment_rating_characters">Charaktere</string>
     <string name="fragment_comment_rating_genre">Genre</string>
     <string name="fragment_comment_rating_music">Musik</string>
-    <string name="fragment_comment_rating_overall">Insgesamt</string>
     <string name="fragment_comment_rating_story">Story</string>
 
     <string name="fragment_discussion_meta_info">Von %1$s in %2$s</string>
@@ -721,7 +677,6 @@
     <string name="fragment_create_conference_add_participant">Teilnehmer hinzufügen</string>
     <string name="fragment_create_conference_add_participant_hint">Nutzername</string>
     <string name="fragment_create_conference_delete_description">Entfernen</string>
-    <string name="fragment_create_conference_cancel_content_description">Abbrechen</string>
     <string name="fragment_create_conference_accept_description">Akzeptieren</string>
 
     <string name="fragment_chat_container_public">Öffentlich</string>
@@ -759,13 +714,7 @@
         anzuzeigen
     </string>
 
-    <string name="view_expandable_multi_selection_extend_content_description">Ausklappen</string>
-    <string name="view_expandable_multi_selection_reset_content_description">Zurücksetzen</string>
-
     <string name="view_web_iframe_link">Zum Inhalt</string>
-
-    <string name="layout_chat_bar_emoji_content_description">Emoji Auswahl</string>
-    <string name="layout_chat_bar_send_content_description">Senden</string>
 
     <string name="exoplayer_play_description">Abspielen</string>
     <string name="exoplayer_pause_description">Anhalten</string>
@@ -887,14 +836,6 @@
     </string>
 
     <string name="profile_preference_ads_category_title">Werbung</string>
-    <string name="profile_preference_banner_ads_title">Bannerwerbung</string>
-    <string name="profile_preference_banner_ads_summary_off">
-        Bannerwerbung wird nicht angezeigt.
-        Beachte allerdings, dass es Stellen in der App geben kann, an denen immer Werbung angezeigt wird
-    </string>
-    <string name="profile_preference_banner_ads_summary_on">
-        Bannerwerbung wird angezeigt. Danke für die Unterstützung!
-    </string>
     <string name="profile_preference_video_ads_title">Videowerbung</string>
     <string name="profile_preference_video_ads_summary">Videowerbung vor Proxer-Streams wird %s angezeigt</string>
     <string name="profile_preference_privacy_category_title">Datenschutz</string>
@@ -949,10 +890,6 @@
         Erhalte Benachrichtigungen zu News und deinem Account
     </string>
 
-    <string name="introduction_theme_title">Thema</string>
-    <string name="introduction_theme_description">
-        Verwende das dunkle Thema. Das kannst du jederzeit in den Einstellungen ändern
-    </string>
     <string name="introduction_skip">Überspringen</string>
     <string name="introduction_next">Weiter</string>
     <string name="introduction_done">Los geht\'s</string>
@@ -987,13 +924,11 @@
     <string name="action_sort_count">Nach Episoden</string>
     <string name="action_sort_name">Nach Name</string>
     <string name="action_sort_rating">Nach Bewertungen</string>
-    <string name="action_sort_time">Nach Datum</string>
 
     <string name="action_write_comment">Kommentar schreiben</string>
     <string name="action_create_comment">Neuer Kommentar</string>
     <string name="action_update_comment">Kommentar bearbeiten</string>
 
-    <string name="action_send_message">Nachricht schreiben</string>
     <string name="action_create_chat">Neuer Chat</string>
     <string name="action_new_group_with_user">Neue Gruppe mit diesem Nutzer</string>
     <string name="action_create_group">Neue Gruppe</string>
@@ -1004,15 +939,11 @@
     <string name="action_conference_set_topic">%1$s hat den Konferenztitel in %2$s geändert</string>
     <string name="action_conference_exit">%1$s hat die Konferenz verlassen</string>
 
-    <string name="action_filter_available">Nur verfügbare anzeigen</string>
-
-    <string name="action_preview">Vorschau</string>
     <string name="action_publish">Veröffentlichen</string>
 
     <string name="action_show_in_browser">Im Browser anzeigen</string>
 
     <string name="action_open_in_other_app">In einer anderen App öffnen</string>
-    <string name="action_cast">An Cast Gerät senden</string>
 
     <string name="rank_10">Schnupperninja</string>
     <string name="rank_100">Anwärter</string>

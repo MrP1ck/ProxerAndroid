@@ -8,7 +8,7 @@ import me.proxer.app.R
 /**
  * Applies the given [ThemeContainer] to this Activity. Needs to be called before the views are inflated.
  *
- * [style] is the style providing the color roles, which allows to use a variant like [Theme.noBackground].
+ * [style] is the style providing the color roles.
  */
 fun Activity.applyThemeContainer(container: ThemeContainer, @StyleRes style: Int = container.theme.main) {
     theme.applyStyle(style, true)

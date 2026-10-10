@@ -28,7 +28,12 @@ class DirectReplyReceiver : BroadcastReceiver() {
                 .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
                 .apply { putExtra(CONFERENCE_ID_EXTRA, conferenceId) }
 
-            return PendingIntent.getBroadcast(context, conferenceId.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PENDING_INTENT_FLAG_MUTABLE)
+            return PendingIntent.getBroadcast(
+                context,
+                conferenceId.toInt(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PENDING_INTENT_FLAG_MUTABLE
+            )
         }
     }
 

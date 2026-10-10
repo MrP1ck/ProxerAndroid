@@ -3,9 +3,15 @@ package me.proxer.app.util
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ResolveInfo
+import android.graphics.Bitmap
 import android.net.Uri
-import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.Glide
+import coil3.SingletonImageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.transformations
+import coil3.toBitmap
+import coil3.transform.CircleCropTransformation
+import kotlinx.coroutines.runBlocking
 import me.proxer.app.util.extension.androidUri
 import okhttp3.HttpUrl
 import org.threeten.bp.format.DateTimeFormatter
@@ -20,14 +26,18 @@ object Utils {
     val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-    fun getCircleBitmapFromUrl(context: Context, url: HttpUrl) = try {
-        Glide.with(context)
-            .asBitmap()
-            .load(url.toString())
-            .circleCrop()
-            .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-            .get()
-    } catch (error: Throwable) {
+    /**
+     * Loads the image at [url] as a round bitmap, e.g. for notifications. Blocks the calling thread.
+     */
+    fun getCircleBitmapFromUrl(context: Context, url: HttpUrl): Bitmap? = try {
+        val request = ImageRequest.Builder(context)
+            .data(url.toString())
+            .transformations(CircleCropTransformation())
+            .allowHardware(false)
+            .build()
+
+        runBlocking { SingletonImageLoader.get(context).execute(request) }.image?.toBitmap()
+    } catch (error: Exception) {
         Timber.e(error)
 
         null

@@ -31,6 +31,51 @@
         <ignore regexp=".*org.jsoup.*" />
     </issue>
 
+    <!-- Strings are mostly read in callbacks, where stringResource can't be used. -->
+    <issue id="LocalContextGetResourceValueCall" severity="ignore" />
+    <issue id="LocalContextResourcesRead" severity="ignore" />
+
+    <!-- Keys of LaunchedEffects observing LiveData events, which are nullable Unit values on purpose. -->
+    <issue id="OpaqueUnitKey" severity="ignore" />
+
+    <!-- False positives: Compose's items extensions and Coil's directory extension are meant to be used. -->
+    <issue id="MemberExtensionConflict" severity="ignore" />
+
+    <!-- Slots like actions are named after their purpose. -->
+    <issue id="ComposableLambdaParameterNaming" severity="ignore" />
+
+    <!-- The toast helpers show the toast before returning it. -->
+    <issue id="ShowToast" severity="ignore" />
+
+    <!-- The deep links mirror the URLs of the website, which do not verify app links. -->
+    <issue id="IntentFilterUniqueDataAttributes" severity="ignore" />
+    <issue id="AppLinkWarning" severity="ignore" />
+
+    <!-- Style suggestions, not issues. -->
+    <issue id="UseKtx" severity="ignore" />
+    <issue id="TypographyQuotes" severity="ignore" />
+    <issue id="PluralsCandidate" severity="ignore" />
+    <issue id="ConvertToWebp" severity="ignore" />
+    <issue id="ReportShortcutUsage" severity="ignore" />
+
+    <!-- The target and compile SDK are raised deliberately; the plugin version is pinned to the supported one. -->
+    <issue id="OldTargetApi" severity="ignore" />
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+
+    <!-- The native library of conceal (used by hawk for the migration of old login data) is not 16 KB aligned yet. -->
+    <issue id="Aligned16KB" severity="warning" />
+
+    <!-- The AutoDispose lint detector is not compatible with the current lint version. -->
+    <issue id="LintError" severity="ignore" />
+
+    <!--
+    Pre-existing: this trust manager skips the chain validation for mp4upload.com (see the warning in the file). It
+    is a known security issue which needs to be removed; it is excluded here so lint can guard everything else.
+    -->
+    <issue id="CustomX509TrustManager">
+        <ignore path="**/Mp4UploadTrustManagerWorkaround.kt" />
+    </issue>
+
     <!-- Enable all lint checks with error severity, except for those listed above. -->
     <issue id="all" severity="error" />
 </lint>

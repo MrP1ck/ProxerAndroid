@@ -56,8 +56,10 @@ class RatingDialog : ComposeDialog() {
     private fun openStore() {
         try {
             startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=$APPLICATION_ID".toUri()))
-        } catch (error: ActivityNotFoundException) {
-            startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$APPLICATION_ID".toUri()))
+        } catch (ignored: ActivityNotFoundException) {
+            startActivity(
+                Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$APPLICATION_ID".toUri())
+            )
         }
     }
 }

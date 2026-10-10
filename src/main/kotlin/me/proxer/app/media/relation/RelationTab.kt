@@ -59,7 +59,10 @@ fun RelationTab(
                     coverUrl = ProxerUrls.entryImage(relation.id),
                     title = relation.name,
                     subtitle = relation.medium.toAppString(context) + " · " + pluralStringResource(
-                        if (relation.category == Category.ANIME) R.plurals.media_episode_count else R.plurals.media_chapter_count,
+                        when (relation.category == Category.ANIME) {
+                            true -> R.plurals.media_episode_count
+                            false -> R.plurals.media_chapter_count
+                        },
                         relation.episodeAmount,
                         relation.episodeAmount
                     ),

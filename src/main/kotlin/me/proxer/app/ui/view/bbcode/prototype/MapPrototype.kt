@@ -51,7 +51,7 @@ object MapPrototype : TextMutatorPrototype, AutoClosingPrototype {
         override fun onClick(widget: View) {
             try {
                 widget.context.startActivity(Intent(Intent.ACTION_VIEW, uri))
-            } catch (error: ActivityNotFoundException) {
+            } catch (ignored: ActivityNotFoundException) {
                 widget.context.toast(widget.context.getString(R.string.view_bbcode_map_no_activity_error))
             }
         }

@@ -95,12 +95,18 @@ fun MediaInfoTab(viewModel: MediaInfoViewModel, state: ContentState<Entry>, cont
     val userInfoUpdateError by viewModel.userInfoUpdateError.observeAsState()
 
     LaunchedEffect(userInfoUpdate) {
-        if (userInfoUpdate != null) snackbarHostState?.showSnackbar(context.getString(R.string.fragment_set_user_info_success))
+        if (userInfoUpdate != null) {
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.fragment_set_user_info_success)
+            )
+        }
     }
 
     LaunchedEffect(userInfoUpdateError) {
         userInfoUpdateError?.let {
-            snackbarHostState?.showSnackbar(context.getString(R.string.error_set_user_info, context.getString(it.message)))
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.error_set_user_info, context.getString(it.message))
+            )
         }
     }
 
@@ -120,7 +126,11 @@ fun MediaInfoTab(viewModel: MediaInfoViewModel, state: ContentState<Entry>, cont
                 onFinish = viewModel::markAsFinished,
                 onSubscribe = viewModel::toggleSubscription,
                 onAdaptionClick = {
-                    navigator.openMedia(entry.adaptionInfo.id, entry.adaptionInfo.name, entry.adaptionInfo.medium?.toCategory())
+                    navigator.openMedia(
+                        entry.adaptionInfo.id,
+                        entry.adaptionInfo.name,
+                        entry.adaptionInfo.medium?.toCategory()
+                    )
                 },
                 onTranslatorGroupClick = { navigator.openTranslatorGroup(it.id, it.name) },
                 onIndustryClick = { navigator.openIndustry(it.id, it.name) },
@@ -288,7 +298,10 @@ private fun MediaHeader(entry: Entry, onCoverClick: () -> Unit) {
 
             Text(
                 text = entry.medium.toAppString(context) + " · " + pluralStringResource(
-                    if (entry.category == Category.ANIME) R.plurals.media_episode_count else R.plurals.media_chapter_count,
+                    when (entry.category == Category.ANIME) {
+                        true -> R.plurals.media_episode_count
+                        false -> R.plurals.media_chapter_count
+                    },
                     entry.episodeAmount,
                     entry.episodeAmount
                 ),
@@ -343,8 +356,18 @@ private fun UserActions(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         UserAction(R.drawable.ic_symbol_schedule, R.string.fragment_media_info_note, userInfo?.isNoted == true, onNote)
-        UserAction(R.drawable.ic_symbol_star, R.string.fragment_media_info_favor, userInfo?.isTopTen == true, onFavorite)
-        UserAction(R.drawable.ic_symbol_check_circle, R.string.fragment_media_info_finish, userInfo?.isFinished == true, onFinish)
+        UserAction(
+            R.drawable.ic_symbol_star,
+            R.string.fragment_media_info_favor,
+            userInfo?.isTopTen == true,
+            onFavorite
+        )
+        UserAction(
+            R.drawable.ic_symbol_check_circle,
+            R.string.fragment_media_info_finish,
+            userInfo?.isFinished == true,
+            onFinish
+        )
         UserAction(
             R.drawable.ic_symbol_notifications,
             R.string.fragment_media_info_subscribe,

@@ -2,8 +2,6 @@ package me.proxer.app.ui.view.bbcode
 
 import android.content.res.Resources
 import android.text.Spanned
-import com.bumptech.glide.RequestManager
-import java.lang.ref.WeakReference
 import java.util.LinkedHashMap
 
 /**
@@ -13,7 +11,6 @@ class BBArgs : LinkedHashMap<String, Any?> {
 
     companion object {
         private const val TEXT_ARGUMENT = "text"
-        private const val GLIDE_ARGUMENT = "glide"
         private const val USER_ID_ARGUMENT = "userId"
         private const val RESOURCES_ARGUMENT = "resources"
         private const val ENABLE_EMOTICONS_ARGUMENT = "enable_emoticons"
@@ -26,7 +23,6 @@ class BBArgs : LinkedHashMap<String, Any?> {
         }
 
     val resources get() = this[RESOURCES_ARGUMENT] as? Resources?
-    val glide get() = (this[GLIDE_ARGUMENT] as? WeakReference<*>)?.get() as? RequestManager?
     val userId get() = this[USER_ID_ARGUMENT] as? String?
     val enableEmoticons get() = this[ENABLE_EMOTICONS_ARGUMENT] as? Boolean? ?: false
 
@@ -37,14 +33,12 @@ class BBArgs : LinkedHashMap<String, Any?> {
     constructor(
         text: CharSequence? = null,
         resources: Resources? = null,
-        glide: RequestManager? = null,
         userId: String? = null,
         enableEmoticons: Boolean? = null,
         vararg custom: Pair<String, Any?>
     ) {
         if (text != null) this[TEXT_ARGUMENT] = text
         if (resources != null) this[RESOURCES_ARGUMENT] = resources
-        if (glide != null) this[GLIDE_ARGUMENT] = WeakReference(glide)
         if (userId != null) this[USER_ID_ARGUMENT] = userId
         if (enableEmoticons != null) this[ENABLE_EMOTICONS_ARGUMENT] = enableEmoticons
 

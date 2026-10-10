@@ -40,26 +40,74 @@ class ProfileSettingsActivity : ComposeActivity() {
         fun navigateTo(context: Activity) = context.startActivity<ProfileSettingsActivity>()
 
         private val constraints = listOf(
-            ConstraintSetting(R.string.profile_preference_profile, { it.profileVisibility }, { copy(profileVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_topten, { it.topTenVisibility }, { copy(topTenVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_anime, { it.animeVisibility }, { copy(animeVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_manga, { it.mangaVisibility }, { copy(mangaVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_comment, { it.commentVisibility }, { copy(commentVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_forum, { it.forumVisibility }, { copy(forumVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_friend, { it.friendVisibility }, { copy(friendVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_friend_request,
+            ConstraintSetting(
+                R.string.profile_preference_profile,
+                { it.profileVisibility },
+                { copy(profileVisibility = it) }
+            ),
+            ConstraintSetting(
+                R.string.profile_preference_topten,
+                { it.topTenVisibility },
+                { copy(topTenVisibility = it) }
+            ),
+            ConstraintSetting(
+                R.string.profile_preference_anime,
+                { it.animeVisibility },
+                { copy(animeVisibility = it) }
+            ),
+            ConstraintSetting(
+                R.string.profile_preference_manga,
+                { it.mangaVisibility },
+                { copy(mangaVisibility = it) }
+            ),
+            ConstraintSetting(
+                R.string.profile_preference_comment,
+                { it.commentVisibility },
+                { copy(commentVisibility = it) }
+            ),
+            ConstraintSetting(
+                R.string.profile_preference_forum,
+                { it.forumVisibility },
+                { copy(forumVisibility = it) }
+            ),
+            ConstraintSetting(
+                R.string.profile_preference_friend,
+                { it.friendVisibility },
+                { copy(friendVisibility = it) }
+            ),
+            ConstraintSetting(
+                R.string.profile_preference_friend_request,
                 { it.friendRequestConstraint },
                 { copy(friendRequestConstraint = it) }
             ),
-            ConstraintSetting(R.string.profile_preference_about, { it.aboutVisibility }, { copy(aboutVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_history, { it.historyVisibility }, { copy(historyVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_guest_book, { it.guestBookVisibility }, { copy(guestBookVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_guest_book_entry,
+            ConstraintSetting(
+                R.string.profile_preference_about,
+                { it.aboutVisibility },
+                { copy(aboutVisibility = it) }
+            ),
+            ConstraintSetting(
+                R.string.profile_preference_history,
+                { it.historyVisibility },
+                { copy(historyVisibility = it) }
+            ),
+            ConstraintSetting(R.string.profile_preference_guest_book, {
+                it.guestBookVisibility
+            }, { copy(guestBookVisibility = it) }),
+            ConstraintSetting(
+                R.string.profile_preference_guest_book_entry,
                 { it.guestBookEntryConstraint },
                 { copy(guestBookEntryConstraint = it) }
             ),
-            ConstraintSetting(R.string.profile_preference_gallery, { it.galleryVisibility }, { copy(galleryVisibility = it) }),
-            ConstraintSetting(R.string.profile_preference_article, { it.articleVisibility }, { copy(articleVisibility = it) })
+            ConstraintSetting(
+                R.string.profile_preference_gallery,
+                { it.galleryVisibility },
+                { copy(galleryVisibility = it) }
+            ),
+            ConstraintSetting(
+                R.string.profile_preference_article,
+                { it.articleVisibility },
+                { copy(articleVisibility = it) }
+            )
         )
     }
 
@@ -143,7 +191,10 @@ class ProfileSettingsActivity : ComposeActivity() {
 
         ListPreference(
             title = stringResource(R.string.profile_preference_video_ads_title),
-            entries = choices(R.array.profile_settings_video_ads_interval_titles, R.array.profile_settings_video_ads_interval_values),
+            entries = choices(
+                R.array.profile_settings_video_ads_interval_titles,
+                R.array.profile_settings_video_ads_interval_values
+            ),
             selected = normalizedInterval.toString(),
             onSelect = { onUpdate(settings.copy(adInterval = it.toInt())) },
             summary = { context.getString(R.string.profile_preference_video_ads_summary, it.lowercase(Locale.GERMANY)) }

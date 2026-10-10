@@ -21,9 +21,6 @@ import me.proxer.app.util.extension.toParcelableTag
 import me.proxer.library.api.PagingLimitEndpoint
 import me.proxer.library.entity.list.MediaListEntry
 import me.proxer.library.entity.list.Tag
-import me.proxer.library.enums.FskConstraint
-import me.proxer.library.enums.Language
-import me.proxer.library.enums.MediaSearchSortCriteria
 import me.proxer.library.enums.MediaType
 import me.proxer.library.enums.TagRateFilter
 import me.proxer.library.enums.TagSpoilerFilter

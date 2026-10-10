@@ -210,7 +210,6 @@ dependencies {
     implementation libs.androidx.activity.compose
     implementation libs.androidx.lifecycle.runtime.compose
     implementation libs.androidx.lifecycle.viewmodel.compose
-    implementation libs.androidx.fragment.compose
     implementation libs.androidx.navigation.compose
     implementation libs.androidx.core.splashscreen
     implementation libs.kotlinx.serialization.json
@@ -224,9 +223,6 @@ dependencies {
     implementation libs.play.app.update
     implementation libs.play.services.cast.framework
     implementation libs.play.services.ads.identifier
-    implementation(libs.interactivemedia) {
-        version { strictly libs.versions.interactiveMedia.get() }
-    }
 
     implementation libs.androidx.appcompat
     implementation libs.androidx.activity.ktx
@@ -246,37 +242,14 @@ dependencies {
     implementation libs.rxjava
     implementation libs.rxkotlin
     implementation libs.rxandroid
-    implementation libs.rxbinding.core
-    implementation libs.rxbinding.appcompat
-    implementation libs.rxbinding.recyclerview
-    implementation libs.rxbinding.swiperefreshlayout
-    implementation libs.rxbinding.material
     implementation libs.rx.preferences
     implementation libs.rxbus
     implementation libs.autodispose.ktx
     implementation libs.autodispose.android.archcomponents.ktx
 
-    implementation libs.androidx.recyclerview
-    implementation libs.androidx.cardview
-    implementation libs.androidx.gridlayout
-    implementation libs.androidx.viewpager2
-    implementation libs.androidx.swiperefreshlayout
-    implementation libs.androidx.exifinterface
-    implementation libs.androidx.constraintlayout
     implementation libs.material
-    implementation libs.support.spinner
-    implementation libs.iconics.core
-    implementation libs.iconics.views
-    implementation libs.community.material.typeface
     implementation libs.aboutlibraries.compose
-    implementation libs.subsampling.scale.image.view
-    implementation libs.subsampling.pdf.decoder
-    implementation libs.material.dialogs.core
-    implementation libs.flexbox
-    implementation libs.emoji.ios
     implementation libs.customtabshelper
-    implementation libs.aspect.ratio.imageview
-    implementation libs.gravitysnaphelper
     implementation libs.glance.appwidget
     implementation libs.glance.material3
     implementation libs.media3.exoplayer
@@ -290,8 +263,6 @@ dependencies {
 
     implementation libs.proxerlib
     implementation libs.threetenabp
-    implementation libs.glide
-    implementation libs.glide.okhttp3
     implementation libs.retrofit
     implementation libs.okhttp
     implementation libs.okhttp.brotli
@@ -299,13 +270,7 @@ dependencies {
     implementation libs.okio
     implementation libs.moshi
     implementation libs.moshi.adapters
-    implementation libs.easy.header.footer.adapter
     implementation libs.koptional.rxjava2
-    implementation libs.kotterknife
-    implementation libs.image.core
-    implementation libs.image.jpeg
-    implementation libs.image.png
-    implementation libs.better.link.movement.method
     implementation libs.jsoup
 
     implementation libs.hawk
@@ -321,7 +286,6 @@ dependencies {
     logReleaseImplementation libs.customactivityoncrash
 
     ksp libs.androidx.room.compiler
-    ksp libs.glide.ksp
     ksp libs.moshi.codegen
 
     compileOnly libs.javax.annotation

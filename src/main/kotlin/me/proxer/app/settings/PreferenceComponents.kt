@@ -190,4 +190,8 @@ internal fun choices(@ArrayRes titles: Int, @ArrayRes values: Int): List<Pair<St
     stringArrayResource(values).zip(stringArrayResource(titles))
 
 @Composable
-internal fun summaryOf(checked: Boolean, @StringRes on: Int, @StringRes off: Int) = stringResource(if (checked) on else off).trim()
+internal fun summaryOf(
+    checked: Boolean,
+    @StringRes on: Int,
+    @StringRes off: Int
+) = stringResource(if (checked) on else off).trim()

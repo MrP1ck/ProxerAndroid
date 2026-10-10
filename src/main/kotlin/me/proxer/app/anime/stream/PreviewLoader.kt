@@ -38,7 +38,12 @@ class PreviewLoader(private val uri: Uri, private val referer: String?, private 
             try {
                 when {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 ->
-                        retriever.getScaledFrameAtTime(positionMs * 1000, 0, width, height)
+                        retriever.getScaledFrameAtTime(
+                            positionMs * 1000,
+                            MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
+                            width,
+                            height
+                        )
                     else -> retriever.getFrameAtTime(positionMs * 1000)
                 }
             } catch (error: RuntimeException) {

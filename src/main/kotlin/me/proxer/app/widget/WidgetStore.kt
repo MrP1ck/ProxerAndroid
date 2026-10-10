@@ -18,7 +18,11 @@ import timber.log.Timber
 /**
  * The state of a widget, shared by all instances of it: the [items], whether it [isLoading] or an [error].
  */
-data class WidgetState<T>(val items: List<T> = emptyList(), val isLoading: Boolean = false, val error: WidgetError? = null)
+data class WidgetState<T>(
+    val items: List<T> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: WidgetError? = null
+)
 
 /**
  * An error shown in a widget. The texts are stored resolved, since resource ids change between versions. If [url] is
@@ -70,10 +74,11 @@ class WidgetStore<T>(private val key: String, private val itemClass: Class<T>) {
             ?: return null
 
         return try {
-            val stored = moshi.adapter(StoredWidgetState::class.java).fromJson(json) ?: return null
             val itemAdapter = moshi.adapter(itemClass)
 
-            WidgetState(stored.items.mapNotNull { itemAdapter.fromJson(it) }, stored.isLoading, stored.error)
+            moshi.adapter(StoredWidgetState::class.java).fromJson(json)?.let { stored ->
+                WidgetState(stored.items.mapNotNull { itemAdapter.fromJson(it) }, stored.isLoading, stored.error)
+            }
         } catch (error: Exception) {
             Timber.e(error)
 

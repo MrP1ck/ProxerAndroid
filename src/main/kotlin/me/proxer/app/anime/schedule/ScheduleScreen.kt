@@ -139,7 +139,10 @@ private fun ScheduleDay(
         Text(
             text = day.toAppString(context),
             style = MaterialTheme.typography.titleMedium,
-            color = if (day.daysFromToday() == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            color = when (day.daysFromToday() == 0) {
+                true -> MaterialTheme.colorScheme.primary
+                false -> MaterialTheme.colorScheme.onSurface
+            },
             fontWeight = if (day.daysFromToday() == 0) FontWeight.Bold else null,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
@@ -205,10 +208,16 @@ private fun ScheduleCard(entry: CalendarEntry, now: LocalDateTime, onClick: () -
                         R.string.fragment_schedule_aired_remaining_time,
                         now.formattedDistanceTo(uploadDateTime)
                     )
-                    else -> stringResource(R.string.fragment_schedule_remaining_time, now.formattedDistanceTo(airingDateTime))
+                    else -> stringResource(
+                        R.string.fragment_schedule_remaining_time,
+                        now.formattedDistanceTo(airingDateTime)
+                    )
                 },
                 style = MaterialTheme.typography.bodySmall,
-                color = if (isUploaded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = when (isUploaded) {
+                    true -> MaterialTheme.colorScheme.primary
+                    false -> MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 maxLines = 2,
                 minLines = 2
             )

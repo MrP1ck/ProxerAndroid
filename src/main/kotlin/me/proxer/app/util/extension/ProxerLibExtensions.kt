@@ -3,12 +3,9 @@
 package me.proxer.app.util.extension
 
 import android.content.Context
-import androidx.annotation.DrawableRes
 import android.content.res.Resources
+import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorInt
 import me.proxer.app.R
 import me.proxer.app.anime.AnimeStream
 import me.proxer.app.anime.resolver.StreamResolutionResult
@@ -190,18 +187,6 @@ fun Category.toEpisodeAppString(context: Context, number: Int? = null): String =
         },
         number
     )
-}
-
-fun MediaState.toAppDrawable(context: Context): IconicsDrawable = IconicsDrawable(context).apply {
-    icon = when (this@toAppDrawable) {
-        MediaState.PRE_AIRING -> CommunityMaterial.Icon3.cmd_radio_tower
-        MediaState.FINISHED -> CommunityMaterial.Icon.cmd_book
-        MediaState.AIRING -> CommunityMaterial.Icon.cmd_book_open_variant
-        MediaState.CANCELLED -> CommunityMaterial.Icon.cmd_close
-        MediaState.CANCELLED_SUB -> CommunityMaterial.Icon.cmd_close
-    }
-
-    colorInt = context.resolveColor(R.attr.colorIcon)
 }
 
 fun UserMediaProgress.toEpisodeAppString(
@@ -404,7 +389,7 @@ inline val EntryCore.isAgeRestricted: Boolean
 inline val Page.decodedName: String
     get() = try {
         URLDecoder.decode(name, "UTF-8")
-    } catch (error: UnsupportedEncodingException) {
+    } catch (ignored: UnsupportedEncodingException) {
         ""
     }
 

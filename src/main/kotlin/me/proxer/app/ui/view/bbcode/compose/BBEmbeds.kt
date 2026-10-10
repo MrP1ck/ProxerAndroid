@@ -57,7 +57,15 @@ internal fun BBPdf(url: HttpUrl?, width: Int?) {
     }
 
     Column(
-        modifier = Modifier.let { if (width != null) it.widthIn(max = with(density) { width.toDp() }) else it.fillMaxWidth() },
+        modifier = Modifier.let {
+            if (width != null) {
+                it.widthIn(
+                    max = with(density) { width.toDp() }
+                )
+            } else {
+                it.fillMaxWidth()
+            }
+        },
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         when (val safePages = pages) {
@@ -65,7 +73,12 @@ internal fun BBPdf(url: HttpUrl?, width: Int?) {
                 CircularProgressIndicator()
             }
             else -> safePages.forEach { page ->
-                Image(page, contentDescription = null, contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
+                Image(
+                    page,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
@@ -112,7 +125,9 @@ internal fun BBWiki(link: String) {
     val html by produceState<String?>(null, link) {
         value = withContext(Dispatchers.IO) {
             runCatching {
-                GlobalContext.getOrNull()?.getOrNull<ProxerApi>()?.wiki?.content(link)?.buildSingle()?.blockingGet()?.content
+                GlobalContext.getOrNull()?.getOrNull<ProxerApi>()?.wiki?.content(
+                    link
+                )?.buildSingle()?.blockingGet()?.content
             }.onFailure { Timber.e(it) }.getOrNull()
         }
     }

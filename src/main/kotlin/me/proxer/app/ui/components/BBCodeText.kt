@@ -69,7 +69,13 @@ fun BBCodeText(
                     .fillMaxWidth()
                     .animateContentSize()
                     .let {
-                        if (collapsedHeight != null && !isExpanded) it.heightIn(max = collapsedHeight).clipToBounds() else it
+                        if (collapsedHeight != null && !isExpanded) {
+                            it.heightIn(
+                                max = collapsedHeight
+                            ).clipToBounds()
+                        } else {
+                            it
+                        }
                     }
             ) {
                 BBCodeContent(

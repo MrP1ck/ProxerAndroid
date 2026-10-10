@@ -70,7 +70,10 @@ fun MediaControls(
                 Text(
                     text = row.value,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (row.onClick != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    color = when (row.onClick != null) {
+                        true -> MaterialTheme.colorScheme.primary
+                        false -> MaterialTheme.colorScheme.onSurface
+                    },
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = row.onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier
@@ -112,7 +115,10 @@ fun MediaControls(
             }
         }
 
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), modifier = Modifier.fillMaxWidth()) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            modifier = Modifier.fillMaxWidth()
+        ) {
             TextButton(onClick = { onBookmark(current) }) {
                 Icon(
                     painterResource(R.drawable.ic_symbol_bookmark_add),

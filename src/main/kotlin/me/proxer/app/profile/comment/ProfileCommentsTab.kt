@@ -66,7 +66,9 @@ fun ProfileCommentsTab(
 
     LaunchedEffect(deletionError) {
         deletionError?.let {
-            snackbarHostState?.showSnackbar(context.getString(R.string.error_comment_deletion, context.getString(it.message)))
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.error_comment_deletion, context.getString(it.message))
+            )
         }
     }
 
@@ -120,7 +122,9 @@ fun ProfileCommentsTab(
                 ),
                 onHeaderClick = { navigator.openMedia(comment.entryId, comment.entryName, comment.category) },
                 onEdit = {
-                    editComment.launch(EditCommentActivity.Contract.Input(comment.id, comment.entryId, comment.entryName))
+                    editComment.launch(
+                        EditCommentActivity.Contract.Input(comment.id, comment.entryId, comment.entryName)
+                    )
                 },
                 onDelete = { commentToDelete = comment.id }
             )

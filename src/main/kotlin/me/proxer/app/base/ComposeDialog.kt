@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
-import kotlin.properties.Delegates
 import me.proxer.app.R
 import me.proxer.app.ui.theme.ProxerAppTheme
 import me.proxer.app.util.data.PreferenceHelper
@@ -19,6 +18,7 @@ import me.proxer.app.util.extension.fallbackHandleLink
 import me.proxer.app.util.extension.safeInject
 import me.zhanghai.android.customtabshelper.CustomTabsHelperFragment
 import okhttp3.HttpUrl
+import kotlin.properties.Delegates
 
 /**
  * A dialog rendered with Compose. Unlike a dialog composable, it survives configuration changes and can be shown from

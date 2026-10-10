@@ -102,7 +102,9 @@ fun ProxerApp(
                         onClick = { navController.navigateToTopLevel(destination.graph) },
                         icon = {
                             Icon(
-                                painter = painterResource(if (isSelected) destination.selectedIcon else destination.icon),
+                                painter = painterResource(
+                                    if (isSelected) destination.selectedIcon else destination.icon
+                                ),
                                 contentDescription = null
                             )
                         },

@@ -211,7 +211,9 @@ class AnimeActivity : ComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = {
-                        Column(Modifier.clickable(enabled = name != null) { navigator.openMedia(id, name, Category.ANIME) }) {
+                        Column(
+                            Modifier.clickable(enabled = name != null) { navigator.openMedia(id, name, Category.ANIME) }
+                        ) {
                             val episodeTitle = Category.ANIME.toEpisodeAppString(context, episode)
 
                             if (name == null) TopAppBarTitle(episodeTitle) else TopAppBarTitle(name, episodeTitle)
@@ -223,11 +225,19 @@ class AnimeActivity : ComposeActivity() {
                             IconButton(
                                 onClick = {
                                     navigator.share(
-                                        getString(R.string.share_anime, episode, name, ProxerUrls.animeWeb(id, episode, language))
+                                        getString(
+                                            R.string.share_anime,
+                                            episode,
+                                            name,
+                                            ProxerUrls.animeWeb(id, episode, language)
+                                        )
                                     )
                                 }
                             ) {
-                                Icon(painterResource(R.drawable.ic_symbol_share), contentDescription = stringResource(R.string.action_share))
+                                Icon(
+                                    painterResource(R.drawable.ic_symbol_share),
+                                    contentDescription = stringResource(R.string.action_share)
+                                )
                             }
                         }
                     }
@@ -276,7 +286,9 @@ class AnimeActivity : ComposeActivity() {
                     onPlay = { stream ->
                         val connectivityManager = getSystemService<ConnectivityManager>()
 
-                        if (connectivityManager?.isConnectedToCellular == true && preferenceHelper.shouldCheckCellular) {
+                        val isCellular = connectivityManager?.isConnectedToCellular == true
+
+                        if (isCellular && preferenceHelper.shouldCheckCellular) {
                             NoWifiDialog.show(this@AnimeActivity, stream.id)
                         } else {
                             viewModel.resolve(stream)
@@ -378,7 +390,9 @@ internal fun AnimeContent(
                                 stream = stream,
                                 isExpanded = expandedStreamId == stream.id,
                                 isLoggedIn = isLoggedIn,
-                                onToggle = { expandedStreamId = if (expandedStreamId == stream.id) null else stream.id },
+                                onToggle = {
+                                    expandedStreamId = stream.id.takeIf { it != expandedStreamId }
+                                },
                                 actions = actions
                             )
                         }
@@ -516,12 +530,18 @@ private fun StreamButtons(stream: AnimeStream, isLoginRequired: Boolean, actions
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
-                    painter = painterResource(if (isLoginRequired) R.drawable.ic_symbol_login else R.drawable.ic_symbol_play_arrow),
+                    painter = painterResource(
+                        if (isLoginRequired) R.drawable.ic_symbol_login else R.drawable.ic_symbol_play_arrow
+                    ),
                     contentDescription = null,
                     modifier = Modifier.size(ButtonDefaults.IconSize)
                 )
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text(stringResource(if (isLoginRequired) R.string.error_action_login else R.string.fragment_anime_stream_play))
+                Text(
+                    stringResource(
+                        if (isLoginRequired) R.string.error_action_login else R.string.fragment_anime_stream_play
+                    )
+                )
             }
         }
     }

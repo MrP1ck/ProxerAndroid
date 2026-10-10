@@ -1,17 +1,9 @@
 package me.proxer.app.util
 
 import android.content.Intent
-import android.os.Build
-import android.provider.Settings
-import android.view.View
 import androidx.media3.common.PlaybackException
 import androidx.media3.datasource.HttpDataSource
-import java.io.IOException
-import java.net.SocketTimeoutException
-import javax.net.ssl.SSLPeerUnverifiedException
 import me.proxer.app.R
-import me.proxer.app.auth.LoginDialog
-import me.proxer.app.base.BaseActivity
 import me.proxer.app.comment.CommentInvalidProgressException
 import me.proxer.app.comment.CommentTooLongException
 import me.proxer.app.exception.AgeConfirmationRequiredException
@@ -22,7 +14,6 @@ import me.proxer.app.exception.PartialException
 import me.proxer.app.exception.StreamResolutionException
 import me.proxer.app.manga.MangaLinkException
 import me.proxer.app.manga.MangaNotAvailableException
-import me.proxer.app.settings.AgeConfirmationDialog
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction.AGE_CONFIRMATION
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction.CAPTCHA
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction.LOGIN
@@ -135,7 +126,9 @@ import me.proxer.library.ProxerException.ServerErrorType.WIKI_INVALID_PERMISSION
 import me.proxer.library.ProxerException.ServerErrorType.WIKI_INVALID_TITLE
 import me.proxer.library.enums.Device
 import me.proxer.library.util.ProxerUrls
-import okhttp3.HttpUrl
+import java.io.IOException
+import java.net.SocketTimeoutException
+import javax.net.ssl.SSLPeerUnverifiedException
 
 /**
  * @author Ruben Gees
