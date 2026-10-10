@@ -13,9 +13,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -31,6 +29,7 @@ import me.proxer.app.comment.CommentCardData
 import me.proxer.app.comment.DeleteCommentDialog
 import me.proxer.app.comment.EditCommentActivity
 import me.proxer.app.comment.userImageUrl
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.PagedList
 import me.proxer.app.ui.components.collectContentState
@@ -62,7 +61,6 @@ fun CommentsTab(
     val user by rememberCurrentUser()
     val state = viewModel.collectContentState()
     val onErrorAction = rememberErrorActionHandler(viewModel::load)
-    val deletionError by viewModel.itemDeletionError.observeAsState()
 
     var sortCriteria by rememberSaveable { mutableStateOf(viewModel.sortCriteria) }
     var commentToDelete by rememberSaveable { mutableStateOf<String?>(null) }
@@ -71,12 +69,10 @@ fun CommentsTab(
         if (comment != null) viewModel.updateComment(comment)
     }
 
-    LaunchedEffect(deletionError) {
-        deletionError?.let {
-            snackbarHostState?.showSnackbar(
-                context.getString(R.string.error_comment_deletion, context.getString(it.message))
-            )
-        }
+    LiveDataEffect(viewModel.itemDeletionError) {
+        snackbarHostState?.showSnackbar(
+            context.getString(R.string.error_comment_deletion, context.getString(it.message))
+        )
     }
 
     Box(

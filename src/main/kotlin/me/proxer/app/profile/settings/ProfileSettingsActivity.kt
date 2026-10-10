@@ -16,6 +16,7 @@ import me.proxer.app.base.ComposeActivity
 import me.proxer.app.settings.ListPreference
 import me.proxer.app.settings.PreferenceCategory
 import me.proxer.app.settings.choices
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LoadingState
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.ProxerScaffold
@@ -152,31 +153,25 @@ class ProfileSettingsActivity : ComposeActivity() {
     private fun Errors(viewModel: ProfileSettingsViewModel) {
         val context = LocalContext.current
         val snackbarHostState = LocalSnackbarHostState.current
-        val error by viewModel.error.observeAsState()
-        val updateError by viewModel.updateError.observeAsState()
         val onRefreshErrorAction = rememberErrorActionHandler(viewModel::refresh)
         val onUpdateErrorAction = rememberErrorActionHandler(viewModel::retryUpdate)
 
-        LaunchedEffect(error) {
-            error?.let {
-                snackbarHostState?.showErrorSnackbar(
-                    context = context,
-                    error = it,
-                    onAction = onRefreshErrorAction,
-                    message = context.getString(R.string.error_refresh, context.getString(it.message))
-                )
-            }
+        LiveDataEffect(viewModel.error) {
+            snackbarHostState?.showErrorSnackbar(
+                context = context,
+                error = it,
+                onAction = onRefreshErrorAction,
+                message = context.getString(R.string.error_refresh, context.getString(it.message))
+            )
         }
 
-        LaunchedEffect(updateError) {
-            updateError?.let {
-                snackbarHostState?.showErrorSnackbar(
-                    context = context,
-                    error = it,
-                    onAction = onUpdateErrorAction,
-                    message = context.getString(R.string.error_set_user_info, context.getString(it.message))
-                )
-            }
+        LiveDataEffect(viewModel.updateError) {
+            snackbarHostState?.showErrorSnackbar(
+                context = context,
+                error = it,
+                onAction = onUpdateErrorAction,
+                message = context.getString(R.string.error_set_user_info, context.getString(it.message))
+            )
         }
     }
 

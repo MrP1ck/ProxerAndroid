@@ -9,9 +9,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,6 +24,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import me.proxer.app.R
 import me.proxer.app.base.ComposeActivity
 import me.proxer.app.ui.components.DialogButton
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.PagedList
 import me.proxer.app.ui.components.ProxerScaffold
@@ -59,7 +58,6 @@ class NotificationActivity : ComposeActivity() {
         val viewModel = koinViewModel<NotificationViewModel>()
         val state = viewModel.collectContentState()
         val onErrorAction = rememberErrorActionHandler(viewModel::load)
-        val deletionError by viewModel.deletionError.observeAsState()
         var isDeleteAllDialogVisible by rememberSaveable { mutableStateOf(false) }
 
         LifecycleResumeEffect(Unit) {
@@ -84,15 +82,13 @@ class NotificationActivity : ComposeActivity() {
         ) { padding ->
             val snackbarHostState = LocalSnackbarHostState.current
 
-            LaunchedEffect(deletionError) {
-                deletionError?.let {
-                    snackbarHostState?.showErrorSnackbar(
-                        context = context,
-                        error = it,
-                        onAction = onErrorAction,
-                        message = context.getString(R.string.error_notification_deletion, context.getString(it.message))
-                    )
-                }
+            LiveDataEffect(viewModel.deletionError) {
+                snackbarHostState?.showErrorSnackbar(
+                    context = context,
+                    error = it,
+                    onAction = onErrorAction,
+                    message = context.getString(R.string.error_notification_deletion, context.getString(it.message))
+                )
             }
 
             PagedList(

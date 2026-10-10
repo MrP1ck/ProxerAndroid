@@ -43,6 +43,7 @@ import me.proxer.app.chat.prv.message.MessengerReportViewModel
 import me.proxer.app.chat.prv.message.MessengerViewModel
 import me.proxer.app.chat.prv.sync.MessengerDao
 import me.proxer.app.chat.prv.sync.MessengerNotifications
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.RegisterWhileResumed
 import me.proxer.app.ui.components.collectContentState
@@ -129,12 +130,13 @@ class PrvMessengerActivity : ComposeActivity() {
         val state = viewModel.collectContentState()
         val onErrorAction = rememberErrorActionHandler(viewModel::load)
         val conference by viewModel.conference.observeAsState(initialConference)
-        val draft by viewModel.draft.observeAsState()
+        var loadedDraft by remember { mutableStateOf<String?>(null) }
         val deleted by viewModel.deleted.observeAsState()
         var isReportDialogVisible by rememberSaveable { mutableStateOf(false) }
 
         RegisterWhileResumed(MessengerFragmentPingEvent::class.java)
 
+        LiveDataEffect(viewModel.draft) { loadedDraft = it }
         LaunchedEffect(Unit) { if (initialMessage == null) viewModel.loadDraft() }
         LaunchedEffect(deleted) { if (deleted != null) finish() }
 
@@ -186,7 +188,7 @@ class PrvMessengerActivity : ComposeActivity() {
                     }
                 )
             ),
-            initialDraft = initialMessage ?: draft,
+            initialDraft = initialMessage ?: loadedDraft,
             showAuthors = conference.isGroup,
             onNavigateUp = navigator::navigateUp,
             onErrorAction = onErrorAction,

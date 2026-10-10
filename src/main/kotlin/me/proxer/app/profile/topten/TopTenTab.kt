@@ -8,15 +8,14 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import me.proxer.app.R
 import me.proxer.app.ui.components.ContentStateHost
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.RemovableCoverCard
 import me.proxer.app.ui.components.SectionHeader
@@ -45,14 +44,11 @@ fun TopTenTab(
     val context = LocalContext.current
     val state = viewModel.collectContentState()
     val onErrorAction = rememberErrorActionHandler(viewModel::load)
-    val deletionError by viewModel.itemDeletionError.observeAsState()
 
-    LaunchedEffect(deletionError) {
-        deletionError?.let {
-            snackbarHostState?.showSnackbar(
-                context.getString(R.string.error_topten_entry_removal, context.getString(it.message))
-            )
-        }
+    LiveDataEffect(viewModel.itemDeletionError) {
+        snackbarHostState?.showSnackbar(
+            context.getString(R.string.error_topten_entry_removal, context.getString(it.message))
+        )
     }
 
     ContentStateHost(

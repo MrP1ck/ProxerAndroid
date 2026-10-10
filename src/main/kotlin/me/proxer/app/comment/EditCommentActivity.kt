@@ -69,6 +69,7 @@ import me.proxer.app.base.ComposeActivity
 import me.proxer.app.ui.components.BBCodeText
 import me.proxer.app.ui.components.ContentStateHost
 import me.proxer.app.ui.components.EmptyState
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.TopAppBarTitle
@@ -114,8 +115,6 @@ class EditCommentActivity : ComposeActivity() {
         val state = viewModel.collectContentState()
         val onErrorAction = rememberErrorActionHandler(viewModel::load)
         val isUpdate by viewModel.isUpdate.observeAsState(false)
-        val publishResult by viewModel.publishResult.observeAsState()
-        val publishError by viewModel.publishError.observeAsState()
 
         var text by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue()) }
         var isPreviewVisible by rememberSaveable { mutableStateOf(false) }
@@ -128,12 +127,10 @@ class EditCommentActivity : ComposeActivity() {
             }
         }
 
-        LaunchedEffect(publishResult) {
-            if (publishResult != null) {
-                setResult(Activity.RESULT_OK, Intent().putExtra(COMMENT_EXTRA, publishResult))
-                toast(R.string.fragment_edit_comment_published)
-                finish()
-            }
+        LiveDataEffect(viewModel.publishResult) {
+            setResult(Activity.RESULT_OK, Intent().putExtra(COMMENT_EXTRA, it))
+            toast(R.string.fragment_edit_comment_published)
+            finish()
         }
 
         ProxerScaffold(
@@ -168,15 +165,13 @@ class EditCommentActivity : ComposeActivity() {
         ) { padding ->
             val snackbarHostState = LocalSnackbarHostState.current
 
-            LaunchedEffect(publishError) {
-                publishError?.let {
-                    snackbarHostState?.showErrorSnackbar(
-                        context = context,
-                        error = it,
-                        onAction = onErrorAction,
-                        message = context.getString(R.string.error_comment_publish, context.getString(it.message))
-                    )
-                }
+            LiveDataEffect(viewModel.publishError) {
+                snackbarHostState?.showErrorSnackbar(
+                    context = context,
+                    error = it,
+                    onAction = onErrorAction,
+                    message = context.getString(R.string.error_comment_publish, context.getString(it.message))
+                )
             }
 
             ContentStateHost(

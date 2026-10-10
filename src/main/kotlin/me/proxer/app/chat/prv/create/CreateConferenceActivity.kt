@@ -52,6 +52,7 @@ import me.proxer.app.base.ComposeActivity
 import me.proxer.app.chat.prv.Participant
 import me.proxer.app.chat.prv.PrvMessengerActivity
 import me.proxer.app.comment.userImageUrl
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.SectionHeader
@@ -108,8 +109,6 @@ class CreateConferenceActivity : ComposeActivity() {
         val validators = koinInject<Validators>()
         val user by rememberCurrentUser()
         val isLoading by viewModel.isLoading.observeAsState(false)
-        val result by viewModel.result.observeAsState()
-        val error by viewModel.error.observeAsState()
         val onErrorAction = rememberErrorActionHandler { }
 
         var topic by rememberSaveable { mutableStateOf("") }
@@ -186,14 +185,12 @@ class CreateConferenceActivity : ComposeActivity() {
                 }
             }
 
-            LaunchedEffect(error) { error?.let { showError(it) } }
+            LiveDataEffect(viewModel.error) { showError(it) }
 
-            LaunchedEffect(result) {
-                result?.let {
-                    finish()
+            LiveDataEffect(viewModel.result) {
+                finish()
 
-                    PrvMessengerActivity.navigateTo(this@CreateConferenceActivity, it)
-                }
+                PrvMessengerActivity.navigateTo(this@CreateConferenceActivity, it)
             }
 
             LaunchedEffect(Unit) {

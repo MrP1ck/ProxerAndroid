@@ -53,7 +53,12 @@ fun <T> BaseViewModel<T>.collectContentState(): ContentState<T> {
     val data by data.observeAsState()
     val error by error.observeAsState()
     val isLoading by isLoading.observeAsState(false)
-    val refreshError = (this as? PagedViewModel<*>)?.refreshError?.observeAsState()?.value
+    var refreshError by remember(this) { mutableStateOf<ErrorAction?>(null) }
+
+    // The refresh error is a one-shot event, which observeAsState would miss (see LiveDataEffect).
+    (this as? PagedViewModel<*>)?.let { pagedViewModel ->
+        LiveDataEffect(pagedViewModel.refreshError) { refreshError = it }
+    }
 
     LoadOnFirstComposition(this)
 

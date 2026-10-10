@@ -6,7 +6,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,6 +22,7 @@ import me.proxer.app.chat.ConversationScreen
 import me.proxer.app.chat.ReportMessageDialog
 import me.proxer.app.chat.pub.room.info.ChatRoomInfoActivity
 import me.proxer.app.comment.userImageUrl
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.collectContentState
 import me.proxer.app.ui.components.map
@@ -73,10 +73,10 @@ class ChatActivity : ComposeActivity() {
         val user by rememberCurrentUser()
         val state = viewModel.collectContentState()
         val onErrorAction = rememberErrorActionHandler(viewModel::load)
-        val draft by viewModel.draft.observeAsState()
-        val sendError by viewModel.sendMessageError.observeAsState()
+        var loadedDraft by remember { mutableStateOf<String?>(null) }
         var messageToReport by rememberSaveable { mutableStateOf<String?>(null) }
 
+        LiveDataEffect(viewModel.draft) { loadedDraft = it }
         LaunchedEffect(Unit) { viewModel.loadDraft() }
 
         LifecycleResumeEffect(viewModel) {
@@ -85,12 +85,10 @@ class ChatActivity : ComposeActivity() {
             onPauseOrDispose { viewModel.pausePolling() }
         }
 
-        LaunchedEffect(sendError) {
-            sendError?.let {
-                snackbarHostState?.showSnackbar(
-                    context.getString(R.string.error_chat_send_message, context.getString(it.message))
-                )
-            }
+        LiveDataEffect(viewModel.sendMessageError) {
+            snackbarHostState?.showSnackbar(
+                context.getString(R.string.error_chat_send_message, context.getString(it.message))
+            )
         }
 
         val messages = remember(state, user) {
@@ -127,7 +125,7 @@ class ChatActivity : ComposeActivity() {
                     }
                 )
             ),
-            initialDraft = draft,
+            initialDraft = loadedDraft,
             showAuthors = true,
             onNavigateUp = navigator::navigateUp,
             onErrorAction = onErrorAction,

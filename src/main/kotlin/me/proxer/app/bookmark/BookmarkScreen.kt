@@ -33,7 +33,6 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -52,6 +51,7 @@ import me.proxer.app.R
 import me.proxer.app.ui.components.COVER_ASPECT_RATIO
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.LanguageFlag
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.PagedGrid
 import me.proxer.app.ui.components.ProxerAsyncImage
@@ -104,34 +104,24 @@ fun BookmarkScreen(
         viewModel.searchQuery = query.trim()
     }
 
-    val undoData by viewModel.undoData.observeAsState()
-    val itemDeletionError by viewModel.itemDeletionError.observeAsState()
-    val undoError by viewModel.undoError.observeAsState()
+    LiveDataEffect(viewModel.undoData) {
+        val result = snackbarHostState?.showSnackbar(
+            message = context.getString(R.string.fragment_bookmark_delete_message),
+            actionLabel = context.getString(R.string.action_undo),
+            duration = SnackbarDuration.Long
+        )
 
-    LaunchedEffect(undoData) {
-        if (undoData != null && snackbarHostState != null) {
-            val result = snackbarHostState.showSnackbar(
-                message = context.getString(R.string.fragment_bookmark_delete_message),
-                actionLabel = context.getString(R.string.action_undo),
-                duration = SnackbarDuration.Long
-            )
-
-            if (result == SnackbarResult.ActionPerformed) viewModel.undo()
-        }
+        if (result == SnackbarResult.ActionPerformed) viewModel.undo()
     }
 
-    LaunchedEffect(itemDeletionError) {
-        itemDeletionError?.let {
-            snackbarHostState?.showSnackbar(
-                context.getString(R.string.error_bookmark_deletion, context.getString(it.message))
-            )
-        }
+    LiveDataEffect(viewModel.itemDeletionError) {
+        snackbarHostState?.showSnackbar(
+            context.getString(R.string.error_bookmark_deletion, context.getString(it.message))
+        )
     }
 
-    LaunchedEffect(undoError) {
-        undoError?.let {
-            snackbarHostState?.showSnackbar(context.getString(R.string.error_undo, context.getString(it.message)))
-        }
+    LiveDataEffect(viewModel.undoError) {
+        snackbarHostState?.showSnackbar(context.getString(R.string.error_undo, context.getString(it.message)))
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()

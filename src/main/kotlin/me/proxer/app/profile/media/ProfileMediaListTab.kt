@@ -10,9 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -21,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import me.proxer.app.R
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.PagedGrid
 import me.proxer.app.ui.components.RemovableCoverCard
@@ -56,15 +55,12 @@ fun ProfileMediaListTab(
     val context = LocalContext.current
     val state = viewModel.collectContentState()
     val onErrorAction = rememberErrorActionHandler(viewModel::load)
-    val deletionError by viewModel.itemDeletionError.observeAsState()
     var filter by rememberSaveable { mutableStateOf(viewModel.filter) }
 
-    LaunchedEffect(deletionError) {
-        deletionError?.let {
-            snackbarHostState?.showSnackbar(
-                context.getString(R.string.error_media_entry_deletion, context.getString(it.message))
-            )
-        }
+    LiveDataEffect(viewModel.itemDeletionError) {
+        snackbarHostState?.showSnackbar(
+            context.getString(R.string.error_media_entry_deletion, context.getString(it.message))
+        )
     }
 
     Column(

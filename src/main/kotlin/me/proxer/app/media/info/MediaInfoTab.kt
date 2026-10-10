@@ -26,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +50,7 @@ import me.proxer.app.ui.components.ChipRow
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.ContentStateHost
 import me.proxer.app.ui.components.LanguageFlag
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.ProxerAsyncImage
 import me.proxer.app.ui.components.RatingStars
@@ -91,23 +91,17 @@ fun MediaInfoTab(viewModel: MediaInfoViewModel, state: ContentState<Entry>, cont
     val user by rememberCurrentUser()
 
     val userInfo by viewModel.userInfoData.observeAsState()
-    val userInfoUpdate by viewModel.userInfoUpdateData.observeAsState()
-    val userInfoUpdateError by viewModel.userInfoUpdateError.observeAsState()
 
-    LaunchedEffect(userInfoUpdate) {
-        if (userInfoUpdate != null) {
-            snackbarHostState?.showSnackbar(
-                context.getString(R.string.fragment_set_user_info_success)
-            )
-        }
+    LiveDataEffect(viewModel.userInfoUpdateData) {
+        snackbarHostState?.showSnackbar(
+            context.getString(R.string.fragment_set_user_info_success)
+        )
     }
 
-    LaunchedEffect(userInfoUpdateError) {
-        userInfoUpdateError?.let {
-            snackbarHostState?.showSnackbar(
-                context.getString(R.string.error_set_user_info, context.getString(it.message))
-            )
-        }
+    LiveDataEffect(viewModel.userInfoUpdateError) {
+        snackbarHostState?.showSnackbar(
+            context.getString(R.string.error_set_user_info, context.getString(it.message))
+        )
     }
 
     fun showMessage(message: String) {

@@ -40,7 +40,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,6 +72,7 @@ import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.base.ComposeActivity
 import me.proxer.app.ui.components.ErrorState
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LoadingState
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.MediaControlInfo
@@ -185,8 +185,6 @@ class MangaActivity : ComposeActivity() {
         val user by rememberCurrentUser()
         val state = viewModel.collectContentState()
         val onErrorAction = rememberErrorActionHandler(viewModel::load)
-        val userStateData by viewModel.userStateData.observeAsState()
-        val userStateError by viewModel.userStateError.observeAsState()
         val snackbarHostState = remember { SnackbarHostState() }
 
         var episode by rememberSaveable { mutableIntStateOf(viewModel.episode) }
@@ -221,21 +219,17 @@ class MangaActivity : ComposeActivity() {
             if (chapterInfo != null) areControlsVisible = false
         }
 
-        LaunchedEffect(userStateData) {
-            if (userStateData != null) {
-                snackbarHostState.showSnackbar(context.getString(R.string.fragment_set_user_info_success))
-            }
+        LiveDataEffect(viewModel.userStateData) {
+            snackbarHostState.showSnackbar(context.getString(R.string.fragment_set_user_info_success))
         }
 
-        LaunchedEffect(userStateError) {
-            userStateError?.let {
-                snackbarHostState.showErrorSnackbar(
-                    context = context,
-                    error = it,
-                    onAction = onErrorAction,
-                    message = context.getString(R.string.error_set_user_info, context.getString(it.message))
-                )
-            }
+        LiveDataEffect(viewModel.userStateError) {
+            snackbarHostState.showErrorSnackbar(
+                context = context,
+                error = it,
+                onAction = onErrorAction,
+                message = context.getString(R.string.error_set_user_info, context.getString(it.message))
+            )
         }
 
         val controls: @Composable (showInfo: Boolean) -> Unit = { showInfo ->

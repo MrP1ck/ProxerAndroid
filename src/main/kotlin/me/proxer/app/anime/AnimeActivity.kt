@@ -31,9 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +53,7 @@ import me.proxer.app.anime.resolver.StreamResolutionResult
 import me.proxer.app.base.ComposeActivity
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.ErrorState
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LoadingState
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.MediaControlTexts
@@ -167,10 +166,6 @@ class AnimeActivity : ComposeActivity() {
         val user by rememberCurrentUser()
         val state = viewModel.collectContentState()
         val onErrorAction = rememberErrorActionHandler(viewModel::load)
-        val resolutionResult by viewModel.resolutionResult.observeAsState()
-        val resolutionError by viewModel.resolutionError.observeAsState()
-        val userStateData by viewModel.userStateData.observeAsState()
-        val userStateError by viewModel.userStateError.observeAsState()
 
         var episode by rememberSaveable { mutableIntStateOf(viewModel.episode) }
 
@@ -190,8 +185,8 @@ class AnimeActivity : ComposeActivity() {
             intent.putExtra(EPISODE_EXTRA, newEpisode)
         }
 
-        LaunchedEffect(resolutionResult) {
-            when (val result = resolutionResult) {
+        LiveDataEffect(viewModel.resolutionResult) { result ->
+            when (result) {
                 is StreamResolutionResult.Video -> result.play(
                     context,
                     id,
@@ -203,7 +198,7 @@ class AnimeActivity : ComposeActivity() {
                 )
                 is StreamResolutionResult.Link -> result.show(this@AnimeActivity)
                 is StreamResolutionResult.App -> result.navigate(context)
-                else -> Unit
+                is StreamResolutionResult.Message -> Unit
             }
         }
 
@@ -246,29 +241,24 @@ class AnimeActivity : ComposeActivity() {
         ) { padding ->
             val snackbarHostState = LocalSnackbarHostState.current
 
-            LaunchedEffect(resolutionError) {
-                when (val error = resolutionError) {
-                    null -> Unit
+            LiveDataEffect(viewModel.resolutionError) { error ->
+                when (error) {
                     is AppRequiredErrorAction -> error.showDialog(this@AnimeActivity)
                     else -> snackbarHostState?.showErrorSnackbar(context, error, onErrorAction)
                 }
             }
 
-            LaunchedEffect(userStateData) {
-                if (userStateData != null) {
-                    snackbarHostState?.showSnackbar(context.getString(R.string.fragment_set_user_info_success))
-                }
+            LiveDataEffect(viewModel.userStateData) {
+                snackbarHostState?.showSnackbar(context.getString(R.string.fragment_set_user_info_success))
             }
 
-            LaunchedEffect(userStateError) {
-                userStateError?.let {
-                    snackbarHostState?.showErrorSnackbar(
-                        context = context,
-                        error = it,
-                        onAction = onErrorAction,
-                        message = context.getString(R.string.error_set_user_info, context.getString(it.message))
-                    )
-                }
+            LiveDataEffect(viewModel.userStateError) {
+                snackbarHostState?.showErrorSnackbar(
+                    context = context,
+                    error = it,
+                    onAction = onErrorAction,
+                    message = context.getString(R.string.error_set_user_info, context.getString(it.message))
+                )
             }
 
             AnimeContent(

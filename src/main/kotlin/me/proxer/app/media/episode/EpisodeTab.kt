@@ -23,10 +23,8 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,6 +42,7 @@ import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.ui.components.ContentStateHost
 import me.proxer.app.ui.components.LanguageFlag
+import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.ProxerAsyncImage
 import me.proxer.app.ui.components.collectContentState
@@ -83,25 +82,19 @@ fun EpisodeTab(
     val user by rememberCurrentUser()
     val state = viewModel.collectContentState()
     val retryHandler = rememberErrorActionHandler(viewModel::load)
-    val bookmarkData by viewModel.bookmarkData.observeAsState()
-    val bookmarkError by viewModel.bookmarkError.observeAsState()
 
     var isLanguagePickerVisible by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(bookmarkData) {
-        if (bookmarkData != null) {
-            snackbarHostState?.showSnackbar(
-                context.getString(R.string.fragment_set_user_info_success)
-            )
-        }
+    LiveDataEffect(viewModel.bookmarkData) {
+        snackbarHostState?.showSnackbar(
+            context.getString(R.string.fragment_set_user_info_success)
+        )
     }
 
-    LaunchedEffect(bookmarkError) {
-        bookmarkError?.let {
-            snackbarHostState?.showSnackbar(
-                context.getString(R.string.error_set_user_info, context.getString(it.message))
-            )
-        }
+    LiveDataEffect(viewModel.bookmarkError) {
+        snackbarHostState?.showSnackbar(
+            context.getString(R.string.error_set_user_info, context.getString(it.message))
+        )
     }
 
     val canBookmark = !languages.isNullOrEmpty() && category != null && user != null
