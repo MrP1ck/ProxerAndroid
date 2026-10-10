@@ -3,9 +3,11 @@
 package me.proxer.app.util.extension
 
 import android.app.Activity
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +18,12 @@ import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.children
+
+/**
+ * [PendingIntent.FLAG_MUTABLE] on Android 12+, where an explicit mutability flag is required.
+ * Needed for PendingIntents that are filled in by the system, like direct replies and widget list items.
+ */
+val PENDING_INTENT_FLAG_MUTABLE = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
 
 @ColorInt
 inline fun Context.resolveColor(

@@ -22,7 +22,12 @@ class MessengerNotificationReadReceiver : BroadcastReceiver() {
                 .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
                 .apply { putExtra(CONFERENCE_ID_EXTRA, conferenceId) }
 
-            return PendingIntent.getBroadcast(context, conferenceId.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            return PendingIntent.getBroadcast(
+                context,
+                conferenceId.toInt(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         }
     }
 

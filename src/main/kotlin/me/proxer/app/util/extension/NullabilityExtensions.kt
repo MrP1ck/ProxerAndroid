@@ -7,21 +7,9 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
-import android.text.Editable
-import android.widget.EditText
-import androidx.recyclerview.widget.RecyclerView
-
-inline val RecyclerView.safeLayoutManager: RecyclerView.LayoutManager
-    get() = requireNotNull(layoutManager)
-
-inline val EditText.safeText: Editable
-    get() = requireNotNull(text)
 
 inline fun Intent.getSafeStringExtra(key: String) =
     requireNotNull(getStringExtra(key)) { "No value found for key $key" }
-
-inline fun Intent.getSafeStringArrayExtra(key: String): Array<out String> =
-    requireNotNull(getStringArrayExtra(key)) { "No value found for key $key" }
 
 inline fun <reified T : Parcelable> Intent.getSafeParcelableExtra(key: String) =
     requireNotNull(getParcelableExtra<T>(key)) { "No value found for key $key" }

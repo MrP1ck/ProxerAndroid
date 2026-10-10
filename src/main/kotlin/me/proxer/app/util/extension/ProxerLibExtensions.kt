@@ -4,13 +4,9 @@ package me.proxer.app.util.extension
 
 import android.content.Context
 import android.content.res.Resources
+import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorInt
 import me.proxer.app.R
-import me.proxer.app.R.id.description
-import me.proxer.app.R.id.post
 import me.proxer.app.anime.AnimeStream
 import me.proxer.app.anime.resolver.StreamResolutionResult
 import me.proxer.app.chat.prv.LocalConference
@@ -86,7 +82,7 @@ object ProxerLibExtensions {
         context.getString(R.string.fsk_fear) -> FskConstraint.FEAR
         context.getString(R.string.fsk_violence) -> FskConstraint.VIOLENCE
         context.getString(R.string.fsk_sex) -> FskConstraint.SEX
-        else -> error("Could not find fsk constraint for description: $description")
+        else -> error("Could not find fsk constraint for description: $string")
     }
 }
 
@@ -135,14 +131,15 @@ fun AnimeLanguage.toMediaLanguage() = when (this) {
     AnimeLanguage.OTHER -> MediaLanguage.OTHER
 }
 
-fun Language.toAppDrawable(context: Context) = AppCompatResources.getDrawable(
-    context,
-    when (this) {
+val Language.flagDrawableRes
+    @DrawableRes get() = when (this) {
         Language.GERMAN -> R.drawable.ic_germany
         Language.ENGLISH -> R.drawable.ic_united_states
         Language.OTHER -> R.drawable.ic_united_nations
     }
-) ?: error("Could not resolve Drawable for language: $this")
+
+fun Language.toAppDrawable(context: Context) = AppCompatResources.getDrawable(context, flagDrawableRes)
+    ?: error("Could not resolve Drawable for language: $this")
 
 fun MediaLanguage.toAppString(context: Context): String = context.getString(
     when (this) {
@@ -190,18 +187,6 @@ fun Category.toEpisodeAppString(context: Context, number: Int? = null): String =
         },
         number
     )
-}
-
-fun MediaState.toAppDrawable(context: Context): IconicsDrawable = IconicsDrawable(context).apply {
-    icon = when (this@toAppDrawable) {
-        MediaState.PRE_AIRING -> CommunityMaterial.Icon3.cmd_radio_tower
-        MediaState.FINISHED -> CommunityMaterial.Icon.cmd_book
-        MediaState.AIRING -> CommunityMaterial.Icon.cmd_book_open_variant
-        MediaState.CANCELLED -> CommunityMaterial.Icon.cmd_close
-        MediaState.CANCELLED_SUB -> CommunityMaterial.Icon.cmd_close
-    }
-
-    colorInt = context.resolveColor(R.attr.colorIcon)
 }
 
 fun UserMediaProgress.toEpisodeAppString(
@@ -306,9 +291,8 @@ fun FskConstraint.toAppStringDescription(context: Context): String = context.get
     }
 )
 
-fun FskConstraint.toAppDrawable(context: Context) = AppCompatResources.getDrawable(
-    context,
-    when (this) {
+val FskConstraint.drawableRes
+    @DrawableRes get() = when (this) {
         FskConstraint.FSK_0 -> R.drawable.ic_fsk_0
         FskConstraint.FSK_6 -> R.drawable.ic_fsk_6
         FskConstraint.FSK_12 -> R.drawable.ic_fsk_12
@@ -319,7 +303,9 @@ fun FskConstraint.toAppDrawable(context: Context) = AppCompatResources.getDrawab
         FskConstraint.SEX -> R.drawable.ic_fsk_sex
         FskConstraint.VIOLENCE -> R.drawable.ic_fsk_violence
     }
-) ?: error("Could not resolve Drawable for fsk constraint: $this")
+
+fun FskConstraint.toAppDrawable(context: Context) = AppCompatResources.getDrawable(context, drawableRes)
+    ?: error("Could not resolve Drawable for fskConstraint: $this")
 
 fun IndustryType.toAppString(context: Context): String = context.getString(
     when (this) {
@@ -403,7 +389,7 @@ inline val EntryCore.isAgeRestricted: Boolean
 inline val Page.decodedName: String
     get() = try {
         URLDecoder.decode(name, "UTF-8")
-    } catch (error: UnsupportedEncodingException) {
+    } catch (ignored: UnsupportedEncodingException) {
         ""
     }
 
@@ -464,7 +450,7 @@ fun Topic.toTopicMetaData() = TopicMetaData(
     lastPostDate,
     hits,
     isLocked,
-    post,
+    postAmount,
     subject
 )
 

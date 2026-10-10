@@ -1,7 +1,7 @@
 package me.proxer.app
 
+import android.content.Context
 import android.content.res.Resources
-import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -40,6 +40,7 @@ import me.proxer.app.media.TagDatabase
 import me.proxer.app.media.comments.CommentsViewModel
 import me.proxer.app.media.discussion.DiscussionViewModel
 import me.proxer.app.media.episode.EpisodeViewModel
+import me.proxer.app.media.list.MediaListFilter
 import me.proxer.app.media.list.MediaListViewModel
 import me.proxer.app.media.recommendation.RecommendationViewModel
 import me.proxer.app.media.relation.RelationViewModel
@@ -91,7 +92,7 @@ import java.util.concurrent.TimeUnit
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
-private const val DEFAULT_PREFERENCES = "defaultPreferences"
+const val DEFAULT_PREFERENCES = "defaultPreferences"
 private const val STORAGE_PREFERENCES = "storagePreferences"
 
 private const val DEFAULT_RX_PREFERENCES = "defaultRxPreferences"
@@ -112,7 +113,10 @@ private val headersToRedact = listOf("proxer-api-key", "set-cookie")
 private val applicationModules = module {
     single { androidContext().packageManager }
 
-    single(named(DEFAULT_PREFERENCES)) { PreferenceManager.getDefaultSharedPreferences(androidContext()) }
+    single(named(DEFAULT_PREFERENCES)) {
+        // The file of PreferenceManager.getDefaultSharedPreferences, which the settings used before.
+        androidContext().getSharedPreferences("${androidContext().packageName}_preferences", Context.MODE_PRIVATE)
+    }
     single(named(STORAGE_PREFERENCES)) {
         val masterKey = MasterKey.Builder(androidContext())
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -234,7 +238,7 @@ private val applicationModules = module {
     }
 
     single<LoginTokenManager> { ProxerLoginTokenManager(get()) }
-    single { LoginHandler(get(), get(), get(), get()) }
+    single { LoginHandler(get(), get(), get()) }
 }
 
 private val viewModelModule = module {
@@ -258,13 +262,7 @@ private val viewModelModule = module {
         BookmarkViewModel(searchQuery, category, filterAvailable)
     }
 
-    viewModel { parameterList ->
-        MediaListViewModel(
-            parameterList[0], parameterList[1], parameterList[2], parameterList[3], parameterList[4],
-            parameterList[5], parameterList[6], parameterList[7], parameterList[8], parameterList[9],
-            parameterList[10], parameterList[11]
-        )
-    }
+    viewModel { (initialFilter: MediaListFilter) -> MediaListViewModel(initialFilter) }
 
     viewModel { ScheduleViewModel() }
 

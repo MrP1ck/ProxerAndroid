@@ -13,13 +13,11 @@ import me.proxer.app.notification.NotificationWorker
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.subscribeAndLogErrors
-import me.proxer.library.ProxerApi
 
 /**
  * @author Ruben Gees
  */
 class LoginHandler(
-    private val api: ProxerApi,
     private val storageHelper: StorageHelper,
     private val preferenceHelper: PreferenceHelper,
     private val messengerDao: MessengerDao

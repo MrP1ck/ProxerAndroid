@@ -24,7 +24,7 @@ class LocalDataInitializer(
     private companion object {
         private const val VERSION = "version"
 
-        private const val currentVersion = 7
+        private const val CURRENT_VERSION = 7
     }
 
     @Volatile
@@ -55,8 +55,8 @@ class LocalDataInitializer(
                         migrate6To7(storagePreferences)
                     }
 
-                    if (previousVersion != currentVersion) {
-                        preferences.edit(commit = true) { putInt(VERSION, currentVersion) }
+                    if (previousVersion != CURRENT_VERSION) {
+                        preferences.edit(commit = true) { putInt(VERSION, CURRENT_VERSION) }
                     }
 
                     isInitialized = true

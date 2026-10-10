@@ -75,8 +75,11 @@ class MessengerViewModel(initialConference: LocalConference) : PagedViewModel<Lo
     }
 
     private val conferenceSource: (LocalConference?) -> Unit = {
-        if (it != null) conference.value = it
-        else deleted.value = Unit
+        if (it != null) {
+            conference.value = it
+        } else {
+            deleted.value = Unit
+        }
     }
 
     private val messengerDao by safeInject<MessengerDao>()

@@ -7,8 +7,28 @@ max_line_length = 120
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.kt]
+[*.{kt,kts}]
 continuation_indent_size = 4
+# The project follows the IntelliJ IDEA code style, not the stricter ktlint_official default of newer ktlint versions.
+ktlint_code_style = intellij_idea
+ij_kotlin_allow_trailing_comma = false
+ij_kotlin_allow_trailing_comma_on_call_site = false
+# Composables are named in PascalCase.
+ktlint_function_naming_ignore_when_annotated_with = Composable
+# Rules added by newer ktlint versions which conflict with the existing code style.
+ktlint_standard_class-signature = disabled
+ktlint_standard_function-signature = disabled
+ktlint_standard_function-expression-body = disabled
+ktlint_standard_function-literal = disabled
+ktlint_standard_argument-list-wrapping = disabled
+ktlint_standard_parameter-list-wrapping = disabled
+ktlint_standard_binary-expression-wrapping = disabled
+ktlint_standard_multiline-expression-wrapping = disabled
+ktlint_standard_chain-method-continuation = disabled
+ktlint_standard_condition-wrapping = disabled
+ktlint_standard_enum-wrapping = disabled
+ktlint_standard_property-wrapping = disabled
+ktlint_standard_comment-wrapping = disabled
 
 [*.{java,gradle}]
 continuation_indent_size = 8

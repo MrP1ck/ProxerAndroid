@@ -4,70 +4,89 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
-import android.util.Size
-import com.gojuno.koptional.rxjava2.filterSome
-import com.gojuno.koptional.toOptional
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import me.proxer.app.MainApplication.Companion.GENERIC_USER_AGENT
 import me.proxer.app.MainApplication.Companion.USER_AGENT
+import timber.log.Timber
 
 /**
+ * Loads frames of a video for the preview while seeking.
+ *
  * @author Ruben Gees
  */
-object PreviewLoader {
+class PreviewLoader(private val uri: Uri, private val referer: String?, private val isProxerStream: Boolean) {
 
-    fun loadFrames(requests: Observable<Long>, sizeCallback: () -> Size, metaData: PreviewMetaData): Flowable<Bitmap> {
-        val mediaMetadataRetriever = MediaMetadataRetriever()
+    private val retriever = MediaMetadataRetriever()
+    private val mutex = Mutex()
 
-        fun getFrameAtTime(timeUs: Long, size: Size): Bitmap? {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                mediaMetadataRetriever.getScaledFrameAtTime(timeUs, 0, size.width, size.height)
-            } else {
-                mediaMetadataRetriever.getFrameAtTime(timeUs)
+    private var isInitialized = false
+    private var isFailed = false
+
+    /**
+     * Returns the frame at [positionMs], scaled to fit [width] and [height] where supported, or null if the frame
+     * could not be loaded.
+     */
+    suspend fun frameAt(positionMs: Long, width: Int, height: Int): Bitmap? = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            if (!initialize()) return@withLock null
+
+            try {
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 ->
+                        retriever.getScaledFrameAtTime(
+                            positionMs * 1000,
+                            MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
+                            width,
+                            height
+                        )
+                    else -> retriever.getFrameAtTime(positionMs * 1000)
+                }
+            } catch (error: RuntimeException) {
+                Timber.w(error)
+
+                null
             }
         }
-
-        return Completable
-            .fromAction {
-                try {
-                    mediaMetadataRetriever.setDataSource(metaData.uri.toString(), makeHeaders(metaData))
-                } catch (error: Throwable) {
-                    // MediaMetadataRetriever throws IllegalArgumentExceptions on some devices due to bugs in the
-                    // implementation. Ignore these by rethrowing a generic RuntimeException.
-                    @Suppress("TooGenericExceptionThrown")
-                    throw RuntimeException(error)
-                }
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .andThen(requests)
-            .toFlowable(BackpressureStrategy.LATEST)
-            .observeOn(Schedulers.io(), false, 1)
-            .map { getFrameAtTime(it * 1000, sizeCallback()).toOptional() }
-            .filterSome()
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnCancel { mediaMetadataRetriever.release() }
-            .doOnTerminate { mediaMetadataRetriever.release() }
     }
 
-    data class PreviewMetaData(val uri: Uri, val referer: String?, val isProxerStream: Boolean)
+    /**
+     * Opens the video ahead of time, which can take a while for remote videos.
+     */
+    suspend fun prepare() = withContext(Dispatchers.IO) {
+        mutex.withLock { initialize() }
+    }
 
-    private fun makeHeaders(metaData: PreviewMetaData) = emptyMap<String, String>()
-        .let {
-            when {
-                metaData.referer != null -> it.plus("Referer" to metaData.referer)
-                else -> it
+    fun release() {
+        CoroutineScope(Dispatchers.IO).launch {
+            mutex.withLock { retriever.release() }
+        }
+    }
+
+    private fun initialize(): Boolean {
+        if (!isInitialized && !isFailed) {
+            try {
+                retriever.setDataSource(uri.toString(), headers())
+
+                isInitialized = true
+            } catch (error: RuntimeException) {
+                // MediaMetadataRetriever throws on some devices due to bugs in the implementation.
+                Timber.w(error)
+
+                isFailed = true
             }
         }
-        .let {
-            when {
-                metaData.isProxerStream -> it.plus("User-Agent" to USER_AGENT)
-                else -> it.plus("User-Agent" to GENERIC_USER_AGENT)
-            }
-        }
+
+        return isInitialized
+    }
+
+    private fun headers() = buildMap {
+        if (referer != null) put("Referer", referer)
+
+        put("User-Agent", if (isProxerStream) USER_AGENT else GENERIC_USER_AGENT)
+    }
 }

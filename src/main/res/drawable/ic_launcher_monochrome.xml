@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The themed launcher icon (Android 13+). The logo is inset to fit the safe zone of adaptive icons. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_proxer"
+    android:inset="27%" />

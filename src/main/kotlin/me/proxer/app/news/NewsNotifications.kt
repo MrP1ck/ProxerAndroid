@@ -7,14 +7,15 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import me.proxer.app.MainActivity
+import me.proxer.app.MainSection
 import me.proxer.app.R
 import me.proxer.app.forum.TopicActivity
 import me.proxer.app.util.NotificationUtils.NEWS_CHANNEL
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.extension.getQuantityString
+import me.proxer.app.util.extension.notifyIfPermitted
 import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toInstantBP
-import me.proxer.app.util.wrapper.MaterialDrawerWrapper.DrawerItem
 import me.proxer.library.entity.notifications.NewsArticle
 
 /**
@@ -29,7 +30,7 @@ object NewsNotifications {
     fun showOrUpdate(context: Context, news: Collection<NewsArticle>) {
         when (val notification = buildNewsNotification(context, news)) {
             null -> NotificationManagerCompat.from(context).cancel(ID)
-            else -> NotificationManagerCompat.from(context).notify(ID, notification)
+            else -> context.notifyIfPermitted(ID, notification)
         }
     }
 
@@ -57,7 +58,7 @@ object NewsNotifications {
                     context,
                     ID,
                     TopicActivity.getIntent(context, current.threadId, current.categoryId, current.subject),
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 style = NotificationCompat.BigTextStyle(builder)
@@ -71,8 +72,8 @@ object NewsNotifications {
                 intent = PendingIntent.getActivity(
                     context,
                     ID,
-                    MainActivity.getSectionIntent(context, DrawerItem.NEWS),
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    MainActivity.getSectionIntent(context, MainSection.NEWS),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 style = NotificationCompat.InboxStyle().also {

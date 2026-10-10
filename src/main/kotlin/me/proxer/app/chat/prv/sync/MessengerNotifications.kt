@@ -8,6 +8,7 @@ import android.graphics.Typeface
 import android.os.Build
 import android.text.SpannableString
 import android.text.style.StyleSpan
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
@@ -15,12 +16,10 @@ import androidx.core.app.RemoteInput
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.text.set
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorRes
-import com.mikepenz.iconics.utils.sizeDp
 import me.proxer.app.MainActivity
+import me.proxer.app.MainSection
 import me.proxer.app.R
 import me.proxer.app.auth.LocalUser
 import me.proxer.app.chat.prv.LocalConference
@@ -31,8 +30,8 @@ import me.proxer.app.util.Utils
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.LocalConferenceMap
 import me.proxer.app.util.extension.getQuantityString
+import me.proxer.app.util.extension.notifyIfPermitted
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.wrapper.MaterialDrawerWrapper.DrawerItem
 import me.proxer.library.enums.Device
 import me.proxer.library.util.ProxerUrls
 
@@ -43,6 +42,7 @@ object MessengerNotifications {
 
     private const val GROUP = "chat"
     private const val ID = 782_373_275
+    private const val GENERIC_ICON_SIZE_DP = 96
 
     private val storageHelper by safeInject<StorageHelper>()
 
@@ -62,7 +62,7 @@ object MessengerNotifications {
         notifications.forEach { (id, notification) ->
             when (notification) {
                 null -> NotificationManagerCompat.from(context).cancel(id)
-                else -> NotificationManagerCompat.from(context).notify(id, notification)
+                else -> context.notifyIfPermitted(id, notification)
             }
         }
     }
@@ -101,8 +101,8 @@ object MessengerNotifications {
             .setStyle(style)
             .setContentIntent(
                 TaskStackBuilder.create(context)
-                    .addNextIntent(MainActivity.getSectionIntent(context, DrawerItem.MESSENGER))
-                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+                    .addNextIntent(MainActivity.getSectionIntent(context, MainSection.MESSENGER))
+                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             )
             .setDefaults(Notification.DEFAULT_ALL)
             .setColor(ContextCompat.getColor(context, R.color.primary))
@@ -160,9 +160,9 @@ object MessengerNotifications {
         val conferenceIcon = buildConferenceIcon(context, conference)
         val style = buildIndividualStyle(context, messages, conference, user, conferenceIcon)
         val intent = TaskStackBuilder.create(context)
-            .addNextIntent(MainActivity.getSectionIntent(context, DrawerItem.MESSENGER))
+            .addNextIntent(MainActivity.getSectionIntent(context, MainSection.MESSENGER))
             .addNextIntent(PrvMessengerActivity.getIntent(context, conference))
-            .getPendingIntent(conference.id.toInt(), PendingIntent.FLAG_UPDATE_CURRENT)
+            .getPendingIntent(conference.id.toInt(), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         return NotificationCompat.Builder(context, CHAT_CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_proxer)
@@ -250,15 +250,19 @@ object MessengerNotifications {
             }
     }
 
-    private fun buildGenericIcon(context: Context, isGroup: Boolean) = IconicsDrawable(context).apply {
-        icon = when (isGroup) {
-            true -> CommunityMaterial.Icon.cmd_account_multiple
-            false -> CommunityMaterial.Icon.cmd_account
-        }
+    private fun buildGenericIcon(context: Context, isGroup: Boolean): Bitmap {
+        val size = (GENERIC_ICON_SIZE_DP * context.resources.displayMetrics.density).toInt()
+        val icon = requireNotNull(
+            AppCompatResources.getDrawable(
+                context,
+                if (isGroup) R.drawable.ic_symbol_group else R.drawable.ic_symbol_person
+            )
+        )
 
-        colorRes = R.color.primary
-        sizeDp = 96
-    }.toBitmap()
+        return icon.mutate()
+            .apply { setTint(ContextCompat.getColor(context, R.color.primary)) }
+            .toBitmap(size, size)
+    }
 
     private fun Bitmap.toIconCompat() = IconCompat.createWithBitmap(this)
 }

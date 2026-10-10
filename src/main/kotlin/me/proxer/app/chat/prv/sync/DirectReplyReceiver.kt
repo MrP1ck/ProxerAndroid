@@ -8,6 +8,7 @@ import androidx.core.app.RemoteInput
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import me.proxer.app.util.data.StorageHelper
+import me.proxer.app.util.extension.PENDING_INTENT_FLAG_MUTABLE
 import me.proxer.app.util.extension.getSafeCharSequence
 import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.subscribeAndLogErrors
@@ -27,7 +28,12 @@ class DirectReplyReceiver : BroadcastReceiver() {
                 .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
                 .apply { putExtra(CONFERENCE_ID_EXTRA, conferenceId) }
 
-            return PendingIntent.getBroadcast(context, conferenceId.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            return PendingIntent.getBroadcast(
+                context,
+                conferenceId.toInt(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PENDING_INTENT_FLAG_MUTABLE
+            )
         }
     }
 
@@ -57,7 +63,7 @@ class DirectReplyReceiver : BroadcastReceiver() {
             .subscribeAndLogErrors()
     }
 
-    private fun getMessageText(intent: Intent) = RemoteInput.getResultsFromIntent(intent)
+    private fun getMessageText(intent: Intent) = requireNotNull(RemoteInput.getResultsFromIntent(intent))
         .getSafeCharSequence(REMOTE_REPLY_EXTRA)
         .toString()
 }

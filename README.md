@@ -11,6 +11,12 @@ This fork contains fixes on top of the last official release (1.11.5):
 - The manga reader shows WebP pages, which are used by many newer webtoon uploads. Previously these pages stayed
   blank forever ([#1](https://github.com/MrP1ck/ProxerAndroid/pull/1)).
 - The project builds again after the shutdown of jcenter.
+- The UI is rewritten with Jetpack Compose and Material 3: Material You colors (with the previous color schemes as
+  presets and a pure black option), a bottom navigation bar on phones and a navigation rail on tablets, edge-to-edge
+  screens, Glance widgets and a themed launcher icon. The stream player uses Media3 and supports
+  picture-in-picture.
+- The toolchain is current: Gradle 8, the Android Gradle Plugin 8, Kotlin 2 and KSP. Android 6.0 or newer is
+  required.
 
 The downloads below are the official releases and do not include these fixes. To use them, build the app yourself.
 
@@ -30,7 +36,7 @@ It features major functionalities including an anime player for various hosters 
 After having installed the following tools: 
 
 - [Git](https://git-scm.com/download)
-- [JDK 11](https://adoptium.net/temurin/releases/?version=11) (the Gradle version used does not run on newer JDKs)
+- [JDK 17](https://adoptium.net/temurin/releases/?version=17)
 - [Android SDK](https://developer.android.com/studio/#downloads)
 
 You can run these commands:
@@ -90,27 +96,22 @@ If you want to build the app for testing purposes in the `debug` variant, run:
 gradlew.bat assembleDebug
 ```
 
-Some dependencies were only published on jcenter, which is shut down. Most of them are replaced with artifacts from
-Maven Central (see `gradle/dependencies.gradle`). ExoPlayer 2.11.8 is not available anywhere else, so it is downloaded
-from the [Aliyun jcenter mirror](https://maven.aliyun.com/repository/jcenter) (see `gradle/repositories.gradle`).
+The dependencies are declared in the version catalog `gradle/libs.versions.toml` and come from Google's Maven
+repository, Maven Central and JitPack (see `settings.gradle`).
 
 ### Screenshots
 
-| News                         | Anime List                         | Manga Reader                         |
+| News                         | Anime List                         | Media Detail                         |
 |------------------------------|------------------------------------|--------------------------------------|
-| ![](art/screenshot/news.png) | ![](art/screenshot/anime-list.png) | ![](art/screenshot/manga-reader.png) |
+| ![](art/screenshot/news.png) | ![](art/screenshot/anime-list.png) | ![](art/screenshot/media-detail.png) |
 
-| Media Detail                         | Instant Chat                            | Public Chat                         |
-|--------------------------------------|-----------------------------------------|-------------------------------------|
-| ![](art/screenshot/media-detail.png) | ![](art/screenshot/conference-list.png) | ![](art/screenshot/public-chat.png) |
+| Anime Schedule                   | Anime Stream List                     | Manga Reader                         |
+|----------------------------------|---------------------------------------|--------------------------------------|
+| ![](art/screenshot/schedule.png) | ![](art/screenshot/anime-streams.png) | ![](art/screenshot/manga-reader.png) |
 
-| Anime Stream List                     | Anime Player                       |
-|---------------------------------------|------------------------------------|
-| ![](art/screenshot/anime-streams.png) | ![](art/screenshot/anime-play.png) |
-
-| Profile Overview                | Profile Top Ten                    | Profile Media List               |
-|---------------------------------|------------------------------------|----------------------------------|
-| ![](art/screenshot/profile.png) | ![](art/screenshot/ucp-topten.png) | ![](art/screenshot/ucp-list.png) |
+| Anime Player                       | Design Settings                           |
+|------------------------------------|-------------------------------------------|
+| ![](art/screenshot/anime-play.png) | ![](art/screenshot/settings-design.png) |
 
 ### Contributions and contributors
 

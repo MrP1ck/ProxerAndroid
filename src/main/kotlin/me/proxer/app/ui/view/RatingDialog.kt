@@ -1,51 +1,65 @@
 package me.proxer.app.ui.view
 
-import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.afollestad.materialdialogs.MaterialDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import me.proxer.app.BuildConfig.APPLICATION_ID
 import me.proxer.app.R
-import me.proxer.app.base.BaseDialog
+import me.proxer.app.base.ComposeDialog
+import me.proxer.app.ui.components.DialogButton
+import me.proxer.app.ui.components.ProxerDialogContent
 
 /**
+ * Asks the user to rate the app in the Play Store.
+ *
  * @author Ruben Gees
  */
-class RatingDialog : BaseDialog() {
+class RatingDialog : ComposeDialog() {
 
     companion object {
         fun show(activity: AppCompatActivity) = RatingDialog()
             .show(activity.supportFragmentManager, "rating_dialog")
     }
 
-    @Suppress("DEPRECATION")
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = MaterialDialog(requireContext())
-        .title(R.string.dialog_rating_title)
-        .message(R.string.dialog_rating_content)
-        .positiveButton(R.string.dialog_rating_positive) {
-            preferenceHelper.hasRated = true
+    @Composable
+    override fun DialogContent() {
+        ProxerDialogContent(
+            title = stringResource(R.string.dialog_rating_title),
+            icon = { Icon(painterResource(R.drawable.ic_symbol_star), contentDescription = null) },
+            confirmButton = {
+                DialogButton(R.string.dialog_rating_positive, onClick = {
+                    preferenceHelper.hasRated = true
 
-            try {
-                requireContext().startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("market://details?id=$APPLICATION_ID")
-                    )
-                )
-            } catch (error: ActivityNotFoundException) {
-                requireContext().startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("https://play.google.com/store/apps/details?id=$APPLICATION_ID")
-                    )
-                )
-            }
+                    openStore()
+                    dismiss()
+                })
+            },
+            dismissButton = {
+                DialogButton(R.string.dialog_rating_negative, onClick = {
+                    preferenceHelper.hasRated = true
+
+                    dismiss()
+                })
+            },
+            neutralButton = { DialogButton(R.string.dialog_rating_neutral, onClick = ::dismiss) }
+        ) {
+            Text(stringResource(R.string.dialog_rating_content).trim())
         }
-        .neutralButton(R.string.dialog_rating_neutral)
-        .negativeButton(R.string.dialog_rating_negative) {
-            preferenceHelper.hasRated = true
+    }
+
+    private fun openStore() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=$APPLICATION_ID".toUri()))
+        } catch (ignored: ActivityNotFoundException) {
+            startActivity(
+                Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$APPLICATION_ID".toUri())
+            )
         }
+    }
 }
