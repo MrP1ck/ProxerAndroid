@@ -2,6 +2,11 @@ name: CI
 
 on: [push, pull_request]
 
+# A new push cancels the runs of older commits on the same branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
