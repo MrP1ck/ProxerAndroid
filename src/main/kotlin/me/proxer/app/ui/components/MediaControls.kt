@@ -42,7 +42,7 @@ data class MediaControlInfo(val label: String, val value: String, val onClick: (
 
 /**
  * The controls to switch to the previous or next episode (or chapter) and to bookmark it. When the [current] one is the
- * last one, the entry can be marked as finished instead of bookmarking the next one. Replaces the MediaControlView.
+ * last one, the entry can be marked as finished instead of bookmarking the next one.
  */
 @Composable
 fun MediaControls(

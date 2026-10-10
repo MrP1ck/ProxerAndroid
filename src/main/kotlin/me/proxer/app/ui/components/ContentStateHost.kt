@@ -38,7 +38,7 @@ import me.proxer.app.util.ErrorUtils.ErrorAction.Companion.ACTION_MESSAGE_DEFAUL
 import me.proxer.app.util.ErrorUtils.ErrorAction.Companion.ACTION_MESSAGE_HIDE
 
 /**
- * Shows the loading indicator, the error or the [content] of a [ContentState]. Replaces BaseContentFragment.
+ * Shows the loading indicator, the error or the [content] of a [ContentState].
  *
  * [isEmpty] decides if the data is considered empty, in which case [emptyMessage] is shown instead of [content].
  */

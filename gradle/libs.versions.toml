@@ -79,7 +79,8 @@ subsamplingPdfDecoder = "ad07ddf671"
 materialDialogs = "3.3.0"
 flexbox = "3.0.0"
 emojiIos = "9058c30868"
-exoplayer = "2.11.8"
+media3 = "1.10.1"
+desugarJdkLibs = "2.1.5"
 previewSeekbar = "09eec85551"
 materialProgressBar = "1.6.1"
 materialRatingBar = "1.4.0"
@@ -208,10 +209,15 @@ customtabshelper = { module = "me.zhanghai.android.customtabshelper:library", ve
 introduction = { module = "com.github.rubengees:introduction", version.ref = "introduction" }
 aspect-ratio-imageview = { module = "com.github.santalu:aspect-ratio-imageview", version.ref = "aspectRatioImageView" }
 gravitysnaphelper = { module = "com.github.rubensousa:gravitysnaphelper", version.ref = "gravitySnapHelper" }
-exoplayer = { module = "com.google.android.exoplayer:exoplayer", version.ref = "exoplayer" }
-exoplayer-cast = { module = "com.google.android.exoplayer:extension-cast", version.ref = "exoplayer" }
-exoplayer-okhttp = { module = "com.google.android.exoplayer:extension-okhttp", version.ref = "exoplayer" }
-exoplayer-ima = { module = "com.google.android.exoplayer:extension-ima", version.ref = "exoplayer" }
+desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
+media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+media3-exoplayer-hls = { module = "androidx.media3:media3-exoplayer-hls", version.ref = "media3" }
+media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "media3" }
+media3-exoplayer-smoothstreaming = { module = "androidx.media3:media3-exoplayer-smoothstreaming", version.ref = "media3" }
+media3-exoplayer-ima = { module = "androidx.media3:media3-exoplayer-ima", version.ref = "media3" }
+media3-datasource-okhttp = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "media3" }
+media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
+media3-cast = { module = "androidx.media3:media3-cast", version.ref = "media3" }
 previewseekbar = { module = "com.github.rubengees.PreviewSeekBar:previewseekbar", version.ref = "previewSeekbar" }
 previewseekbar-exoplayer = { module = "com.github.rubengees.PreviewSeekBar:previewseekbar-exoplayer", version.ref = "previewSeekbar" }
 

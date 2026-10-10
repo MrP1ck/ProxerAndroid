@@ -10,10 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-import com.github.rubensousa.previewseekbar.exoplayer.PreviewTimeBar
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import io.reactivex.Observable
-import me.proxer.app.util.rx.PreviewTimeBarRequestObservable
 import me.proxer.app.util.rx.SubsamplingScaleImageViewEventObservable
 import me.proxer.app.util.rx.TextViewLinkClickObservable
 import me.proxer.app.util.rx.TextViewLinkLongClickObservable
@@ -39,10 +37,6 @@ inline fun SubsamplingScaleImageView.events(): Observable<SubsamplingScaleImageV
     return SubsamplingScaleImageViewEventObservable(this)
 }
 
-@CheckResult
-inline fun PreviewTimeBar.loadRequests(): Observable<Long> {
-    return PreviewTimeBarRequestObservable(this)
-}
 
 @CheckResult
 inline fun RecyclerView.endScrolls(threshold: Int = 5): Observable<Unit> = scrollEvents()

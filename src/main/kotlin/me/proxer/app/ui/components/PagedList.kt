@@ -47,7 +47,7 @@ private const val DEFAULT_PAGING_THRESHOLD = 5
 
 /**
  * A list for [ContentState]s of paged data, with pull to refresh, loading more items when the end is reached and
- * errors at the end of the list. Replaces PagedContentFragment.
+ * errors at the end of the list.
  */
 @Composable
 fun <T> PagedList(
@@ -247,7 +247,7 @@ private fun PagedFooter(state: ContentState<*>, onErrorAction: (ErrorAction) -> 
 }
 
 /**
- * Shows a snackbar when refreshing failed while data is shown, like PagedContentFragment did.
+ * Shows a snackbar when refreshing failed while data is shown.
  */
 @Composable
 private fun RefreshErrorSnackbar(refreshError: ErrorAction?, onErrorAction: (ErrorAction) -> Unit) {

@@ -238,7 +238,8 @@
         <activity
             android:name=".anime.stream.StreamActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask"
+            android:supportsPictureInPicture="true" />
 
         <activity
             android:name=".manga.MangaActivity"

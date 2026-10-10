@@ -4,9 +4,11 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.view.View
-import com.google.android.exoplayer2.ExoPlaybackException
-import com.google.android.exoplayer2.upstream.HttpDataSource
-import com.google.android.exoplayer2.upstream.Loader
+import androidx.media3.common.PlaybackException
+import androidx.media3.datasource.HttpDataSource
+import java.io.IOException
+import java.net.SocketTimeoutException
+import javax.net.ssl.SSLPeerUnverifiedException
 import me.proxer.app.R
 import me.proxer.app.auth.LoginDialog
 import me.proxer.app.base.BaseActivity
@@ -134,9 +136,6 @@ import me.proxer.library.ProxerException.ServerErrorType.WIKI_INVALID_TITLE
 import me.proxer.library.enums.Device
 import me.proxer.library.util.ProxerUrls
 import okhttp3.HttpUrl
-import java.io.IOException
-import java.net.SocketTimeoutException
-import javax.net.ssl.SSLPeerUnverifiedException
 
 /**
  * @author Ruben Gees
@@ -316,8 +315,7 @@ object ErrorUtils {
         }
         is PartialException -> error.innerError
         is ChatException -> error.innerError
-        is ExoPlaybackException -> error.cause?.let { getInnermostError(it) } ?: error
-        is Loader.UnexpectedLoaderException -> error.cause?.let { getInnermostError(it) } ?: error
+        is PlaybackException -> error.cause?.let { getInnermostError(it) } ?: error
         else -> error
     }
 
@@ -331,28 +329,6 @@ object ErrorUtils {
         companion object {
             const val ACTION_MESSAGE_DEFAULT = -1
             const val ACTION_MESSAGE_HIDE = -2
-        }
-
-        fun toClickListener(activity: BaseActivity) = when (buttonAction) {
-            CAPTCHA -> View.OnClickListener {
-                activity.showPage(ProxerUrls.captchaWeb(Utils.getIpAddress(), Device.MOBILE), skipCheck = true)
-            }
-            NETWORK_SETTINGS -> View.OnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    activity.startActivity(Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY))
-                } else {
-                    activity.startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
-                }
-            }
-            LOGIN -> View.OnClickListener { LoginDialog.show(activity) }
-            AGE_CONFIRMATION -> View.OnClickListener { AgeConfirmationDialog.show(activity) }
-            OPEN_LINK -> data[LINK_DATA_KEY].let { link ->
-                when (link) {
-                    is HttpUrl -> View.OnClickListener { activity.showPage(link, skipCheck = true) }
-                    else -> null
-                }
-            }
-            else -> null
         }
 
         fun toIntent() = when (buttonAction) {

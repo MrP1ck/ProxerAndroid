@@ -48,8 +48,6 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
     protected open val themeOverlay: Int?
         @StyleRes get() = null
 
-    protected open val root: ViewGroup by bindView(R.id.root)
-
     protected val bus by safeInject<RxBus>()
     protected val storageHelper by safeInject<StorageHelper>()
     protected val preferenceHelper by safeInject<PreferenceHelper>()
@@ -85,28 +83,11 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
         ActivityCompat.recreate(this)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> onBackPressed()
-        }
-
-        return super.onOptionsItemSelected(item)
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
         intent.extras?.let { state ->
             outState.putBundle(STATE, state)
-        }
-    }
-
-    override fun onBackPressed() {
-        // Workaround for memory leak on Android 10: https://twitter.com/Piwai/status/1169274624749658112
-        if (isTaskRoot && supportFragmentManager.backStackEntryCount == 0) {
-            finishAfterTransition()
-        } else {
-            super.onBackPressed()
         }
     }
 
@@ -118,31 +99,4 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
         customTabsHelper.fallbackHandleLink(this, url, forceBrowser, skipCheck)
     }
 
-    fun snackbar(
-        message: CharSequence,
-        duration: Int = Snackbar.LENGTH_LONG,
-        actionMessage: Int = ErrorUtils.ErrorAction.ACTION_MESSAGE_DEFAULT,
-        actionCallback: View.OnClickListener? = null,
-        maxLines: Int = -1
-    ) {
-        Snackbar.make(root, message, duration).apply {
-            when (actionMessage) {
-                ErrorUtils.ErrorAction.ACTION_MESSAGE_DEFAULT -> {
-                    val multilineActionMessage = getString(R.string.error_action_retry).replace(" ", "\n")
-
-                    setAction(multilineActionMessage, actionCallback)
-                }
-                ErrorUtils.ErrorAction.ACTION_MESSAGE_HIDE -> setAction(null, null)
-                else -> setAction(actionMessage, actionCallback)
-            }
-
-            if (maxLines >= 0) {
-                (view as ViewGroup).recursiveChildren
-                    .filterIsInstance(TextView::class.java)
-                    .forEach { it.maxLines = maxLines }
-            }
-
-            show()
-        }
-    }
 }
