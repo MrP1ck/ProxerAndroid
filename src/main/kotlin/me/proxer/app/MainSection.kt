@@ -11,6 +11,7 @@ enum class MainSection(val id: Long) {
     ANIME(3L),
     SCHEDULE(4L),
     MANGA(5L),
+    NOVEL(6L),
     INFO(10L),
     SETTINGS(11L);
 

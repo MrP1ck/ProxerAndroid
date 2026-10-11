@@ -245,6 +245,7 @@ class MainActivity : BaseActivity() {
                 "anime" -> MainSection.ANIME
                 "calendar" -> MainSection.SCHEDULE
                 "manga" -> MainSection.MANGA
+                "novel" -> MainSection.NOVEL
                 else -> null
             }
 
@@ -273,6 +274,12 @@ class MainActivity : BaseActivity() {
             "oneshot" -> "ONESHOT"
             "doujin" -> "DOUJIN"
             "hmanga" -> "HMANGA"
+            else -> null
+        }
+        MainSection.NOVEL -> when (segment) {
+            "lightnovel" -> "LIGHTNOVEL"
+            "webnovel" -> "WEBNOVEL"
+            "visualnovel" -> "VISUALNOVEL"
             else -> null
         }
         else -> null

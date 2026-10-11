@@ -144,7 +144,9 @@ fun ProxerApp(
                     composable<MangaRoute> {
                         val route = it.toRoute<MangaRoute>()
 
-                        MediaListScreen(Category.MANGA, route.type, route.sort)
+                        var category by rememberSaveable { mutableStateOf(Category.valueOf(route.category)) }
+
+                        MediaListScreen(category, route.type, route.sort, onCategoryChange = { category = it })
                     }
                 }
 
@@ -169,7 +171,7 @@ private fun MainSection.toTopLevelDestination() = when (this) {
     MainSection.MESSENGER -> TopLevelDestination.MESSENGER
     MainSection.BOOKMARKS -> TopLevelDestination.BOOKMARKS
     MainSection.ANIME, MainSection.SCHEDULE -> TopLevelDestination.ANIME
-    MainSection.MANGA -> TopLevelDestination.MANGA
+    MainSection.MANGA, MainSection.NOVEL -> TopLevelDestination.MANGA
 }
 
 /**
@@ -197,6 +199,12 @@ private fun NavController.showSection(request: SectionRequest, navigator: AppNav
                 navigate(AnimeRoute(request.type, request.sort)) { popUpTo<AnimeRoute> { inclusive = true } }
             }
             false -> navigateToTopLevel(AnimeGraph)
+        }
+        MainSection.NOVEL -> {
+            navigateToTopLevel(MangaGraph)
+            navigate(MangaRoute(request.type, request.sort, Category.NOVEL.name)) {
+                popUpTo<MangaRoute> { inclusive = true }
+            }
         }
         MainSection.MANGA -> when (request.type != null || request.sort != null) {
             true -> {

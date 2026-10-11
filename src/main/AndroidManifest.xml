@@ -148,6 +148,26 @@
                     android:host="proxer.me"
                     android:pathPattern="/manga/.*"
                     android:scheme="https" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/novel"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/novel"
+                    android:scheme="https" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/novel/.*"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/novel/.*"
+                    android:scheme="https" />
             </intent-filter>
 
             <meta-data

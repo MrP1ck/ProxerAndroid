@@ -61,6 +61,23 @@ class TopLevelScreensScreenshotTest(private val isDark: Boolean) {
     }
 
     @Test
+    fun novelList() = composeRule.captureScreen("screens", "novel_list", isDark) {
+        MediaListContent(
+            category = Category.NOVEL,
+            state = ContentState(PreviewData.mediaListEntries),
+            filter = MediaListFilter(MediaType.ALL_NOVEL),
+            onTypeChange = {},
+            onFilterClick = {},
+            onLoadMore = {},
+            onRefresh = {},
+            onErrorAction = {},
+            onEntryClick = {},
+            contentPadding = noPadding,
+            onCategoryChange = {}
+        )
+    }
+
+    @Test
     fun bookmarks() = composeRule.captureScreen("screens", "bookmarks", isDark) {
         BookmarkContent(
             ContentState(PreviewData.bookmarks), null, false, false, {}, {}, {}, {}, {}, {}, {}, {}, noPadding

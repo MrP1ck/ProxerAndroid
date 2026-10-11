@@ -7,6 +7,7 @@
     <string name="section_schedule">Anime-Wochenplan</string>
     <string name="section_messenger">Messenger</string>
     <string name="section_manga">Manga</string>
+    <string name="section_novel">Novel</string>
     <string name="section_news">News</string>
     <string name="section_bookmarks">Lesezeichen</string>
     <string name="section_guest">Gast</string>
