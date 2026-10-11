@@ -7,7 +7,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
@@ -73,29 +72,6 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
-        }
-    }
-
-    sourceSets {
-        getByName("main") {
-            java.srcDir("src/main/kotlin")
-        }
-
-        getByName("debug") {
-            java.srcDir("src/debug/kotlin")
-        }
-
-        getByName("release") {
-            java.srcDir("src/release/kotlin")
-        }
-
-        getByName("test") {
-            java.srcDir("src/test/kotlin")
-        }
-
-        maybeCreate("logRelease").apply {
-            java.setSrcDirs(listOf("src/release/java", "src/release/kotlin"))
-            res.setSrcDirs(listOf("src/release/res"))
         }
     }
 
@@ -208,6 +184,12 @@ androidComponents {
     }
 
     onVariants { variant ->
+        if (variant.buildType == "logRelease") {
+            // logRelease is release with logging, so it uses the sources and resources of release.
+            variant.sources.java?.addStaticSourceDirectory("src/release/kotlin")
+            variant.sources.res?.addStaticSourceDirectory("src/release/res")
+        }
+
         val suffix = if (variant.buildType == "release") "-release" else ""
 
         variant.outputs.forEach { output ->
