@@ -5,21 +5,20 @@ import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.os.bundleOf
-import com.rubengees.rxbus.RxBus
-import com.uber.autodispose.android.lifecycle.scope
-import com.uber.autodispose.autoDisposable
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.settings.theme.ThemeContainer
 import me.proxer.app.settings.theme.applyThemeContainer
+import me.proxer.app.util.CustomTabsConnection
 import me.proxer.app.util.compat.TaskDescriptionCompat
+import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.androidUri
 import me.proxer.app.util.extension.fallbackHandleLink
-import me.proxer.app.util.extension.safeInject
-import me.zhanghai.android.customtabshelper.CustomTabsHelperFragment
 import okhttp3.HttpUrl
-import kotlin.properties.Delegates
+import org.koin.android.ext.android.inject
 
 /**
  * @author Ruben Gees
@@ -40,11 +39,11 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
     protected open val themeOverlay: Int?
         @StyleRes get() = null
 
-    protected val bus by safeInject<RxBus>()
-    protected val storageHelper by safeInject<StorageHelper>()
-    protected val preferenceHelper by safeInject<PreferenceHelper>()
+    protected val bus by inject<EventBus>()
+    protected val storageHelper by inject<StorageHelper>()
+    protected val preferenceHelper by inject<PreferenceHelper>()
 
-    private var customTabsHelper by Delegates.notNull<CustomTabsHelperFragment>()
+    private val customTabsConnection by lazy { CustomTabsConnection(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // This needs to be called before super.onCreate(), because otherwise Fragments might not see the
@@ -60,11 +59,11 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
 
         super.onCreate(savedInstanceState)
 
-        customTabsHelper = CustomTabsHelperFragment.attachTo(this)
+        lifecycle.addObserver(customTabsConnection)
 
-        preferenceHelper.themeObservable
-            .autoDisposable(this.scope())
-            .subscribe { onThemeChanged(it) }
+        lifecycleScope.launch {
+            preferenceHelper.themeChanges.collect { onThemeChanged(it) }
+        }
     }
 
     /**
@@ -84,10 +83,10 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
     }
 
     override fun setLikelyUrl(url: HttpUrl): Boolean {
-        return customTabsHelper.mayLaunchUrl(url.androidUri(), bundleOf(), emptyList())
+        return customTabsConnection.mayLaunchUrl(url.androidUri(), bundleOf(), emptyList())
     }
 
     override fun showPage(url: HttpUrl, forceBrowser: Boolean, skipCheck: Boolean) {
-        customTabsHelper.fallbackHandleLink(this, url, forceBrowser, skipCheck)
+        customTabsConnection.fallbackHandleLink(this, url, forceBrowser, skipCheck)
     }
 }

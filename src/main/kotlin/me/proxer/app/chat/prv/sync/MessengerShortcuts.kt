@@ -16,20 +16,21 @@ import me.proxer.app.R
 import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.chat.prv.PrvMessengerActivity
 import me.proxer.app.util.Utils
-import me.proxer.app.util.extension.safeInject
 import me.proxer.library.util.ProxerUrls
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.math.min
 
 /**
  * @author Ruben Gees
  */
-object MessengerShortcuts {
+object MessengerShortcuts : KoinComponent {
 
     private const val SHARE_TARGET_CATEGORY = "me.proxer.app.sharingshortcuts.category.TEXT_SHARE_TARGET"
 
-    private val messengerDao by safeInject<MessengerDao>()
+    private val messengerDao by inject<MessengerDao>()
 
-    fun updateShareTargets(context: Context) {
+    suspend fun updateShareTargets(context: Context) {
         val componentName = ComponentName(context, MainActivity::class.java)
 
         val shortcutsLeft = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {

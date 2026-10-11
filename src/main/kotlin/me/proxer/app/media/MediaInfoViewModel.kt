@@ -1,87 +1,84 @@
 package me.proxer.app.media
 
-import androidx.lifecycle.MutableLiveData
-import com.gojuno.koptional.Some
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.exception.AgeConfirmationRequiredException
 import me.proxer.app.exception.NotLoggedInException
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.data.send
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.isTrulyAgeRestricted
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.library.entity.info.Entry
 import me.proxer.library.entity.info.MediaUserInfo
 
 /**
  * @author Ruben Gees
  */
-class MediaInfoViewModel(private val entryId: String) : BaseViewModel<Entry>() {
+class MediaInfoViewModel(
+    dependencies: ViewModelDependencies,
+    private val entryId: String
+) : BaseViewModel<Entry>(dependencies) {
 
-    override val dataSingle: Single<Entry>
-        get() = Single.fromCallable { validate() }
-            .flatMap { api.info.entry(entryId).buildSingle() }
-            .doOnSuccess {
-                if (it.isTrulyAgeRestricted) {
-                    if (!storageHelper.isLoggedIn) {
-                        throw NotLoggedInException()
-                    } else if (!preferenceHelper.isAgeRestrictedMediaAllowed) {
-                        throw AgeConfirmationRequiredException()
-                    }
-                }
+    override suspend fun loadData(): Entry {
+        validate()
+
+        val entry = api.info.entry(entryId).await()
+
+        if (entry.isTrulyAgeRestricted) {
+            if (!storageHelper.isLoggedIn) {
+                throw NotLoggedInException()
+            } else if (!preferenceHelper.isAgeRestrictedMediaAllowed) {
+                throw AgeConfirmationRequiredException()
             }
-            .doAfterSuccess {
-                if (storageHelper.isLoggedIn) {
-                    userInfoDisposable = api.info.userInfo(entryId)
-                        .buildSingle()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeAndLogErrors { userInfoData.value = it }
-                }
+        }
+
+        if (storageHelper.isLoggedIn) {
+            userInfoJob = viewModelScope.launch {
+                catchingErrors { api.info.userInfo(entryId).await() }
+                    .onSuccess { userInfoData.value = it }
             }
+        }
 
-    val userInfoData = MutableLiveData<MediaUserInfo?>()
+        return entry
+    }
 
-    val userInfoUpdateData = ResettingMutableLiveData<Unit?>()
-    val userInfoUpdateError = ResettingMutableLiveData<ErrorAction?>()
+    val userInfoData = MutableStateFlow<MediaUserInfo?>(null)
 
-    private var userInfoDisposable: Disposable? = null
-    private var userInfoUpdateDisposable: Disposable? = null
+    val userInfoUpdateData = Events<Unit>()
+    val userInfoUpdateError = Events<ErrorAction>()
+
+    private var userInfoJob: Job? = null
+    private var userInfoUpdateJob: Job? = null
 
     init {
-        disposables += storageHelper.isLoggedInObservable
-            .subscribe {
+        viewModelScope.launch {
+            storageHelper.isLoggedInChanges.collect {
                 if (it && error.value?.buttonAction == ButtonAction.LOGIN) {
                     reload()
                 }
             }
+        }
 
-        disposables += preferenceHelper.isAgeRestrictedMediaAllowedObservable
-            .subscribe {
+        viewModelScope.launch {
+            preferenceHelper.isAgeRestrictedMediaAllowedChanges.collect {
                 if (error.value?.buttonAction == ButtonAction.AGE_CONFIRMATION) {
                     reload()
                 }
             }
-    }
-
-    override fun onCleared() {
-        userInfoDisposable?.dispose()
-        userInfoUpdateDisposable?.dispose()
-
-        userInfoDisposable = null
-        userInfoUpdateDisposable = null
-
-        super.onCleared()
+        }
     }
 
     fun note() = updateUserInfo(UserInfoUpdateType.NOTE)
+
     fun markAsFinished() = updateUserInfo(UserInfoUpdateType.FINISHED)
 
     fun toggleFavorite() {
@@ -101,43 +98,37 @@ class MediaInfoViewModel(private val entryId: String) : BaseViewModel<Entry>() {
     }
 
     private fun updateUserInfo(updateType: UserInfoUpdateType) {
-        val endpoint = when (updateType) {
-            UserInfoUpdateType.NOTE -> api.info.note(entryId).buildSingle()
-            UserInfoUpdateType.FAVORITE -> api.info.markAsFavorite(entryId).buildSingle()
-            UserInfoUpdateType.FINISHED -> api.info.markAsFinished(entryId).buildSingle()
-            UserInfoUpdateType.SUBSCRIBE -> api.info.subscribe(entryId).buildSingle()
-            UserInfoUpdateType.UNSUBSCRIBE -> api.ucp.deleteSubscription(entryId).buildSingle()
-            UserInfoUpdateType.UNFAVORITE -> api.ucp.topTen().buildSingle().flatMap { topTenEntries ->
-                val topTenId = topTenEntries.find { topTenEntry -> topTenEntry.entryId == entryId }?.id
+        userInfoJob?.cancel()
+        userInfoUpdateJob?.cancel()
+        userInfoUpdateJob = viewModelScope.launch {
+            catchingErrors {
+                validators.validateLogin()
+
+                sendUpdate(updateType)
+            }
+                .onSuccess {
+                    userInfoUpdateData.send()
+                    userInfoData.value?.also { userInfoData.value = applyMediaUserInfoChanges(it, updateType) }
+                }
+                .onFailure { userInfoUpdateError.send(ErrorUtils.handle(it)) }
+        }
+    }
+
+    private suspend fun sendUpdate(updateType: UserInfoUpdateType) {
+        when (updateType) {
+            UserInfoUpdateType.NOTE -> api.info.note(entryId).awaitNullable()
+            UserInfoUpdateType.FAVORITE -> api.info.markAsFavorite(entryId).awaitNullable()
+            UserInfoUpdateType.FINISHED -> api.info.markAsFinished(entryId).awaitNullable()
+            UserInfoUpdateType.SUBSCRIBE -> api.info.subscribe(entryId).awaitNullable()
+            UserInfoUpdateType.UNSUBSCRIBE -> api.ucp.deleteSubscription(entryId).awaitNullable()
+            UserInfoUpdateType.UNFAVORITE -> {
+                val topTenId = api.ucp.topTen().await().find { topTenEntry -> topTenEntry.entryId == entryId }?.id
 
                 if (topTenId != null) {
-                    api.ucp.deleteFavorite(topTenId).buildSingle()
-                } else {
-                    Single.just(Some(Unit))
+                    api.ucp.deleteFavorite(topTenId).awaitNullable()
                 }
             }
         }
-
-        userInfoDisposable?.dispose()
-        userInfoUpdateDisposable?.dispose()
-        userInfoUpdateDisposable = Single.fromCallable { validators.validateLogin() }
-            .flatMap { endpoint }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeAndLogErrors(
-                {
-                    userInfoUpdateError.value = null
-                    userInfoUpdateData.value = Unit
-
-                    userInfoData.value?.also {
-                        userInfoData.value = applyMediaUserInfoChanges(it, updateType)
-                    }
-                },
-                {
-                    userInfoUpdateData.value = null
-                    userInfoUpdateError.value = ErrorUtils.handle(it)
-                }
-            )
     }
 
     private fun applyMediaUserInfoChanges(data: MediaUserInfo, updateType: UserInfoUpdateType) = data.let {

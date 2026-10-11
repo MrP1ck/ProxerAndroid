@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.proxer.app.R
 import me.proxer.app.base.ComposeDialog
 import me.proxer.app.ui.components.DialogButton
@@ -58,8 +58,8 @@ class LinkCheckDialog : ComposeDialog() {
 
     @Composable
     override fun DialogContent() {
-        val isSecure by viewModel.data.observeAsState()
-        val isLoading by viewModel.isLoading.observeAsState()
+        val isSecure by viewModel.data.collectAsStateWithLifecycle()
+        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
         var remember by rememberSaveable { mutableStateOf(false) }
         val message = stringResource(R.string.dialog_link_check_message, link.toString()).trim()
 
@@ -74,7 +74,7 @@ class LinkCheckDialog : ComposeDialog() {
                         preferenceHelper.shouldCheckLinks = false
                     }
 
-                    customTabsHelper.openHttpPage(requireActivity(), link)
+                    customTabsConnection.openHttpPage(requireActivity(), link)
                     dismiss()
                 })
             },

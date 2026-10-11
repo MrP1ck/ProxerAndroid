@@ -48,9 +48,9 @@ data class SectionRequest(val section: MainSection, val type: String? = null, va
 
 private enum class TopLevelDestination(
     val graph: Any,
-    @StringRes val label: Int,
-    @DrawableRes val icon: Int,
-    @DrawableRes val selectedIcon: Int
+    @param:StringRes val label: Int,
+    @param:DrawableRes val icon: Int,
+    @param:DrawableRes val selectedIcon: Int
 ) {
     NEWS(NewsGraph, R.string.section_news, R.drawable.ic_symbol_newspaper, R.drawable.ic_symbol_newspaper_filled),
     ANIME(AnimeGraph, R.string.section_anime, R.drawable.ic_symbol_live_tv, R.drawable.ic_symbol_live_tv_filled),

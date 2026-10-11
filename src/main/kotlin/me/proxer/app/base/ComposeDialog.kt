@@ -11,13 +11,13 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import me.proxer.app.R
 import me.proxer.app.ui.theme.ProxerAppTheme
+import me.proxer.app.util.CustomTabsConnection
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.androidUri
 import me.proxer.app.util.extension.fallbackHandleLink
-import me.proxer.app.util.extension.safeInject
-import me.zhanghai.android.customtabshelper.CustomTabsHelperFragment
 import okhttp3.HttpUrl
+import org.koin.android.ext.android.inject
 import kotlin.properties.Delegates
 
 /**
@@ -28,10 +28,10 @@ import kotlin.properties.Delegates
  */
 abstract class ComposeDialog : AppCompatDialogFragment(), CustomTabsAware {
 
-    protected val storageHelper by safeInject<StorageHelper>()
-    protected val preferenceHelper by safeInject<PreferenceHelper>()
+    protected val storageHelper by inject<StorageHelper>()
+    protected val preferenceHelper by inject<PreferenceHelper>()
 
-    protected var customTabsHelper by Delegates.notNull<CustomTabsHelperFragment>()
+    protected var customTabsConnection by Delegates.notNull<CustomTabsConnection>()
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +39,7 @@ abstract class ComposeDialog : AppCompatDialogFragment(), CustomTabsAware {
 
         setStyle(STYLE_NO_TITLE, R.style.ThemeOverlay_App_ComposeDialog)
 
-        customTabsHelper = CustomTabsHelperFragment.attachTo(this)
+        customTabsConnection = CustomTabsConnection(requireContext()).also { lifecycle.addObserver(it) }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -59,10 +59,10 @@ abstract class ComposeDialog : AppCompatDialogFragment(), CustomTabsAware {
     protected abstract fun DialogContent()
 
     override fun setLikelyUrl(url: HttpUrl): Boolean {
-        return customTabsHelper.mayLaunchUrl(url.androidUri(), bundleOf(), emptyList())
+        return customTabsConnection.mayLaunchUrl(url.androidUri(), bundleOf(), emptyList())
     }
 
     override fun showPage(url: HttpUrl, forceBrowser: Boolean, skipCheck: Boolean) {
-        customTabsHelper.fallbackHandleLink(requireActivity(), url, forceBrowser, skipCheck)
+        customTabsConnection.fallbackHandleLink(requireActivity(), url, forceBrowser, skipCheck)
     }
 }

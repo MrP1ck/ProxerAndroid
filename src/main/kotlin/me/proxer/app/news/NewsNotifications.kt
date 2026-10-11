@@ -14,18 +14,18 @@ import me.proxer.app.util.NotificationUtils.NEWS_CHANNEL
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.extension.getQuantityString
 import me.proxer.app.util.extension.notifyIfPermitted
-import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toInstantBP
 import me.proxer.library.entity.notifications.NewsArticle
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Ruben Gees
  */
-object NewsNotifications {
+object NewsNotifications : KoinComponent {
 
     private const val ID = 1_357_913_213
 
-    private val preferenceHelper by safeInject<PreferenceHelper>()
+    private val preferenceHelper by inject<PreferenceHelper>()
 
     fun showOrUpdate(context: Context, news: Collection<NewsArticle>) {
         when (val notification = buildNewsNotification(context, news)) {
@@ -89,7 +89,7 @@ object NewsNotifications {
 
         val shouldAlert = news
             .maxByOrNull { it.date }
-            ?.date?.toInstantBP()
+            ?.date?.toInstant()
             ?.isAfter(preferenceHelper.lastNewsDate)
             ?: true
 

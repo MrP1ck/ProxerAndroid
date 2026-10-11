@@ -1,16 +1,14 @@
 package me.proxer.app.chat.prv.message
 
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import com.gojuno.koptional.rxjava2.filterSome
-import com.gojuno.koptional.toOptional
-import io.reactivex.Completable
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.chat.prv.LocalMessage
 import me.proxer.app.chat.prv.sync.MessengerDao
@@ -18,14 +16,19 @@ import me.proxer.app.chat.prv.sync.MessengerErrorEvent
 import me.proxer.app.chat.prv.sync.MessengerWorker
 import me.proxer.app.exception.ChatMessageException
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.extension.catchingErrors
 
 /**
  * @author Ruben Gees
  */
-class MessengerViewModel(initialConference: LocalConference) : PagedViewModel<LocalMessage>() {
+class MessengerViewModel(
+    dependencies: ViewModelDependencies,
+    private val messengerDao: MessengerDao,
+    initialConference: LocalConference
+) : PagedViewModel<LocalMessage>(dependencies) {
+
+    override val isLoginRequired = true
 
     override val itemsOnPage = MessengerWorker.MESSAGES_ON_PAGE
 
@@ -34,117 +37,100 @@ class MessengerViewModel(initialConference: LocalConference) : PagedViewModel<Lo
         get() = safeConference.isFullyLoaded
         set(value) = Unit
 
-    override val data = MediatorLiveData<List<LocalMessage>>()
-    val conference = MediatorLiveData<LocalConference>()
-    val draft = ResettingMutableLiveData<String?>()
-    val deleted = MutableLiveData<Unit?>()
+    val conference = MutableStateFlow(initialConference)
+    val draft = Events<String>()
+    val deleted = MutableStateFlow<Unit?>(null)
 
-    override val dataSingle: Single<List<LocalMessage>>
-        get() = Single.fromCallable { validators.validateLogin() }
-            .flatMap {
-                when (page) {
-                    0 -> messengerDao.markConferenceAsRead(safeConference.id)
-                    else -> if (!hasReachedEnd) MessengerWorker.enqueueMessageLoad(safeConference.id)
-                }
+    /**
+     * Stays loading until the synchronization delivered the messages, which arrive through the database.
+     */
+    override suspend fun loadData(): List<LocalMessage> {
+        validators.validateLogin()
 
-                Single.never()
-            }
-
-    private val dataSource: (List<LocalMessage>?) -> Unit = {
-        if (it != null && storageHelper.isLoggedIn) {
-            if (it.isEmpty()) {
-                if (!hasReachedEnd) {
-                    MessengerWorker.enqueueMessageLoad(safeConference.id)
-                }
-            } else {
-                if (error.value == null) {
-                    dataDisposable?.dispose()
-
-                    page = it.size / itemsOnPage
-
-                    isLoading.value = false
-                    error.value = null
-                    data.value = it
-
-                    Completable.fromAction { messengerDao.markConferenceAsRead(safeConference.id) }
-                        .subscribeOn(Schedulers.io())
-                        .subscribeAndLogErrors()
-                }
-            }
+        when (page) {
+            0 -> messengerDao.markConferenceAsRead(safeConference.id)
+            else -> if (!hasReachedEnd) MessengerWorker.enqueueMessageLoad(safeConference.id)
         }
-    }
 
-    private val conferenceSource: (LocalConference?) -> Unit = {
-        if (it != null) {
-            conference.value = it
-        } else {
-            deleted.value = Unit
-        }
+        awaitCancellation()
     }
-
-    private val messengerDao by safeInject<MessengerDao>()
 
     private val safeConference: LocalConference
-        get() = requireNotNull(conference.value)
+        get() = conference.value
 
-    private var draftDisposable: Disposable? = null
+    private var draftJob: Job? = null
 
     init {
-        conference.value = initialConference
+        viewModelScope.launch {
+            messengerDao.getMessagesFlowForConference(initialConference.id).collect { messages ->
+                if (storageHelper.isLoggedIn) {
+                    if (messages.isEmpty()) {
+                        if (!hasReachedEnd) {
+                            MessengerWorker.enqueueMessageLoad(safeConference.id)
+                        }
+                    } else if (error.value == null) {
+                        dataJob?.cancel()
 
-        data.addSource(messengerDao.getMessagesLiveDataForConference(initialConference.id), dataSource)
-        conference.addSource(messengerDao.getConferenceLiveData(initialConference.id), conferenceSource)
+                        page = messages.size / itemsOnPage
+                        isLoading.value = false
+                        error.value = null
+                        data.value = messages
 
-        disposables += bus.register(MessengerErrorEvent::class.java)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { event: MessengerErrorEvent ->
+                        catchingErrors { messengerDao.markConferenceAsRead(safeConference.id) }
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            messengerDao.getConferenceFlow(initialConference.id).collect {
+                if (it != null) {
+                    conference.value = it
+                } else {
+                    deleted.value = Unit
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            bus.events<MessengerErrorEvent>().collect { event ->
                 if (event.error is ChatMessageException) {
-                    dataDisposable?.dispose()
-
+                    dataJob?.cancel()
                     isLoading.value = false
                     error.value = ErrorUtils.handle(event.error)
                 }
             }
-    }
-
-    override fun onCleared() {
-        draftDisposable?.dispose()
-        draftDisposable = null
-
-        super.onCleared()
+        }
     }
 
     fun loadDraft() {
-        draftDisposable?.dispose()
-        draftDisposable = Single
-            .fromCallable { storageHelper.getMessageDraft(safeConference.id.toString()).toOptional() }
-            .filterSome()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { draft.value = it }
+        draftJob?.cancel()
+        draftJob = viewModelScope.launch {
+            withContext(Dispatchers.IO) { storageHelper.getMessageDraft(safeConference.id.toString()) }
+                ?.let { draft.send(it) }
+        }
     }
 
     fun updateDraft(draft: String) {
-        draftDisposable?.dispose()
-        draftDisposable = Single
-            .fromCallable {
-                if (draft.isBlank()) {
-                    storageHelper.deleteMessageDraft(safeConference.id.toString())
-                } else {
-                    storageHelper.putMessageDraft(safeConference.id.toString(), draft)
-                }
+        draftJob?.cancel()
+        draftJob = viewModelScope.launch(Dispatchers.IO) {
+            if (draft.isBlank()) {
+                storageHelper.deleteMessageDraft(safeConference.id.toString())
+            } else {
+                storageHelper.putMessageDraft(safeConference.id.toString(), draft)
             }
-            .subscribeOn(Schedulers.io())
-            .subscribe()
+        }
     }
 
     fun sendMessage(text: String) {
         val safeUser = requireNotNull(storageHelper.user)
 
-        disposables += Single
-            .fromCallable { messengerDao.insertMessageToSend(safeUser, text, safeConference.id) }
-            .doOnSuccess { if (!MessengerWorker.isRunning) MessengerWorker.enqueueSynchronization() }
-            .subscribeOn(Schedulers.io())
-            .subscribeAndLogErrors()
+        viewModelScope.launch {
+            catchingErrors {
+                messengerDao.insertMessageToSend(safeUser, text, safeConference.id)
+
+                if (!MessengerWorker.isRunning()) MessengerWorker.enqueueSynchronization()
+            }
+        }
     }
 }

@@ -1,35 +1,37 @@
 package me.proxer.app.chat.pub.room
 
-import io.reactivex.Single
-import io.reactivex.functions.BiFunction
-import io.reactivex.rxkotlin.plusAssign
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.base.ViewModelDependencies
+import me.proxer.app.util.extension.await
 import me.proxer.library.entity.chat.ChatRoom
 
 /**
  * @author Ruben Gees
  */
-class ChatRoomViewModel : BaseViewModel<List<ChatRoom>>() {
+class ChatRoomViewModel(dependencies: ViewModelDependencies) : BaseViewModel<List<ChatRoom>>(dependencies) {
 
-    private companion object {
-        private val zipper = BiFunction { first: List<ChatRoom>, second: List<ChatRoom> -> first + second }
+    override suspend fun loadData(): List<ChatRoom> {
+        validate()
+
+        val rooms = coroutineScope {
+            val publicRooms = async { api.chat.publicRooms().await() }
+            val userRooms = if (storageHelper.isLoggedIn) async { api.chat.userRooms().await() } else null
+
+            publicRooms.await() + (userRooms?.await() ?: emptyList())
+        }
+
+        return rooms
+            .asSequence()
+            .distinctBy { room -> room.id }
+            .sortedBy { room -> room.id }
+            .toList()
     }
 
-    override val dataSingle: Single<List<ChatRoom>>
-        get() = Single.fromCallable { validate() }
-            .flatMap { api.chat.publicRooms().buildSingle() }
-            .let { if (storageHelper.isLoggedIn) it.zipWith(api.chat.userRooms().buildSingle(), zipper) else it }
-            .map {
-                it
-                    .asSequence()
-                    .distinctBy { room -> room.id }
-                    .sortedBy { room -> room.id }
-                    .toList()
-            }
-
     init {
-        disposables += storageHelper.isLoggedInObservable
-            .subscribe { reload() }
+        viewModelScope.launch { storageHelper.isLoggedInChanges.collect { reload() } }
     }
 }

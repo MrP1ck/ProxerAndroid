@@ -28,7 +28,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.proxer.app.ui.view.ProxerWebView
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.library.ProxerApi
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -123,19 +124,15 @@ internal fun BBWiki(link: String) {
     val environment = LocalBBCodeEnvironment.current
 
     val html by produceState<String?>(null, link) {
-        value = withContext(Dispatchers.IO) {
-            runCatching {
-                GlobalContext.getOrNull()?.getOrNull<ProxerApi>()?.wiki?.content(
-                    link
-                )?.buildSingle()?.blockingGet()?.content
-            }.onFailure { Timber.e(it) }.getOrNull()
-        }
+        value = catchingErrors {
+            GlobalContext.getOrNull()?.getOrNull<ProxerApi>()?.wiki?.content(link)?.await()?.content
+        }.getOrNull()
     }
 
     html?.let { content ->
         AndroidView(
             factory = { context ->
-                ProxerWebView(context).apply { showPageSubject.subscribe { environment.onUrl(it) } }
+                ProxerWebView(context).apply { onShowPage = { environment.onUrl(it) } }
             },
             update = { it.loadHtml(content) },
             onRelease = { it.destroy() },

@@ -397,12 +397,12 @@ fun Stream.toAnimeStream(
     isSupported: Boolean,
     resolutionResult: StreamResolutionResult? = null
 ) = AnimeStream(
-    id, hoster, hosterName, image, uploaderId, uploaderName, date.toInstantBP(), translatorGroupId, translatorGroupName,
+    id, hoster, hosterName, image, uploaderId, uploaderName, date.toInstant(), translatorGroupId, translatorGroupName,
     isOfficial, isPublic, isSupported, resolutionResult
 )
 
 fun Conference.toLocalConference(isFullyLoaded: Boolean) = LocalConference(
-    id.toLong(), topic, customTopic, participantAmount, image, imageType, isGroup, isRead, isRead, date.toInstantBP(),
+    id.toLong(), topic, customTopic, participantAmount, image, imageType, isGroup, isRead, isRead, date.toInstant(),
     unreadMessageAmount, lastReadMessageId, isFullyLoaded
 )
 
@@ -419,13 +419,13 @@ fun Message.toLocalMessage() = LocalMessage(
     username,
     message,
     action,
-    date.toInstantBP(),
+    date.toInstant(),
     device
 )
 
 fun Comment.toParsedComment() = ParsedComment(
     id, entryId, authorId, mediaProgress, ratingDetails,
-    content.toSimpleBBTree(), overallRating, episode, helpfulVotes, date.toInstantBP(), author, image
+    content.toSimpleBBTree(), overallRating, episode, helpfulVotes, date.toInstant(), author, image
 )
 
 fun Comment.toLocalComment() = LocalComment(
@@ -440,7 +440,7 @@ fun Comment.toLocalComment() = LocalComment(
 
 fun UserComment.toParsedUserComment() = ParsedUserComment(
     id, entryId, entryName, medium, category, authorId, mediaProgress, ratingDetails,
-    content.toSimpleBBTree(), overallRating, episode, helpfulVotes, date.toInstantBP(), author, image
+    content.toSimpleBBTree(), overallRating, episode, helpfulVotes, date.toInstant(), author, image
 )
 
 fun Topic.toTopicMetaData() = TopicMetaData(
@@ -461,14 +461,14 @@ fun Post.toParsedPost(resources: Resources): ParsedPost {
     }
 
     return ParsedPost(
-        id, parentId, userId, username, image, date.toInstantBP(), parsedSignature,
+        id, parentId, userId, username, image, date.toInstant(), parsedSignature,
         modifiedById, modifiedByName, modifiedReason, parsedMessage, thankYouAmount
     )
 }
 
 fun Tag.toParcelableTag() = LocalTag(id, type, name, description, subType, isSpoiler)
 
-fun ChatMessage.toParsedMessage() = ParsedChatMessage(id, userId, username, image, message, action, date.toInstantBP())
+fun ChatMessage.toParsedMessage() = ParsedChatMessage(id, userId, username, image, message, action, date.toInstant())
 
 fun UserMediaListEntry.toLocalEntry() = LocalUserMediaListEntry(
     id, name, episodeAmount, medium, state, commentId, commentContent, mediaProgress, episode, rating

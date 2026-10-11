@@ -6,10 +6,13 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
+import android.os.Build
 import android.os.Environment
-import android.os.Looper
+import android.os.StrictMode
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.getSystemService
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.work.Configuration
 import androidx.work.Logger
 import androidx.work.WorkManager
@@ -20,31 +23,24 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.GooglePlayServicesUtil
 import com.google.android.gms.security.ProviderInstaller
-import com.jakewharton.threetenabp.AndroidThreeTen
-import com.kirillr.strictmodehelper.StrictModeCompat
-import com.rubengees.rxbus.RxBus
-import io.reactivex.Completable
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.exceptions.UndeliverableException
-import io.reactivex.plugins.RxJavaPlugins
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.proxer.app.auth.LoginHandler
 import me.proxer.app.base.NetworkConnectedEvent
 import me.proxer.app.ui.image.ProxerImageLoader
 import me.proxer.app.util.NotificationUtils
 import me.proxer.app.util.compat.isConnected
+import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.extension.isPackageInstalled
-import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.app.util.logging.TimberFileTree
 import me.proxer.app.util.logging.WorkManagerTimberLogger
 import okhttp3.OkHttpClient
 import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 /**
  * @author Ruben Gees
@@ -52,13 +48,17 @@ import java.util.concurrent.TimeUnit
 class MainApplication : Application(), SingletonImageLoader.Factory {
 
     companion object {
+        private const val NETWORK_CONNECTED_DELAY = 100L
+
         const val USER_AGENT = "ProxerAndroid/${BuildConfig.VERSION_NAME}"
         const val GENERIC_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
 
-    private val bus by safeInject<RxBus>()
-    private val loginHandler by safeInject<LoginHandler>()
-    private val preferenceHelper by safeInject<PreferenceHelper>()
+    private val bus by inject<EventBus>()
+    private val applicationScope get() = ProcessLifecycleOwner.get().lifecycleScope
+
+    private val loginHandler by inject<LoginHandler>()
+    private val preferenceHelper by inject<PreferenceHelper>()
 
     override fun onCreate() {
         super.onCreate()
@@ -83,7 +83,7 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
 
         initConnectionManager()
 
-        loginHandler.listen(this)
+        loginHandler.listen(applicationScope, this)
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {
@@ -96,9 +96,11 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 if (connectivityManager.isConnected) {
-                    Completable.fromAction { bus.post(NetworkConnectedEvent()) }
-                        .delay(100, TimeUnit.MILLISECONDS)
-                        .subscribeAndLogErrors()
+                    applicationScope.launch {
+                        delay(NETWORK_CONNECTED_DELAY)
+
+                        bus.post(NetworkConnectedEvent())
+                    }
                 }
             }
         }
@@ -140,30 +142,36 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
 
     private fun enableStrictModeForDebug() {
         if (BuildConfig.DEBUG) {
-            val threadPolicy = StrictModeCompat.ThreadPolicy.Builder()
-                .detectAll()
-                .permitCustomSlowCalls()
-                .permitDiskWrites()
-                .permitDiskReads()
-                .penaltyDialog()
-                .penaltyLog()
-                .build()
+            StrictMode.setThreadPolicy(
+                StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .permitCustomSlowCalls()
+                    .permitDiskWrites()
+                    .permitDiskReads()
+                    .penaltyDialog()
+                    .penaltyLog()
+                    .build()
+            )
 
-            val vmPolicy = StrictModeCompat.VmPolicy.Builder()
-                .detectActivityLeaks()
-                .detectCleartextNetwork()
-                .detectFileUriExposure()
-                .detectLeakedClosableObjects()
-                .detectLeakedRegistrationObjects()
-                .detectLeakedSqlLiteObjects()
-                .detectContentUriWithoutPermission()
-                .detectNonSdkApiUsage()
-                .detectImplicitDirectBoot()
-                .detectCredentialProtectedWhileLocked()
-                .penaltyLog()
-                .build()
-
-            StrictModeCompat.setPolicies(threadPolicy, vmPolicy)
+            StrictMode.setVmPolicy(
+                StrictMode.VmPolicy.Builder()
+                    .detectActivityLeaks()
+                    .detectCleartextNetwork()
+                    .detectFileUriExposure()
+                    .detectLeakedClosableObjects()
+                    .detectLeakedRegistrationObjects()
+                    .detectLeakedSqlLiteObjects()
+                    .apply {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) detectContentUriWithoutPermission()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) detectNonSdkApiUsage()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            detectImplicitDirectBoot()
+                            detectCredentialProtectedWhileLocked()
+                        }
+                    }
+                    .penaltyLog()
+                    .build()
+            )
         }
     }
 
@@ -171,7 +179,6 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
     @SuppressLint("RestrictedApi")
     private fun initLibs() {
         WorkManager.initialize(this, Configuration.Builder().build())
-        AndroidThreeTen.init(this)
 
         if (BuildConfig.LOG) {
             Timber.plant(TimberFileTree())
@@ -182,19 +189,6 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
         }
 
         Logger.setLogger(WorkManagerTimberLogger())
-
-        RxJavaPlugins.setErrorHandler { error ->
-            when (error) {
-                is UndeliverableException -> Timber.e(error, "Can't deliver error")
-                is InterruptedException -> Timber.w(error)
-                else ->
-                    Thread.currentThread().uncaughtExceptionHandler
-                        ?.uncaughtException(Thread.currentThread(), error)
-            }
-        }
-
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler { AndroidSchedulers.from(Looper.getMainLooper(), true) }
-        RxAndroidPlugins.setMainThreadSchedulerHandler { AndroidSchedulers.from(Looper.getMainLooper(), true) }
     }
 
     private fun initCache() {
@@ -207,12 +201,13 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
         }
     }
 
-    @SuppressLint("CheckResult")
     private fun initNightMode() {
         AppCompatDelegate.setDefaultNightMode(preferenceHelper.themeContainer.variant.value)
 
-        preferenceHelper.themeObservable.subscribe {
-            AppCompatDelegate.setDefaultNightMode(it.variant.value)
+        applicationScope.launch {
+            preferenceHelper.themeChanges.collect {
+                AppCompatDelegate.setDefaultNightMode(it.variant.value)
+            }
         }
     }
 

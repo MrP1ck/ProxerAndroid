@@ -42,8 +42,8 @@ import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.ui.components.ContentStateHost
 import me.proxer.app.ui.components.LanguageFlag
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.ProxerAsyncImage
 import me.proxer.app.ui.components.collectContentState
 import me.proxer.app.ui.components.plus
@@ -85,13 +85,13 @@ fun EpisodeTab(
 
     var isLanguagePickerVisible by rememberSaveable { mutableStateOf(false) }
 
-    LiveDataEffect(viewModel.bookmarkData) {
+    ObserveAsEvents(viewModel.bookmarkData) {
         snackbarHostState?.showSnackbar(
             context.getString(R.string.fragment_set_user_info_success)
         )
     }
 
-    LiveDataEffect(viewModel.bookmarkError) {
+    ObserveAsEvents(viewModel.bookmarkError) {
         snackbarHostState?.showSnackbar(
             context.getString(R.string.error_set_user_info, context.getString(it.message))
         )

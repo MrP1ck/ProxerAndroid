@@ -15,11 +15,11 @@ import kotlinx.coroutines.withContext
 import me.proxer.app.R
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction
-import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toInstantBP
 import me.proxer.app.widget.WidgetError
 import me.proxer.app.widget.WidgetState
 import me.proxer.library.ProxerApi
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.cancellation.CancellationException
@@ -32,12 +32,12 @@ import kotlin.coroutines.cancellation.CancellationException
 class NewsWidgetUpdateWorker(
     context: Context,
     workerParams: WorkerParameters
-) : CoroutineWorker(context, workerParams) {
+) : CoroutineWorker(context, workerParams), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         private const val NAME = "NewsWidgetUpdateWorker"
 
-        private val workManager by safeInject<WorkManager>()
+        private val workManager by inject<WorkManager>()
 
         fun enqueueWork() {
             val workRequest = OneTimeWorkRequestBuilder<NewsWidgetUpdateWorker>()
@@ -53,7 +53,7 @@ class NewsWidgetUpdateWorker(
         }
     }
 
-    private val api by safeInject<ProxerApi>()
+    private val api by inject<ProxerApi>()
 
     override suspend fun doWork(): Result {
         val previous = newsWidgetStore.read(applicationContext)
@@ -72,7 +72,7 @@ class NewsWidgetUpdateWorker(
                             it.categoryId,
                             it.subject,
                             it.category,
-                            it.date.toInstantBP()
+                            it.date.toInstant()
                         )
                     }
             }

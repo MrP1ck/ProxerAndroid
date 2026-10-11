@@ -1,71 +1,72 @@
 package me.proxer.app.profile.comment
 
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.comment.LocalComment
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.data.send
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.toParsedUserComment
 import me.proxer.library.enums.Category
 import me.proxer.library.enums.CommentContentType
-import org.threeten.bp.Instant
+import java.time.Instant
 import kotlin.properties.Delegates
 
 /**
  * @author Ruben Gees
  */
 class ProfileCommentViewModel(
+    dependencies: ViewModelDependencies,
     private val userId: String?,
     private val username: String?,
     category: Category?
-) : PagedViewModel<ParsedUserComment>() {
+) : PagedViewModel<ParsedUserComment>(dependencies) {
 
     override val itemsOnPage = 10
 
-    override val dataSingle: Single<List<ParsedUserComment>>
-        get() = Single.fromCallable { validate() }
-            .flatMap {
-                api.user.comments(userId, username)
-                    .category(category)
-                    .page(page)
-                    .limit(itemsOnPage)
-                    .hasContent(CommentContentType.COMMENT, CommentContentType.RATING)
-                    .buildSingle()
-            }
-            .observeOn(Schedulers.computation())
-            .map { it.map { comment -> comment.toParsedUserComment() } }
+    override suspend fun loadData(): List<ParsedUserComment> {
+        validate()
+
+        val comments = api.user.comments(userId, username)
+            .category(category)
+            .page(page)
+            .limit(itemsOnPage)
+            .hasContent(CommentContentType.COMMENT, CommentContentType.RATING)
+            .await()
+
+        return withContext(Dispatchers.Default) { comments.map { comment -> comment.toParsedUserComment() } }
+    }
 
     var category by Delegates.observable(category) { _, old, new ->
         if (old != new) reload()
     }
 
-    val itemDeletionError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
+    val itemDeletionError = Events<ErrorUtils.ErrorAction>()
 
-    private var deleteDisposable: Disposable? = null
+    private var deleteJob: Job? = null
 
     fun deleteComment(comment: ParsedUserComment) {
-        deleteDisposable?.dispose()
+        deleteJob?.cancel()
+        deleteJob = viewModelScope.launch {
+            catchingErrors {
+                api.comment.update(comment.id)
+                    .comment("")
+                    .rating(0)
+                    .awaitNullable()
 
-        deleteDisposable = api.comment.update(comment.id)
-            .comment("")
-            .rating(0)
-            .buildSingle()
-            .doOnSuccess { storageHelper.deleteCommentDraft(comment.entryId) }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeAndLogErrors(
-                {
-                    data.value = data.value?.filter { it.id != comment.id }
-                },
-                {
-                    itemDeletionError.value = ErrorUtils.handle(it)
-                }
-            )
+                storageHelper.deleteCommentDraft(comment.entryId)
+            }
+                .onSuccess { data.value = data.value?.filter { it.id != comment.id } }
+                .onFailure { itemDeletionError.send(ErrorUtils.handle(it)) }
+        }
     }
 
     fun updateComment(comment: LocalComment) {

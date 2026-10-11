@@ -41,8 +41,8 @@ import me.proxer.app.ui.view.RatingDialog
 import me.proxer.app.util.InAppUpdateFlow
 import me.proxer.app.util.extension.intentFor
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.threeten.bp.Instant
-import org.threeten.bp.temporal.ChronoUnit
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 /**
  * The single Activity hosting the Compose UI of the app. Sections can be opened through [getSectionIntent] and deep

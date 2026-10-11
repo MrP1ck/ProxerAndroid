@@ -3,24 +3,25 @@ package me.proxer.app.notification
 import android.content.Context
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
+import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.rubengees.rxbus.RxBus
+import kotlinx.coroutines.CancellationException
 import me.proxer.app.news.NewsNotificationEvent
 import me.proxer.app.news.NewsNotifications
 import me.proxer.app.util.WorkerUtils
+import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
-import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toInstantBP
+import me.proxer.app.util.extension.await
 import me.proxer.library.ProxerApi
-import me.proxer.library.ProxerCall
 import me.proxer.library.entity.notifications.NotificationInfo
 import me.proxer.library.enums.NotificationFilter
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -30,14 +31,14 @@ import java.util.concurrent.TimeUnit
 class NotificationWorker(
     context: Context,
     workerParams: WorkerParameters
-) : Worker(context, workerParams) {
+) : CoroutineWorker(context, workerParams), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         private const val NAME = "NotificationWorker"
 
-        private val bus by safeInject<RxBus>()
-        private val workManager by safeInject<WorkManager>()
-        private val preferenceHelper by safeInject<PreferenceHelper>()
+        private val bus by inject<EventBus>()
+        private val workManager by inject<WorkManager>()
+        private val preferenceHelper by inject<PreferenceHelper>()
 
         fun enqueueIfPossible(delay: Boolean = false) {
             val areNotificationsEnabled = preferenceHelper.areNewsNotificationsEnabled ||
@@ -70,22 +71,12 @@ class NotificationWorker(
         }
     }
 
-    private val api by safeInject<ProxerApi>()
-    private val storageHelper by safeInject<StorageHelper>()
+    private val api by inject<ProxerApi>()
+    private val storageHelper by inject<StorageHelper>()
 
-    private var currentCall: ProxerCall<*>? = null
-
-    override fun onStopped() {
-        currentCall?.cancel()
-    }
-
-    override fun doWork() = try {
+    override suspend fun doWork(): Result = try {
         val notificationInfo = when (storageHelper.isLoggedIn) {
-            true ->
-                api.notifications.notificationInfo()
-                    .build()
-                    .also { currentCall = it }
-                    .execute()
+            true -> api.notifications.notificationInfo().await()
             false -> null
         }
 
@@ -101,7 +92,9 @@ class NotificationWorker(
         }
 
         Result.success()
-    } catch (error: Throwable) {
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (@Suppress("TooGenericExceptionCaught") error: Throwable) {
         Timber.e(error)
 
         if (WorkerUtils.shouldRetryForError(error)) {
@@ -111,7 +104,7 @@ class NotificationWorker(
         }
     }
 
-    private fun fetchNews(context: Context, notificationInfo: NotificationInfo?) {
+    private suspend fun fetchNews(context: Context, notificationInfo: NotificationInfo?) {
         val lastNewsDate = preferenceHelper.lastNewsDate
         val newNews = when (notificationInfo?.newsAmount) {
             0 -> emptyList()
@@ -119,16 +112,14 @@ class NotificationWorker(
                 api.notifications.news()
                     .page(0)
                     .limit(notificationInfo?.newsAmount ?: 100)
-                    .build()
-                    .also { currentCall = it }
-                    .safeExecute()
+                    .await()
                     .asSequence()
-                    .filter { it.date.toInstantBP().isAfter(lastNewsDate) }
+                    .filter { it.date.toInstant().isAfter(lastNewsDate) }
                     .sortedByDescending { it.date }
                     .toList()
         }
 
-        newNews.firstOrNull()?.date?.toInstantBP()?.let {
+        newNews.firstOrNull()?.date?.toInstant()?.let {
             if (!isStopped && it != lastNewsDate && !bus.post(NewsNotificationEvent())) {
                 NewsNotifications.showOrUpdate(context, newNews)
 
@@ -137,7 +128,7 @@ class NotificationWorker(
         }
     }
 
-    private fun fetchAccountNotifications(context: Context, notificationInfo: NotificationInfo) {
+    private suspend fun fetchAccountNotifications(context: Context, notificationInfo: NotificationInfo) {
         val lastNotificationsDate = storageHelper.lastNotificationsDate
         val newNotifications = when (notificationInfo.notificationAmount) {
             0 -> emptyList()
@@ -146,12 +137,10 @@ class NotificationWorker(
                     .page(0)
                     .limit(notificationInfo.notificationAmount)
                     .filter(NotificationFilter.UNREAD)
-                    .build()
-                    .also { currentCall = it }
-                    .safeExecute()
+                    .await()
         }
 
-        newNotifications.firstOrNull()?.date?.toInstantBP()?.let {
+        newNotifications.firstOrNull()?.date?.toInstant()?.let {
             if (!isStopped && it != lastNotificationsDate && !bus.post(AccountNotificationEvent())) {
                 AccountNotifications.showOrUpdate(context, newNotifications)
 

@@ -9,13 +9,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.proxer.app.R
 import me.proxer.app.base.ComposeDialog
 import me.proxer.app.ui.components.DialogButton
@@ -38,9 +38,9 @@ class LogoutDialog : ComposeDialog() {
 
     @Composable
     override fun DialogContent() {
-        val isLoading by viewModel.isLoading.observeAsState()
-        val success by viewModel.success.observeAsState()
-        val error by viewModel.error.observeAsState()
+        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+        val success by viewModel.success.collectAsStateWithLifecycle()
+        val error by viewModel.error.collectAsStateWithLifecycle()
 
         LaunchedEffect(success) { if (success != null) dismiss() }
 

@@ -22,8 +22,8 @@ import me.proxer.app.chat.ConversationScreen
 import me.proxer.app.chat.ReportMessageDialog
 import me.proxer.app.chat.pub.room.info.ChatRoomInfoActivity
 import me.proxer.app.comment.userImageUrl
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.collectContentState
 import me.proxer.app.ui.components.map
 import me.proxer.app.ui.components.rememberErrorActionHandler
@@ -76,7 +76,7 @@ class ChatActivity : ComposeActivity() {
         var loadedDraft by remember { mutableStateOf<String?>(null) }
         var messageToReport by rememberSaveable { mutableStateOf<String?>(null) }
 
-        LiveDataEffect(viewModel.draft) { loadedDraft = it }
+        ObserveAsEvents(viewModel.draft) { loadedDraft = it }
         LaunchedEffect(Unit) { viewModel.loadDraft() }
 
         LifecycleResumeEffect(viewModel) {
@@ -85,7 +85,7 @@ class ChatActivity : ComposeActivity() {
             onPauseOrDispose { viewModel.pausePolling() }
         }
 
-        LiveDataEffect(viewModel.sendMessageError) {
+        ObserveAsEvents(viewModel.sendMessageError) {
             snackbarHostState?.showSnackbar(
                 context.getString(R.string.error_chat_send_message, context.getString(it.message))
             )

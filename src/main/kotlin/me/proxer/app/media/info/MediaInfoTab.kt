@@ -27,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.media.MediaInfoViewModel
@@ -50,8 +50,8 @@ import me.proxer.app.ui.components.ChipRow
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.ContentStateHost
 import me.proxer.app.ui.components.LanguageFlag
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.ProxerAsyncImage
 import me.proxer.app.ui.components.RatingStars
 import me.proxer.app.ui.components.SectionHeader
@@ -90,15 +90,15 @@ fun MediaInfoTab(viewModel: MediaInfoViewModel, state: ContentState<Entry>, cont
     val onErrorAction = rememberErrorActionHandler(viewModel::load)
     val user by rememberCurrentUser()
 
-    val userInfo by viewModel.userInfoData.observeAsState()
+    val userInfo by viewModel.userInfoData.collectAsStateWithLifecycle()
 
-    LiveDataEffect(viewModel.userInfoUpdateData) {
+    ObserveAsEvents(viewModel.userInfoUpdateData) {
         snackbarHostState?.showSnackbar(
             context.getString(R.string.fragment_set_user_info_success)
         )
     }
 
-    LiveDataEffect(viewModel.userInfoUpdateError) {
+    ObserveAsEvents(viewModel.userInfoUpdateError) {
         snackbarHostState?.showSnackbar(
             context.getString(R.string.error_set_user_info, context.getString(it.message))
         )

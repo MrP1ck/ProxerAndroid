@@ -1,120 +1,115 @@
 package me.proxer.app.chat.pub.message
 
-import com.gojuno.koptional.rxjava2.filterSome
-import com.gojuno.koptional.toOptional
-import io.reactivex.Flowable
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.catchingErrors
+import me.proxer.app.util.extension.retryWithDelay
 import me.proxer.app.util.extension.toParsedMessage
-import me.proxer.app.util.rx.RxRetryWithDelay
 import me.proxer.library.enums.ChatMessageAction
-import org.threeten.bp.Instant
+import timber.log.Timber
+import java.time.Instant
 import java.util.Collections.emptyList
 import java.util.LinkedList
 import java.util.Queue
-import java.util.concurrent.TimeUnit
 
 /**
  * @author Ruben Gees
  */
-class ChatViewModel(private val chatRoomId: String) : PagedViewModel<ParsedChatMessage>() {
+class ChatViewModel(
+    dependencies: ViewModelDependencies,
+    private val chatRoomId: String
+) : PagedViewModel<ParsedChatMessage>(dependencies) {
+
+    private companion object {
+        private const val POLLING_INTERVAL = 3_000L
+        private const val SEND_ATTEMPTS = 2
+    }
 
     override val itemsOnPage = 50
 
-    override val dataSingle: Single<List<ParsedChatMessage>>
-        get() = Single.fromCallable { validate() }
-            .flatMap {
-                api.chat.messages(chatRoomId)
-                    .messageId(data.value?.lastOrNull()?.id ?: "0")
-                    .buildSingle()
-            }
-            .map { it.map { message -> message.toParsedMessage() } }
+    override suspend fun loadData(): List<ParsedChatMessage> {
+        validate()
 
-    val sendMessageError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
-    val draft = ResettingMutableLiveData<String?>()
+        return loadMessages(data.value?.lastOrNull()?.id ?: "0")
+    }
 
-    private var pollingDisposable: Disposable? = null
-    private var draftDisposable: Disposable? = null
+    val sendMessageError = Events<ErrorUtils.ErrorAction>()
+    val draft = Events<String>()
+
+    private var pollingJob: Job? = null
+    private var draftJob: Job? = null
 
     private val sendMessageQueue: Queue<ParsedChatMessage> = LinkedList()
     private val sentMessageIds = mutableSetOf<String>()
-    private var sendMessageDisposable: Disposable? = null
+    private var sendMessageJob: Job? = null
 
     private var currentFirstId = "0"
 
-    override fun onCleared() {
-        draftDisposable?.dispose()
-        pollingDisposable?.dispose()
-        sendMessageDisposable?.dispose()
-
-        draftDisposable = null
-        pollingDisposable = null
-        sendMessageDisposable = null
-
-        super.onCleared()
-    }
-
     override fun load() {
-        dataDisposable?.dispose()
-        dataDisposable = dataSingle
-            .doAfterSuccess { newData -> hasReachedEnd = newData.size < itemsOnPage }
-            .map { newData -> mergeNewDataWithExistingData(newData, data.value?.lastOrNull()?.id ?: "0") }
-            .subscribeOn(Schedulers.io())
-            .doAfterTerminate { isRefreshing = false }
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {
-                refreshError.value = null
-                error.value = null
-                isLoading.value = true
-            }
-            .doOnSuccess { if (pollingDisposable == null) startPolling() }
-            .doAfterTerminate { isLoading.value = false }
-            .subscribeAndLogErrors(
-                {
-                    currentFirstId = findFirstRemoteId(it) ?: "0"
+        dataJob?.cancel()
+        dataJob = viewModelScope.launch {
+            error.value = null
+            isLoading.value = true
 
-                    refreshError.value = null
-                    error.value = null
-                    data.value = it
-                },
-                {
-                    if (data.value?.size ?: 0 > 0) {
-                        refreshError.value = ErrorUtils.handle(it)
-                    } else {
-                        error.value = ErrorUtils.handle(it)
-                    }
+            try {
+                val newData = loadData()
+
+                hasReachedEnd = newData.size < itemsOnPage
+
+                val mergedData = mergeNewDataWithExistingData(newData, data.value?.lastOrNull()?.id ?: "0")
+
+                isRefreshing = false
+
+                if (pollingJob == null) startPolling()
+
+                currentFirstId = findFirstRemoteId(mergedData) ?: "0"
+                error.value = null
+                data.value = mergedData
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (@Suppress("TooGenericExceptionCaught") loadError: Throwable) {
+                Timber.e(loadError)
+
+                isRefreshing = false
+
+                if ((data.value?.size ?: 0) > 0) {
+                    refreshError.send(ErrorUtils.handle(loadError))
+                } else {
+                    error.value = ErrorUtils.handle(loadError)
                 }
-            )
+            } finally {
+                if (isActive) isLoading.value = false
+            }
+        }
     }
 
     fun loadDraft() {
-        draftDisposable?.dispose()
-        draftDisposable = Single.fromCallable { storageHelper.getMessageDraft(chatRoomId).toOptional() }
-            .filterSome()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { draft.value = it }
+        draftJob?.cancel()
+        draftJob = viewModelScope.launch {
+            withContext(Dispatchers.IO) { storageHelper.getMessageDraft(chatRoomId) }?.let { draft.send(it) }
+        }
     }
 
     fun updateDraft(draft: String) {
-        draftDisposable?.dispose()
-        draftDisposable = Single
-            .fromCallable {
-                if (draft.isBlank()) {
-                    storageHelper.deleteMessageDraft(chatRoomId)
-                } else {
-                    storageHelper.putMessageDraft(chatRoomId, draft)
-                }
+        draftJob?.cancel()
+        draftJob = viewModelScope.launch(Dispatchers.IO) {
+            if (draft.isBlank()) {
+                storageHelper.deleteMessageDraft(chatRoomId)
+            } else {
+                storageHelper.putMessageDraft(chatRoomId, draft)
             }
-            .subscribeOn(Schedulers.io())
-            .subscribe()
+        }
     }
 
     fun sendMessage(text: String) {
@@ -135,20 +130,27 @@ class ChatViewModel(private val chatRoomId: String) : PagedViewModel<ParsedChatM
             data.value = listOf(message).plus(data.value ?: emptyList())
             sendMessageQueue.offer(message)
 
-            if (sendMessageDisposable?.isDisposed != false) {
+            if (sendMessageJob?.isActive != true) {
                 doSendMessages()
             }
         }
     }
 
     fun pausePolling() {
-        pollingDisposable?.dispose()
+        pollingJob?.cancel()
     }
 
     fun resumePolling() {
         if (data.value != null) {
             startPolling(true)
         }
+    }
+
+    private suspend fun loadMessages(firstId: String) = withContext(Dispatchers.Default) {
+        api.chat.messages(chatRoomId)
+            .messageId(firstId)
+            .await()
+            .map { message -> message.toParsedMessage() }
     }
 
     private fun mergeNewDataWithExistingData(
@@ -193,50 +195,57 @@ class ChatViewModel(private val chatRoomId: String) : PagedViewModel<ParsedChatM
     }
 
     private fun startPolling(immediate: Boolean = false) {
-        pollingDisposable?.dispose()
-        pollingDisposable = Single.fromCallable { validators.validateLogin() }
-            .flatMap { api.chat.messages(chatRoomId).messageId("0").buildSingle() }
-            .map { it.map { message -> message.toParsedMessage() } }
-            .repeatWhen { it.concatMap { Flowable.timer(3, TimeUnit.SECONDS) } }
-            .retryWhen { it.concatMap { Flowable.timer(3, TimeUnit.SECONDS) } }
-            .map { newData -> mergeNewDataWithExistingData(newData, "0") }
-            .let { if (!immediate) it.delaySubscription(3, TimeUnit.SECONDS) else it }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeAndLogErrors {
-                val firstId = findFirstRemoteId(it)
+        pollingJob?.cancel()
+        pollingJob = viewModelScope.launch {
+            if (!immediate) delay(POLLING_INTERVAL)
 
-                if (firstId != null && firstId != currentFirstId) {
-                    currentFirstId = firstId
+            while (true) {
+                try {
+                    validate()
 
-                    data.value = it
+                    val mergedData = mergeNewDataWithExistingData(loadMessages("0"), "0")
+                    val firstId = findFirstRemoteId(mergedData)
+
+                    if (firstId != null && firstId != currentFirstId) {
+                        currentFirstId = firstId
+                        data.value = mergedData
+                    }
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (@Suppress("TooGenericExceptionCaught") pollingError: Throwable) {
+                    // Try again with the next poll.
+                    Timber.w(pollingError)
                 }
+
+                delay(POLLING_INTERVAL)
             }
+        }
     }
 
     private fun doSendMessages() {
-        sendMessageDisposable?.dispose()
+        sendMessageJob = viewModelScope.launch {
+            while (true) {
+                val item = sendMessageQueue.poll() ?: break
 
-        sendMessageQueue.poll()?.let { item ->
-            sendMessageDisposable = Single.fromCallable { validators.validateLogin() }
-                .flatMap { api.chat.sendMessage(chatRoomId, item.message).buildSingle() }
-                .retryWhen(RxRetryWithDelay(2, 3_000))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeAndLogErrors(
-                    { id ->
-                        sentMessageIds.add(id)
+                val result = catchingErrors {
+                    retryWithDelay(SEND_ATTEMPTS, POLLING_INTERVAL) {
+                        validators.validateLogin()
 
-                        startPolling(true)
-                        doSendMessages()
-                    },
-                    {
-                        data.value = data.value?.dropWhile { message -> message.id.toLong() < 0 }
-                        sendMessageQueue.clear()
-
-                        sendMessageError.value = ErrorUtils.handle(it)
+                        api.chat.sendMessage(chatRoomId, item.message).await()
                     }
-                )
+                }
+
+                result.onSuccess { id ->
+                    sentMessageIds.add(id)
+                    startPolling(true)
+                }
+
+                result.onFailure {
+                    data.value = data.value?.dropWhile { message -> message.id.toLong() < 0 }
+                    sendMessageQueue.clear()
+                    sendMessageError.send(ErrorUtils.handle(it))
+                }
+            }
         }
     }
 

@@ -1,10 +1,11 @@
 package me.proxer.app.auth
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.core.content.pm.ShortcutManagerCompat
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.proxer.app.chat.prv.sync.MessengerDao
 import me.proxer.app.chat.prv.sync.MessengerNotifications
 import me.proxer.app.chat.prv.sync.MessengerWorker
@@ -12,7 +13,7 @@ import me.proxer.app.notification.AccountNotifications
 import me.proxer.app.notification.NotificationWorker
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.extension.catchingErrors
 
 /**
  * @author Ruben Gees
@@ -23,16 +24,16 @@ class LoginHandler(
     private val messengerDao: MessengerDao
 ) {
 
-    @SuppressLint("CheckResult")
-    fun listen(context: Context) {
-        storageHelper.isLoggedInObservable
-            .subscribe { isLoggedIn ->
+    fun listen(scope: CoroutineScope, context: Context) {
+        scope.launch {
+            storageHelper.isLoggedInChanges.collect { isLoggedIn ->
                 if (isLoggedIn) {
                     onLogin()
                 } else {
                     onLogout(context)
                 }
             }
+        }
     }
 
     private fun onLogin() {
@@ -40,7 +41,7 @@ class LoginHandler(
         NotificationWorker.enqueueIfPossible()
     }
 
-    private fun onLogout(context: Context) {
+    private suspend fun onLogout(context: Context) {
         ShortcutManagerCompat.removeAllDynamicShortcuts(context)
 
         AccountNotifications.cancel(context)
@@ -52,12 +53,11 @@ class LoginHandler(
             NotificationWorker.cancel()
         }
 
-        Completable
-            .fromAction {
+        catchingErrors {
+            withContext(Dispatchers.IO) {
                 storageHelper.reset()
                 messengerDao.clear()
             }
-            .subscribeOn(Schedulers.io())
-            .subscribeAndLogErrors()
+        }
     }
 }

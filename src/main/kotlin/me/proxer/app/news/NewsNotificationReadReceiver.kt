@@ -4,20 +4,20 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
 import me.proxer.app.util.data.PreferenceHelper
-import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.launchAsync
 import me.proxer.library.ProxerApi
-import org.threeten.bp.Instant
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import java.time.Instant
 
 /**
  * @author Ruben Gees
  */
-class NewsNotificationReadReceiver : BroadcastReceiver() {
+class NewsNotificationReadReceiver : BroadcastReceiver(), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         fun getPendingIntent(context: Context): PendingIntent = PendingIntent.getBroadcast(
             context,
             0,
@@ -27,23 +27,20 @@ class NewsNotificationReadReceiver : BroadcastReceiver() {
         )
     }
 
-    private val api by safeInject<ProxerApi>()
-    private val preferenceHelper by safeInject<PreferenceHelper>()
+    private val api by inject<ProxerApi>()
+    private val preferenceHelper by inject<PreferenceHelper>()
 
     override fun onReceive(context: Context, intent: Intent?) {
-        Completable
-            .fromAction {
-                NewsNotifications.cancel(context)
+        launchAsync {
+            NewsNotifications.cancel(context)
 
-                preferenceHelper.lastNewsDate = Instant.now()
+            preferenceHelper.lastNewsDate = Instant.now()
 
-                api.notifications.news()
-                    .markAsRead(true)
-                    .limit(0)
-                    .build()
-                    .execute()
-            }
-            .subscribeOn(Schedulers.io())
-            .subscribeAndLogErrors()
+            api.notifications.news()
+                .markAsRead(true)
+                .limit(0)
+                .build()
+                .awaitNullable()
+        }
     }
 }

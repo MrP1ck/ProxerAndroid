@@ -31,20 +31,21 @@ import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.LocalConferenceMap
 import me.proxer.app.util.extension.getQuantityString
 import me.proxer.app.util.extension.notifyIfPermitted
-import me.proxer.app.util.extension.safeInject
 import me.proxer.library.enums.Device
 import me.proxer.library.util.ProxerUrls
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Ruben Gees
  */
-object MessengerNotifications {
+object MessengerNotifications : KoinComponent {
 
     private const val GROUP = "chat"
     private const val ID = 782_373_275
     private const val GENERIC_ICON_SIZE_DP = 96
 
-    private val storageHelper by safeInject<StorageHelper>()
+    private val storageHelper by inject<StorageHelper>()
 
     fun showOrUpdate(context: Context, conferenceMap: LocalConferenceMap) {
         val notifications = conferenceMap.entries

@@ -25,8 +25,8 @@ import me.proxer.app.widget.WidgetItem
 import me.proxer.app.widget.WidgetState
 import me.proxer.app.widget.WidgetStore
 import me.proxer.library.enums.Category
-import org.threeten.bp.Instant
-import org.threeten.bp.format.DateTimeFormatter
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 internal val scheduleWidgetStore = WidgetStore("schedule", SimpleCalendarEntry::class.java)
 

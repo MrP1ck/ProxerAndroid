@@ -1,13 +1,18 @@
 package me.proxer.app.anime
 
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.proxer.app.anime.resolver.StreamResolutionResult
 import me.proxer.app.anime.resolver.StreamResolverFactory
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.exception.AgeConfirmationRequiredException
 import me.proxer.app.exception.AppRequiredException
 import me.proxer.app.exception.NotLoggedInException
@@ -15,11 +20,13 @@ import me.proxer.app.exception.StreamResolutionException
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.buildPartialErrorSingle
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.data.send
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.awaitPartial
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.isAgeRestricted
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.app.util.extension.toAnimeStream
 import me.proxer.app.util.extension.toMediaLanguage
 import me.proxer.library.api.Endpoint
@@ -32,38 +39,37 @@ import kotlin.properties.Delegates
  * @author Ruben Gees
  */
 class AnimeViewModel(
+    dependencies: ViewModelDependencies,
     private val entryId: String,
     private val language: AnimeLanguage,
     episode: Int
-) : BaseViewModel<AnimeStreamInfo>() {
+) : BaseViewModel<AnimeStreamInfo>(dependencies) {
 
     private companion object {
         private val streamComparator = compareBy<AnimeStream, Int?>(nullsLast()) { it.resolutionResult?.let { 0 } }
     }
 
-    override val dataSingle: Single<AnimeStreamInfo>
-        get() = Single.fromCallable { validate() }
-            .flatMap { entrySingle() }
-            .doOnSuccess {
-                if (it.isAgeRestricted) {
-                    if (!storageHelper.isLoggedIn) {
-                        throw NotLoggedInException()
-                    } else if (!preferenceHelper.isAgeRestrictedMediaAllowed) {
-                        throw AgeConfirmationRequiredException()
-                    }
-                }
-            }
-            .flatMap {
-                Single.just(it).zipWith(streamSingle(it)) { entry, streams ->
-                    AnimeStreamInfo(entry.name, entry.episodeAmount, streams)
-                }
-            }
+    override suspend fun loadData(): AnimeStreamInfo {
+        validate()
 
-    val resolutionResult = ResettingMutableLiveData<StreamResolutionResult>()
-    val resolutionError = ResettingMutableLiveData<ErrorAction>()
+        val entry = loadEntry()
 
-    val userStateData = ResettingMutableLiveData<Unit?>()
-    val userStateError = ResettingMutableLiveData<ErrorAction?>()
+        if (entry.isAgeRestricted) {
+            if (!storageHelper.isLoggedIn) {
+                throw NotLoggedInException()
+            } else if (!preferenceHelper.isAgeRestrictedMediaAllowed) {
+                throw AgeConfirmationRequiredException()
+            }
+        }
+
+        return AnimeStreamInfo(entry.name, entry.episodeAmount, loadStreams(entry))
+    }
+
+    val resolutionResult = Events<StreamResolutionResult>()
+    val resolutionError = Events<ErrorAction>()
+
+    val userStateData = Events<Unit>()
+    val userStateError = Events<ErrorAction>()
 
     var episode by Delegates.observable(episode) { _, old, new ->
         if (old != new) reload()
@@ -71,66 +77,58 @@ class AnimeViewModel(
 
     private var cachedEntryCore: EntryCore? = null
 
-    private var resolverDisposable: Disposable? = null
-    private var userStateDisposable: Disposable? = null
+    private var resolverJob: Job? = null
+    private var userStateJob: Job? = null
 
     init {
-        disposables += storageHelper.isLoggedInObservable
-            .subscribe {
+        viewModelScope.launch {
+            storageHelper.isLoggedInChanges.collect {
                 if (it && error.value?.buttonAction == ButtonAction.LOGIN) {
                     reload()
                 }
             }
+        }
 
-        disposables += preferenceHelper.isAgeRestrictedMediaAllowedObservable
-            .subscribe {
+        viewModelScope.launch {
+            preferenceHelper.isAgeRestrictedMediaAllowedChanges.collect {
                 if (error.value?.buttonAction == ButtonAction.AGE_CONFIRMATION) {
                     reload()
                 }
             }
-    }
-
-    override fun onCleared() {
-        resolverDisposable?.dispose()
-        userStateDisposable?.dispose()
-
-        resolverDisposable = null
-        userStateDisposable = null
-
-        super.onCleared()
+        }
     }
 
     override fun load() {
-        resolverDisposable?.dispose()
+        resolverJob?.cancel()
 
         super.load()
     }
 
     fun resolve(stream: AnimeStream) {
-        resolverDisposable?.dispose()
+        resolverJob?.cancel()
 
-        val resolutionSingle = stream.resolutionResult?.let { Single.just(it) }
-            ?: StreamResolverFactory.resolverFor(stream.hosterName)?.resolve(stream.id)
-            ?: throw StreamResolutionException()
+        val knownResult = stream.resolutionResult
+        val resolver = when (knownResult) {
+            null -> StreamResolverFactory.resolverFor(stream.hosterName) ?: throw StreamResolutionException()
+            else -> null
+        }
 
-        resolverDisposable = resolutionSingle
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { isLoading.value = true }
-            .doAfterTerminate { isLoading.value = false }
-            .subscribeAndLogErrors(
-                {
-                    resolutionError.value = null
-                    resolutionResult.value = it
-                },
-                {
-                    resolutionResult.value = null
-                    resolutionError.value = when (it) {
-                        is AppRequiredException -> AppRequiredErrorAction(it.name, it.appPackage)
-                        else -> ErrorUtils.handle(it)
-                    }
+        resolverJob = viewModelScope.launch {
+            isLoading.value = true
+
+            catchingErrors { knownResult ?: withContext(Dispatchers.Default) { resolver?.resolve(stream.id) } }
+                .onSuccess { result -> result?.let { resolutionResult.send(it) } }
+                .onFailure {
+                    resolutionError.send(
+                        when (it) {
+                            is AppRequiredException -> AppRequiredErrorAction(it.name, it.appPackage)
+                            else -> ErrorUtils.handle(it)
+                        }
+                    )
                 }
-            )
+
+            if (isActive) isLoading.value = false
+        }
     }
 
     fun markAsFinished() = updateUserState(api.info.markAsFinished(entryId))
@@ -139,52 +137,45 @@ class AnimeViewModel(
         api.ucp.setBookmark(entryId, episode, language.toMediaLanguage(), Category.ANIME)
     )
 
-    private fun entrySingle(): Single<EntryCore> {
-        val safeCachedEntryCore = cachedEntryCore
-
-        return when (safeCachedEntryCore != null) {
-            true -> Single.just(safeCachedEntryCore)
-            false -> api.info.entryCore(entryId).buildSingle()
-        }.doOnSuccess { cachedEntryCore = it }
+    private suspend fun loadEntry(): EntryCore {
+        return cachedEntryCore ?: api.info.entryCore(entryId).await().also { cachedEntryCore = it }
     }
 
-    private fun streamSingle(entry: EntryCore) = api.anime.streams(entryId, episode, language)
-        .includeProxerStreams(true)
-        .buildPartialErrorSingle(entry)
-        .map { it.filterNot { stream -> StreamResolverFactory.resolverFor(stream.hosterName)?.ignore == true } }
-        .map { it.groupBy { stream -> stream.hoster }.map { (_, streams) -> streams.shuffled().first() } }
-        .toObservable()
-        .flatMapIterable { it }
-        .flatMapSingle { stream ->
-            val resolver = StreamResolverFactory.resolverFor(stream.hosterName)
+    private suspend fun loadStreams(entry: EntryCore): List<AnimeStream> = coroutineScope {
+        api.anime.streams(entryId, episode, language)
+            .includeProxerStreams(true)
+            .awaitPartial(entry)
+            .filterNot { stream -> StreamResolverFactory.resolverFor(stream.hosterName)?.ignore == true }
+            .groupBy { stream -> stream.hoster }
+            .map { (_, streams) -> streams.shuffled().first() }
+            .map { stream ->
+                async {
+                    val resolver = StreamResolverFactory.resolverFor(stream.hosterName)
 
-            if (resolver != null && resolver.resolveEarly) {
-                resolver.resolve(stream.id).map { resolutionResult ->
-                    stream.toAnimeStream(true, resolutionResult)
+                    if (resolver != null && resolver.resolveEarly) {
+                        val resolutionResult = withContext(Dispatchers.Default) { resolver.resolve(stream.id) }
+
+                        stream.toAnimeStream(true, resolutionResult)
+                    } else {
+                        stream.toAnimeStream(resolver != null)
+                    }
                 }
-            } else {
-                Single.just(stream.toAnimeStream(resolver != null))
             }
-        }
-        .sorted(streamComparator)
-        .toList()
+            .awaitAll()
+            .sortedWith(streamComparator)
+    }
 
     @Suppress("ForbiddenVoid")
     private fun updateUserState(endpoint: Endpoint<Unit?>) {
-        userStateDisposable?.dispose()
-        userStateDisposable = Single.fromCallable { validators.validateLogin() }
-            .flatMap { endpoint.buildSingle() }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeAndLogErrors(
-                {
-                    userStateError.value = null
-                    userStateData.value = Unit
-                },
-                {
-                    userStateData.value = null
-                    userStateError.value = ErrorUtils.handle(it)
-                }
-            )
+        userStateJob?.cancel()
+        userStateJob = viewModelScope.launch {
+            catchingErrors {
+                validators.validateLogin()
+
+                endpoint.awaitNullable()
+            }
+                .onSuccess { userStateData.send() }
+                .onFailure { userStateError.send(ErrorUtils.handle(it)) }
+        }
     }
 }

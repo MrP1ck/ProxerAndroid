@@ -7,13 +7,12 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import com.rubengees.rxbus.RxBus
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.proxer.app.auth.LoginDialog
 import me.proxer.app.base.BaseActivity
 import me.proxer.app.base.BaseViewModel
@@ -24,6 +23,7 @@ import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction
 import me.proxer.app.util.Utils
+import me.proxer.app.util.data.EventBus
 import me.proxer.library.enums.Device
 import me.proxer.library.util.ProxerUrls
 import okhttp3.HttpUrl
@@ -50,19 +50,18 @@ data class ContentState<out T>(
  */
 @Composable
 fun <T> BaseViewModel<T>.collectContentState(): ContentState<T> {
-    val data by data.observeAsState()
-    val error by error.observeAsState()
-    val isLoading by isLoading.observeAsState(false)
+    val data by data.collectAsStateWithLifecycle()
+    val error by error.collectAsStateWithLifecycle()
+    val isLoading by isLoading.collectAsStateWithLifecycle()
     var refreshError by remember(this) { mutableStateOf<ErrorAction?>(null) }
 
-    // The refresh error is a one-shot event, which observeAsState would miss (see LiveDataEffect).
     (this as? PagedViewModel<*>)?.let { pagedViewModel ->
-        LiveDataEffect(pagedViewModel.refreshError) { refreshError = it }
+        ObserveAsEvents(pagedViewModel.refreshError) { refreshError = it }
     }
 
     LoadOnFirstComposition(this)
 
-    return ContentState(data, error, isLoading == true, refreshError)
+    return ContentState(data, error, isLoading, refreshError)
 }
 
 @Composable
@@ -72,9 +71,7 @@ private fun LoadOnFirstComposition(viewModel: BaseViewModel<*>) {
     if (!hasRequestedLoad) {
         hasRequestedLoad = true
 
-        if (viewModel.isLoading.value != true && viewModel.data.value == null && viewModel.error.value == null) {
-            viewModel.load()
-        }
+        viewModel.loadIfNeeded()
     }
 }
 
@@ -88,7 +85,7 @@ private fun LoadOnFirstComposition(viewModel: BaseViewModel<*>) {
 @Composable
 fun rememberErrorActionHandler(onRetry: () -> Unit): (ErrorAction) -> Unit {
     val activity = LocalActivity.current as? BaseActivity
-    val bus = koinInject<RxBus>()
+    val bus = koinInject<EventBus>()
     var isSolvingCaptcha by rememberSaveable { mutableStateOf(false) }
 
     LifecycleResumeEffect(isSolvingCaptcha) {

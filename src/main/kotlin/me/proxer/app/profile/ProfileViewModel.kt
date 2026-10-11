@@ -1,36 +1,36 @@
 package me.proxer.app.profile
 
-import com.gojuno.koptional.None
-import com.gojuno.koptional.Optional
-import io.reactivex.Single
-import io.reactivex.rxkotlin.plusAssign
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.profile.ProfileViewModel.UserInfoWrapper
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.await
 import me.proxer.library.entity.user.UserInfo
 
 /**
  * @author Ruben Gees
  */
 class ProfileViewModel(
+    dependencies: ViewModelDependencies,
     private val userId: String?,
     private val username: String?
-) : BaseViewModel<UserInfoWrapper>() {
+) : BaseViewModel<UserInfoWrapper>(dependencies) {
 
-    override val dataSingle: Single<UserInfoWrapper>
-        get() = Single.fromCallable { validate() }
-            .flatMap { api.user.info(userId, username).buildSingle() }
-            .flatMap { userInfo ->
-                val maybeUcpSingle = when (storageHelper.user?.matches(userId, username) == true) {
-                    true -> api.ucp.watchedEpisodes().buildSingle().map { Optional.toOptional(it) }
-                    false -> Single.just(None)
-                }
+    override suspend fun loadData(): UserInfoWrapper {
+        validate()
 
-                maybeUcpSingle.map { watchedEpisodes -> UserInfoWrapper(userInfo, watchedEpisodes.toNullable()) }
-            }
+        val userInfo = api.user.info(userId, username).await()
+        val watchedEpisodes = when (storageHelper.user?.matches(userId, username) == true) {
+            true -> api.ucp.watchedEpisodes().await()
+            false -> null
+        }
+
+        return UserInfoWrapper(userInfo, watchedEpisodes)
+    }
 
     init {
-        disposables += storageHelper.isLoggedInObservable.subscribe { reload() }
+        viewModelScope.launch { storageHelper.isLoggedInChanges.collect { reload() } }
     }
 
     data class UserInfoWrapper(val info: UserInfo, val watchedEpisodes: Int?)

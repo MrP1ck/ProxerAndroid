@@ -1,67 +1,62 @@
 package me.proxer.app.media.episode
 
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.data.send
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.library.enums.Category
 import me.proxer.library.enums.MediaLanguage
 
 /**
  * @author Ruben Gees
  */
-class EpisodeViewModel(private val entryId: String) : BaseViewModel<List<EpisodeRow>>() {
+class EpisodeViewModel(
+    dependencies: ViewModelDependencies,
+    private val entryId: String
+) : BaseViewModel<List<EpisodeRow>>(dependencies) {
 
-    override val dataSingle: Single<List<EpisodeRow>>
-        get() = Single.fromCallable { validate() }
-            .flatMap {
-                api.info.episodeInfo(entryId)
-                    .limit(Int.MAX_VALUE)
-                    .buildSingle()
-            }
-            .map { info ->
-                info.episodes
-                    .asSequence()
-                    .groupBy { it.number }
-                    .map { (_, episodes) -> EpisodeRow(info.category, info.userProgress, info.lastEpisode, episodes) }
-                    .toList()
-                    .sortedBy { it.number }
-            }
+    override suspend fun loadData(): List<EpisodeRow> {
+        validate()
 
-    val bookmarkData = ResettingMutableLiveData<Unit?>()
-    val bookmarkError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
+        val info = api.info.episodeInfo(entryId)
+            .limit(Int.MAX_VALUE)
+            .await()
 
-    private var bookmarkDisposable: Disposable? = null
-
-    override fun onCleared() {
-        bookmarkDisposable?.dispose()
-        bookmarkDisposable = null
-
-        super.onCleared()
+        return info.episodes
+            .asSequence()
+            .groupBy { it.number }
+            .map { (_, episodes) -> EpisodeRow(info.category, info.userProgress, info.lastEpisode, episodes) }
+            .toList()
+            .sortedBy { it.number }
     }
 
+    val bookmarkData = Events<Unit>()
+    val bookmarkError = Events<ErrorUtils.ErrorAction>()
+
+    private var bookmarkJob: Job? = null
+
     fun bookmark(episode: Int, language: MediaLanguage, category: Category) {
-        bookmarkDisposable?.dispose()
-        bookmarkDisposable = Single.fromCallable { validators.validateLogin() }
-            .flatMap { api.ucp.setBookmark(entryId, episode, language, category).buildSingle() }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { isLoading.value = true }
-            .doAfterTerminate { isLoading.value = false }
-            .subscribeAndLogErrors(
-                {
-                    bookmarkError.value = null
-                    bookmarkData.value = Unit
-                },
-                {
-                    bookmarkData.value = null
-                    bookmarkError.value = ErrorUtils.handle(it)
-                }
-            )
+        bookmarkJob?.cancel()
+        bookmarkJob = viewModelScope.launch {
+            isLoading.value = true
+
+            catchingErrors {
+                validators.validateLogin()
+
+                api.ucp.setBookmark(entryId, episode, language, category).awaitNullable()
+            }
+                .onSuccess { bookmarkData.send() }
+                .onFailure { bookmarkError.send(ErrorUtils.handle(it)) }
+
+            if (isActive) isLoading.value = false
+        }
     }
 }

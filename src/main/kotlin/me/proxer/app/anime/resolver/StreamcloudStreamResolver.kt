@@ -1,10 +1,9 @@
 package me.proxer.app.anime.resolver
 
-import io.reactivex.Single
 import me.proxer.app.MainApplication.Companion.GENERIC_USER_AGENT
 import me.proxer.app.exception.StreamResolutionException
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.toBodySingle
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitString
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
@@ -19,50 +18,46 @@ object StreamcloudStreamResolver : StreamResolver() {
 
     override val name = "Streamcloud"
 
-    override fun resolve(id: String): Single<StreamResolutionResult> = api.anime.link(id)
-        .buildSingle()
-        .flatMap { url ->
-            client
-                .newCall(
-                    Request.Builder()
-                        .get()
-                        .url(url)
-                        .header("User-Agent", GENERIC_USER_AGENT)
-                        .header("Connection", "close")
-                        .build()
-                )
-                .toBodySingle()
-                .map {
-                    val formValues = FormBody.Builder()
-                        .apply {
-                            for (i in formRegex.findAll(it)) {
-                                add(i.groupValues[1], i.groupValues[2].replace("download1", "download2"))
-                            }
-                        }
-                        .build()
+    override suspend fun resolve(id: String): StreamResolutionResult {
+        val url = api.anime.link(id).await()
 
-                    if (formValues.size == 0) {
-                        throw StreamResolutionException()
-                    }
+        val formBody = client
+            .newCall(
+                Request.Builder()
+                    .get()
+                    .url(url)
+                    .header("User-Agent", GENERIC_USER_AGENT)
+                    .header("Connection", "close")
+                    .build()
+            )
+            .awaitString()
 
-                    formValues
+        val formValues = FormBody.Builder()
+            .apply {
+                for (i in formRegex.findAll(formBody)) {
+                    add(i.groupValues[1], i.groupValues[2].replace("download1", "download2"))
                 }
-                .flatMap {
-                    client
-                        .newCall(
-                            Request.Builder()
-                                .post(it)
-                                .url(url)
-                                .header("User-Agent", GENERIC_USER_AGENT)
-                                .header("Connection", "close")
-                                .build()
-                        )
-                        .toBodySingle()
-                }
-                .map {
-                    fileRegex.find(it)?.groupValues?.get(1)?.toHttpUrlOrNull()
-                        ?: throw StreamResolutionException()
-                }
-                .map { StreamResolutionResult.Video(it, "video/mp4", url, internalPlayerOnly = true) }
+            }
+            .build()
+
+        if (formValues.size == 0) {
+            throw StreamResolutionException()
         }
+
+        val fileBody = client
+            .newCall(
+                Request.Builder()
+                    .post(formValues)
+                    .url(url)
+                    .header("User-Agent", GENERIC_USER_AGENT)
+                    .header("Connection", "close")
+                    .build()
+            )
+            .awaitString()
+
+        val fileUrl = fileRegex.find(fileBody)?.groupValues?.get(1)?.toHttpUrlOrNull()
+            ?: throw StreamResolutionException()
+
+        return StreamResolutionResult.Video(fileUrl, "video/mp4", url, internalPlayerOnly = true)
+    }
 }

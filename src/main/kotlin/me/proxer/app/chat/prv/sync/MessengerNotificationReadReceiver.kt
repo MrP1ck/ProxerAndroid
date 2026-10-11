@@ -4,17 +4,16 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
-import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.extension.launchAsync
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Ruben Gees
  */
-class MessengerNotificationReadReceiver : BroadcastReceiver() {
+class MessengerNotificationReadReceiver : BroadcastReceiver(), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         private const val CONFERENCE_ID_EXTRA = "conference_id"
 
         fun getPendingIntent(context: Context, conferenceId: Long): PendingIntent {
@@ -31,25 +30,21 @@ class MessengerNotificationReadReceiver : BroadcastReceiver() {
         }
     }
 
-    private val messengerDao by safeInject<MessengerDao>()
+    private val messengerDao by inject<MessengerDao>()
 
     override fun onReceive(context: Context, intent: Intent) {
         val conferenceId = intent.getLongExtra(CONFERENCE_ID_EXTRA, -1L)
 
-        Completable
-            .fromAction {
-                messengerDao.markConferenceAsRead(conferenceId)
+        launchAsync {
+            messengerDao.markConferenceAsRead(conferenceId)
 
-                val unreadMap = messengerDao.getUnreadConferences()
-                    .asSequence().associateWith {
-                        messengerDao.getMostRecentMessagesForConference(it.id, it.unreadMessageAmount).asReversed()
-                    }
-                    .plus(messengerDao.getConference(conferenceId) to emptyList())
-                    .toMap()
+            val unreadMap = messengerDao.getUnreadConferences()
+                .associateWith {
+                    messengerDao.getMostRecentMessagesForConference(it.id, it.unreadMessageAmount).asReversed()
+                }
+                .plus(messengerDao.getConference(conferenceId) to emptyList())
 
-                MessengerNotifications.showOrUpdate(context, unreadMap)
-            }
-            .subscribeOn(Schedulers.io())
-            .subscribeAndLogErrors()
+            MessengerNotifications.showOrUpdate(context, unreadMap)
+        }
     }
 }

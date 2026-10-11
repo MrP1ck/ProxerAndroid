@@ -1,18 +1,20 @@
 package me.proxer.app.base
 
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.data.Events
 import me.proxer.library.entity.ProxerIdItem
+import timber.log.Timber
 
 /**
  * @author Ruben Gees
  */
-abstract class PagedViewModel<T> : BaseViewModel<List<T>>() {
+abstract class PagedViewModel<T>(dependencies: ViewModelDependencies) : BaseViewModel<List<T>>(dependencies) {
 
-    val refreshError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
+    val refreshError = Events<ErrorUtils.ErrorAction>()
 
     protected open var hasReachedEnd = false
     protected var isRefreshing = false
@@ -25,34 +27,39 @@ abstract class PagedViewModel<T> : BaseViewModel<List<T>>() {
     override fun load() {
         val currentPage = page
 
-        dataDisposable?.dispose()
-        dataDisposable = dataSingle
-            .doAfterSuccess { newData -> hasReachedEnd = newData.size < itemsOnPage }
-            .map { newData -> mergeNewDataWithExistingData(data.value ?: emptyList(), newData, currentPage) }
-            .subscribeOn(Schedulers.io())
-            .doAfterTerminate { isRefreshing = false }
-            .doAfterSuccess { if (!isRefreshing) page++ }
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {
-                refreshError.value = null
+        dataJob?.cancel()
+        dataJob = viewModelScope.launch {
+            error.value = null
+            isLoading.value = true
+
+            try {
+                val newData = loadData()
+
+                hasReachedEnd = newData.size < itemsOnPage
+
+                val mergedData = mergeNewDataWithExistingData(data.value ?: emptyList(), newData, currentPage)
+
+                if (!isRefreshing) page++
+                isRefreshing = false
+
                 error.value = null
-                isLoading.value = true
-            }
-            .doAfterTerminate { isLoading.value = false }
-            .subscribeAndLogErrors(
-                {
-                    refreshError.value = null
-                    error.value = null
-                    data.value = it
-                },
-                {
-                    if (currentPage == 0 && data.value?.size ?: 0 > 0) {
-                        refreshError.value = ErrorUtils.handle(it)
-                    } else {
-                        error.value = ErrorUtils.handle(it)
-                    }
+                data.value = mergedData
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (@Suppress("TooGenericExceptionCaught") loadError: Throwable) {
+                Timber.e(loadError)
+
+                isRefreshing = false
+
+                if (currentPage == 0 && (data.value?.size ?: 0) > 0) {
+                    refreshError.send(ErrorUtils.handle(loadError))
+                } else {
+                    error.value = ErrorUtils.handle(loadError)
                 }
-            )
+            } finally {
+                if (isActive) isLoading.value = false
+            }
+        }
     }
 
     override fun loadIfPossible() {
@@ -68,7 +75,6 @@ abstract class PagedViewModel<T> : BaseViewModel<List<T>>() {
     }
 
     override fun reload() {
-        refreshError.value = null
         hasReachedEnd = false
         isRefreshing = false
         page = 0

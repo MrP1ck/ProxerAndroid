@@ -22,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,6 +45,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.proxer.app.R
 import me.proxer.app.base.ComposeDialog
 import me.proxer.app.ui.components.DialogButton
@@ -71,10 +71,10 @@ class LoginDialog : ComposeDialog() {
 
     @Composable
     override fun DialogContent() {
-        val isLoading by viewModel.isLoading.observeAsState()
-        val isTwoFactorAuthenticationEnabled by viewModel.isTwoFactorAuthenticationEnabled.observeAsState()
-        val success by viewModel.success.observeAsState()
-        val error by viewModel.error.observeAsState()
+        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+        val isTwoFactorAuthenticationEnabled by viewModel.isTwoFactorAuthenticationEnabled.collectAsStateWithLifecycle()
+        val success by viewModel.success.collectAsStateWithLifecycle()
+        val error by viewModel.error.collectAsStateWithLifecycle()
 
         var username by rememberSaveable { mutableStateOf("") }
         var password by rememberSaveable { mutableStateOf("") }

@@ -1,17 +1,18 @@
 package me.proxer.app.base
 
-import io.reactivex.Single
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.await
 import me.proxer.library.api.Endpoint
 
 /**
  * @author Ruben Gees
  */
-abstract class BaseContentViewModel<T : Any> : BaseViewModel<T>() {
+abstract class BaseContentViewModel<T : Any>(dependencies: ViewModelDependencies) : BaseViewModel<T>(dependencies) {
 
-    override val dataSingle: Single<T>
-        get() = Single.fromCallable { validate() }
-            .flatMap { endpoint.buildSingle() }
+    override suspend fun loadData(): T {
+        validate()
+
+        return endpoint.await()
+    }
 
     protected abstract val endpoint: Endpoint<T>
 }

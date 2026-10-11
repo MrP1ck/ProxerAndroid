@@ -4,20 +4,20 @@ package me.proxer.app.util.extension
 
 import android.content.Context
 import me.proxer.app.R
-import org.threeten.bp.Duration
-import org.threeten.bp.Instant
-import org.threeten.bp.LocalDate
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.Period
-import org.threeten.bp.ZoneId
-import org.threeten.bp.temporal.ChronoUnit
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Period
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.Date
 
 private val zeroDate = Date(0)
 
 fun Date.distanceInWordsToNow(context: Context): String = when (zeroDate) {
     this -> context.getString(R.string.time_unknown)
-    else -> toLocalDateTimeBP().distanceInWordsToNow(context)
+    else -> toLocalDateTime().distanceInWordsToNow(context)
 }
 
 fun LocalDateTime.formattedDistanceTo(other: LocalDateTime): String {
@@ -64,7 +64,6 @@ fun LocalDateTime.distanceInWordsToNow(context: Context): String {
 
 inline fun Instant.toLocalDateTime(): LocalDateTime = atZone(ZoneId.systemDefault()).toLocalDateTime()
 inline fun Instant.toLocalDate(): LocalDate = atZone(ZoneId.systemDefault()).toLocalDate()
-inline fun Instant.toDate() = Date(toEpochMilli())
+inline fun Instant.toDate(): Date = Date.from(this)
 
-inline fun Date.toLocalDateTimeBP(): LocalDateTime = toInstantBP().toLocalDateTime()
-inline fun Date.toInstantBP(): Instant = Instant.ofEpochMilli(time)
+inline fun Date.toLocalDateTime(): LocalDateTime = toInstant().toLocalDateTime()

@@ -7,18 +7,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.proxer.app.R
 import me.proxer.app.base.ComposeActivity
 import me.proxer.app.settings.ListPreference
 import me.proxer.app.settings.PreferenceCategory
 import me.proxer.app.settings.choices
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LoadingState
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.rememberErrorActionHandler
 import me.proxer.app.ui.components.showErrorSnackbar
@@ -117,7 +117,7 @@ class ProfileSettingsActivity : ComposeActivity() {
         val navigator = LocalAppNavigator.current
         val viewModel = koinViewModel<ProfileSettingsViewModel>()
         val user by rememberCurrentUser()
-        val settings by viewModel.data.observeAsState()
+        val settings by viewModel.data.collectAsStateWithLifecycle()
 
         ProxerScaffold(
             title = stringResource(R.string.section_profile_settings),
@@ -156,7 +156,7 @@ class ProfileSettingsActivity : ComposeActivity() {
         val onRefreshErrorAction = rememberErrorActionHandler(viewModel::refresh)
         val onUpdateErrorAction = rememberErrorActionHandler(viewModel::retryUpdate)
 
-        LiveDataEffect(viewModel.error) {
+        ObserveAsEvents(viewModel.error) {
             snackbarHostState?.showErrorSnackbar(
                 context = context,
                 error = it,
@@ -165,7 +165,7 @@ class ProfileSettingsActivity : ComposeActivity() {
             )
         }
 
-        LiveDataEffect(viewModel.updateError) {
+        ObserveAsEvents(viewModel.updateError) {
             snackbarHostState?.showErrorSnackbar(
                 context = context,
                 error = it,

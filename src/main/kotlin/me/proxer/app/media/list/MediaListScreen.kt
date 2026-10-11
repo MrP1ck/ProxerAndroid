@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -82,8 +81,8 @@ fun MediaListScreen(
     val navigator = LocalAppNavigator.current
     val state = viewModel.collectContentState()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
-    val genres by viewModel.genreData.observeAsState()
-    val tags by viewModel.tagData.observeAsState()
+    val genres by viewModel.genreData.collectAsStateWithLifecycle()
+    val tags by viewModel.tagData.collectAsStateWithLifecycle()
     val onErrorAction = rememberErrorActionHandler(viewModel::load)
 
     var isSearching by rememberSaveable { mutableStateOf(!filter.searchQuery.isNullOrBlank()) }

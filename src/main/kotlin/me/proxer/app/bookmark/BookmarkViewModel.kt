@@ -1,15 +1,16 @@
 package me.proxer.app.bookmark
 
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedContentViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
+import me.proxer.app.util.data.Events
 import me.proxer.app.util.data.UniqueQueue
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.data.send
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.library.api.PagingLimitEndpoint
 import me.proxer.library.entity.ucp.Bookmark
 import me.proxer.library.enums.Category
@@ -19,10 +20,13 @@ import kotlin.properties.Delegates
  * @author Ruben Gees
  */
 class BookmarkViewModel(
+    dependencies: ViewModelDependencies,
     searchQuery: String?,
     category: Category?,
     filterAvailable: Boolean
-) : PagedContentViewModel<Bookmark>() {
+) : PagedContentViewModel<Bookmark>(dependencies) {
+
+    override val isLoginRequired = true
 
     override val itemsOnPage = 30
 
@@ -32,10 +36,9 @@ class BookmarkViewModel(
             .category(category)
             .filterAvailable(if (filterAvailable) true else null)
 
-    val itemDeletionError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
-
-    val undoData = ResettingMutableLiveData<Unit?>()
-    val undoError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
+    val itemDeletionError = Events<ErrorUtils.ErrorAction>()
+    val undoData = Events<Unit>()
+    val undoError = Events<ErrorUtils.ErrorAction>()
 
     var searchQuery by Delegates.observable(searchQuery) { _, old, new ->
         if (old != new && !(old.isNullOrBlank() && new.isNullOrBlank())) reload()
@@ -50,29 +53,18 @@ class BookmarkViewModel(
     }
 
     private val deletionQueue = UniqueQueue<Bookmark>()
-    private var deletionDisposable: Disposable? = null
+    private var deletionJob: Job? = null
 
     private var undoItem: Bookmark? = null
-    private var undoDisposable: Disposable? = null
-
-    override fun onCleared() {
-        deletionDisposable?.dispose()
-        deletionDisposable = null
-
-        undoDisposable?.dispose()
-        undoDisposable = null
-        undoItem = null
-
-        super.onCleared()
-    }
+    private var undoJob: Job? = null
 
     override fun refresh() = reload()
 
     fun addItemToDelete(item: Bookmark) {
         deletionQueue.add(item)
 
-        if (deletionDisposable?.isDisposed != false) {
-            doItemDeletion()
+        if (deletionJob?.isActive != true) {
+            startItemDeletion()
         }
     }
 
@@ -80,62 +72,44 @@ class BookmarkViewModel(
         val safeUndoItem = undoItem
 
         if (safeUndoItem != null) {
-            deletionDisposable?.dispose()
-            undoDisposable?.dispose()
+            deletionJob?.cancel()
+            undoJob?.cancel()
+            undoJob = viewModelScope.launch {
+                catchingErrors {
+                    validators.validateLogin()
 
-            undoDisposable = Single.fromCallable { validators.validateLogin() }
-                .flatMap { bookmarkSingle(safeUndoItem) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { undoError.value = null }
-                .doOnEvent { _, _ -> undoData.value = null }
-                .subscribeAndLogErrors(
-                    {
-                        data.value = listOf(safeUndoItem) + (data.value ?: emptyList())
-
-                        // Explicitly hide error (if no other, real error was present) to remove no data message
-                        if (error.value == null) {
-                            error.value = null
-                        }
-                    },
-                    {
-                        undoError.value = ErrorUtils.handle(it)
-                    }
-                )
+                    bookmarkCall(safeUndoItem).awaitNullable()
+                }
+                    .onSuccess { data.value = listOf(safeUndoItem) + (data.value ?: emptyList()) }
+                    .onFailure { undoError.send(ErrorUtils.handle(it)) }
+            }
         }
     }
 
-    private fun doItemDeletion() {
-        deletionQueue.poll()?.let { item ->
-            deletionDisposable?.dispose()
-            undoDisposable?.dispose()
+    private fun startItemDeletion() {
+        deletionJob = viewModelScope.launch {
+            while (true) {
+                val item = deletionQueue.poll() ?: break
 
-            undoItem = null
+                undoJob?.cancel()
+                undoItem = null
 
-            deletionDisposable = api.ucp.deleteBookmark(item.id)
-                .buildSingle()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { undoData.value = null }
-                .subscribeAndLogErrors(
-                    {
-                        undoItem = item
+                val result = catchingErrors { api.ucp.deleteBookmark(item.id).awaitNullable() }
 
-                        undoData.value = Unit
-                        data.value = data.value?.filterNot { newItem -> newItem == item }
+                result.onSuccess {
+                    undoItem = item
+                    undoData.send()
+                    data.value = data.value?.filterNot { newItem -> newItem == item }
+                }
 
-                        doItemDeletion()
-                    },
-                    {
-                        deletionQueue.clear()
-
-                        itemDeletionError.value = ErrorUtils.handle(it)
-                    }
-                )
+                result.onFailure {
+                    deletionQueue.clear()
+                    itemDeletionError.send(ErrorUtils.handle(it))
+                }
+            }
         }
     }
 
-    private fun bookmarkSingle(bookmark: Bookmark) = api.ucp
+    private fun bookmarkCall(bookmark: Bookmark) = api.ucp
         .setBookmark(bookmark.entryId, bookmark.episode, bookmark.language, bookmark.category)
-        .buildSingle()
 }

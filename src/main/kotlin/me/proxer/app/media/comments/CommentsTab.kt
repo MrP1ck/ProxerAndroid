@@ -29,8 +29,8 @@ import me.proxer.app.comment.CommentCardData
 import me.proxer.app.comment.DeleteCommentDialog
 import me.proxer.app.comment.EditCommentActivity
 import me.proxer.app.comment.userImageUrl
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.PagedList
 import me.proxer.app.ui.components.collectContentState
 import me.proxer.app.ui.components.plus
@@ -69,7 +69,7 @@ fun CommentsTab(
         if (comment != null) viewModel.updateComment(comment)
     }
 
-    LiveDataEffect(viewModel.itemDeletionError) {
+    ObserveAsEvents(viewModel.itemDeletionError) {
         snackbarHostState?.showSnackbar(
             context.getString(R.string.error_comment_deletion, context.getString(it.message))
         )

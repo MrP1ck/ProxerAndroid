@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,14 +45,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.base.ComposeActivity
 import me.proxer.app.chat.prv.Participant
 import me.proxer.app.chat.prv.PrvMessengerActivity
 import me.proxer.app.comment.userImageUrl
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.SectionHeader
 import me.proxer.app.ui.components.UserAvatar
@@ -108,7 +108,7 @@ class CreateConferenceActivity : ComposeActivity() {
         val viewModel = koinViewModel<CreateConferenceViewModel>()
         val validators = koinInject<Validators>()
         val user by rememberCurrentUser()
-        val isLoading by viewModel.isLoading.observeAsState(false)
+        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
         val onErrorAction = rememberErrorActionHandler { }
 
         var topic by rememberSaveable { mutableStateOf("") }
@@ -185,9 +185,9 @@ class CreateConferenceActivity : ComposeActivity() {
                 }
             }
 
-            LiveDataEffect(viewModel.error) { showError(it) }
+            ObserveAsEvents(viewModel.error) { showError(it) }
 
-            LiveDataEffect(viewModel.result) {
+            ObserveAsEvents(viewModel.result) {
                 finish()
 
                 PrvMessengerActivity.navigateTo(this@CreateConferenceActivity, it)

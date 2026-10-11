@@ -4,14 +4,12 @@ import android.annotation.SuppressLint
 import android.os.Environment
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.util.Log
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
-import org.threeten.bp.LocalDate
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
-import org.threeten.bp.format.DateTimeParseException
 import timber.log.Timber
 import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.concurrent.Executors
 
 /**
@@ -36,21 +34,18 @@ class TimberFileTree : Timber.Tree() {
 
     override fun isLoggable(tag: String?, priority: Int) = priority >= Log.INFO
 
-    @SuppressLint("CheckResult")
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         if (!resolvedLogsDirectory.canWrite()) {
             return
         }
 
-        Completable
-            .fromAction { internalLog(tag, message) }
-            .subscribeOn(Schedulers.from(executor))
-            .subscribe(
-                {},
-                {
-                    Log.e(TimberFileTree::class.java.name, "Failure while logging to file", it)
-                }
-            )
+        executor.execute {
+            try {
+                internalLog(tag, message)
+            } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
+                Log.e(TimberFileTree::class.java.name, "Failure while logging to file", error)
+            }
+        }
     }
 
     private fun internalLog(tag: String?, message: String) {
