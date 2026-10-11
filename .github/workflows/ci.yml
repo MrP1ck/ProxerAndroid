@@ -22,6 +22,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: MrP1ck/ProxerLibJava
+          # Change to the default branch once the library changes are merged.
+          ref: feature/characters-persons-novels
           path: ProxerLibJava
 
       - name: Set up JDK 17
