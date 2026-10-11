@@ -273,8 +273,6 @@ dependencies {
     implementation libs.koptional.rxjava2
     implementation libs.jsoup
 
-    implementation libs.hawk
-
     implementation libs.strictmodecompat
     implementation libs.timber
     implementation libs.anrwatchdog

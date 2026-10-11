@@ -69,7 +69,6 @@ customtabsHelper = "1.0.6"
 # Utils
 proxerLib = "5.4.0"
 threetenabp = "1.4.9"
-hawk = "7a1a625455"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 okio = "3.9.1"
@@ -174,7 +173,6 @@ moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "
 moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 koptional-rxjava2 = { module = "com.github.gojuno.koptional:koptional-rxjava2-extensions", version.ref = "koptional" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
-hawk = { module = "com.github.rubengees:hawk", version.ref = "hawk" }
 javax-annotation = { module = "javax.annotation:javax.annotation-api", version.ref = "javaxAnnotation" }
 
 strictmodecompat = { module = "com.github.kirich1409:StrictModeCompat", version.ref = "strictModeCompat" }

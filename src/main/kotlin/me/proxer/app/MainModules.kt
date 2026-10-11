@@ -55,9 +55,7 @@ import me.proxer.app.profile.settings.ProfileSettingsViewModel
 import me.proxer.app.profile.topten.TopTenViewModel
 import me.proxer.app.settings.status.ServerStatusViewModel
 import me.proxer.app.ui.LinkCheckViewModel
-import me.proxer.app.util.Mp4UploadTrustManagerWorkaround
 import me.proxer.app.util.Validators
-import me.proxer.app.util.data.HawkMoshiParser
 import me.proxer.app.util.data.InstantJsonAdapter
 import me.proxer.app.util.data.LocalDataInitializer
 import me.proxer.app.util.data.PreferenceHelper
@@ -79,7 +77,6 @@ import okhttp3.Cache
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import okhttp3.brotli.BrotliInterceptor
-import okhttp3.internal.platform.Platform
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -165,10 +162,7 @@ private val applicationModules = module {
             else -> null
         }
 
-        val trustManager = Mp4UploadTrustManagerWorkaround.create()
-
         OkHttpClient.Builder()
-            .sslSocketFactory(Platform.get().newSslSocketFactory(trustManager), trustManager)
             .connectionSpecs(listOf(ConnectionSpec.MODERN_TLS, ConnectionSpec.CLEARTEXT))
             .socketFactory(TaggedSocketFactory())
             .connectTimeout(5, TimeUnit.SECONDS)
@@ -226,12 +220,9 @@ private val applicationModules = module {
     single { get<MessengerDatabase>().dao() }
     single { get<TagDatabase>().dao() }
 
-    single { HawkMoshiParser(get()) }
-
     single {
         LocalDataInitializer(
             androidContext(),
-            get(),
             get(named(DEFAULT_PREFERENCES)),
             get(named(STORAGE_PREFERENCES))
         )
