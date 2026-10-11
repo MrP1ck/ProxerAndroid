@@ -1,6 +1,7 @@
 package me.proxer.app.manga
 
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +33,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -209,8 +211,21 @@ private fun MangaPage(url: String, isVertical: Boolean, onTap: (Offset) -> Unit,
                 contentDescription = null,
                 state = state,
                 contentScale = if (isVertical) ContentScale.FillWidth else ContentScale.Fit,
+                // In the vertical list the zoom layer would take over vertical drags from the list, so it is disabled
+                // there and taps are detected separately.
+                gesturesEnabled = !isVertical,
                 onClick = { offset -> coordinates?.let { onTap(it.localToRoot(offset)) } },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        if (isVertical) {
+                            Modifier.pointerInput(Unit) {
+                                detectTapGestures { offset -> coordinates?.let { onTap(it.localToRoot(offset)) } }
+                            }
+                        } else {
+                            Modifier
+                        }
+                    )
             )
 
             if (!state.isImageDisplayed) {
