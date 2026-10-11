@@ -1,9 +1,5 @@
 # ![](art/logo/proxer-logo-title.png) Proxer.Me Android [![Latest Release](https://img.shields.io/github/release/proxer/ProxerAndroid.svg)](https://github.com/proxer/ProxerAndroid/releases/latest) [![Build status](https://github.com/proxer/ProxerAndroid/workflows/CI/badge.svg)](https://github.com/proxer/ProxerAndroid/actions?workflow=CI)
 
-### Unmaintained
-
-This app is not maintained anymore and will not receive any more updates. It might or might not work anymore.
-
 ### About this fork
 
 This fork contains fixes on top of the last official release (1.11.5):
@@ -107,10 +103,3 @@ repository, Maven Central and JitPack (see `settings.gradle`).
 | Anime Player                       | Design Settings                           |
 |------------------------------------|-------------------------------------------|
 | ![](art/screenshot/anime-play.png) | ![](art/screenshot/settings-design.png) |
-
-### Contributions and contributors
-
-A guide for contribution can be found [here](.github/CONTRIBUTING.md).
-
-- [@InfiniteSoul](https://github.com/InfiniteSoul) for implementing a persistent Navigation Drawer for tablets and UI improvements.
-- [@MrP1ck](https://github.com/MrP1ck) for the UI redesign.
