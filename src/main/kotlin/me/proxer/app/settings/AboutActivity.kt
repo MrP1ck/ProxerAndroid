@@ -28,7 +28,6 @@ import androidx.core.net.toUri
 import me.proxer.app.BuildConfig
 import me.proxer.app.R
 import me.proxer.app.base.ComposeActivity
-import me.proxer.app.settings.status.ServerStatusActivity
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.shell.LocalAppNavigator
 import me.proxer.app.util.extension.startActivity
@@ -86,14 +85,6 @@ class AboutActivity : ComposeActivity() {
                         stringResource(R.string.about_source_code_description)
                     ) {
                         openLink(repositoryLink)
-                    }
-
-                    AboutItem(
-                        R.drawable.ic_symbol_dns,
-                        R.string.about_server_status,
-                        stringResource(R.string.about_server_status_description)
-                    ) {
-                        ServerStatusActivity.navigateTo(this@AboutActivity)
                     }
                 }
 

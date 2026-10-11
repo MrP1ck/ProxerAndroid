@@ -52,7 +52,6 @@ import me.proxer.app.profile.history.HistoryViewModel
 import me.proxer.app.profile.media.ProfileMediaListViewModel
 import me.proxer.app.profile.settings.ProfileSettingsViewModel
 import me.proxer.app.profile.topten.TopTenViewModel
-import me.proxer.app.settings.status.ServerStatusViewModel
 import me.proxer.app.ui.LinkCheckViewModel
 import me.proxer.app.util.Validators
 import me.proxer.app.util.data.EventBus
@@ -298,8 +297,6 @@ private val viewModelModule = module {
     }
 
     viewModel { (id: String?, entryId: String?) -> EditCommentViewModel(get(), id, entryId) }
-
-    viewModel { ServerStatusViewModel(get(), get()) }
 
     viewModel { LinkCheckViewModel(get()) }
 }
