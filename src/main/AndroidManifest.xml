@@ -148,6 +148,26 @@
                     android:host="proxer.me"
                     android:pathPattern="/manga/.*"
                     android:scheme="https" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/novel"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/novel"
+                    android:scheme="https" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/novel/.*"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/novel/.*"
+                    android:scheme="https" />
             </intent-filter>
 
             <meta-data
@@ -179,7 +199,6 @@
 
         <activity android:name=".notification.NotificationActivity" />
 
-        <activity android:name=".chat.pub.message.ChatActivity" />
 
         <activity
             android:name=".chat.prv.PrvMessengerActivity"
@@ -200,7 +219,6 @@
 
         <activity android:name=".chat.prv.conference.info.ConferenceInfoActivity" />
 
-        <activity android:name=".chat.pub.room.info.ChatRoomInfoActivity" />
 
         <activity android:name=".profile.settings.ProfileSettingsActivity" />
 
@@ -233,6 +251,81 @@
         <activity android:name=".info.translatorgroup.TranslatorGroupActivity" />
 
         <activity android:name=".info.industry.IndustryActivity" />
+
+        <activity android:name=".discover.DiscoverActivity" />
+
+        <activity
+            android:name=".discover.DirectoryActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/translatorgroups"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/translatorgroups"
+                    android:scheme="https" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/industry"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/industry"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".info.character.CharacterActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/character"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/character"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".info.person.PersonActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/persons"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/persons"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".ui.ImageDetailActivity" />

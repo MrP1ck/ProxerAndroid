@@ -23,24 +23,26 @@ import me.proxer.app.chat.prv.create.CreateConferenceViewModel
 import me.proxer.app.chat.prv.message.MessengerReportViewModel
 import me.proxer.app.chat.prv.message.MessengerViewModel
 import me.proxer.app.chat.prv.sync.MessengerDatabase
-import me.proxer.app.chat.pub.message.ChatReportViewModel
-import me.proxer.app.chat.pub.message.ChatViewModel
-import me.proxer.app.chat.pub.room.ChatRoomViewModel
-import me.proxer.app.chat.pub.room.info.ChatRoomInfoViewModel
 import me.proxer.app.comment.EditCommentViewModel
+import me.proxer.app.discover.DirectoryKind
+import me.proxer.app.discover.DirectoryViewModel
 import me.proxer.app.forum.TopicViewModel
+import me.proxer.app.info.character.CharacterViewModel
 import me.proxer.app.info.industry.IndustryInfoViewModel
 import me.proxer.app.info.industry.IndustryProjectViewModel
+import me.proxer.app.info.person.PersonViewModel
 import me.proxer.app.info.translatorgroup.TranslatorGroupInfoViewModel
 import me.proxer.app.info.translatorgroup.TranslatorGroupProjectViewModel
 import me.proxer.app.manga.MangaViewModel
 import me.proxer.app.media.MediaInfoViewModel
 import me.proxer.app.media.TagDatabase
+import me.proxer.app.media.character.EntryCharactersViewModel
 import me.proxer.app.media.comments.CommentsViewModel
 import me.proxer.app.media.discussion.DiscussionViewModel
 import me.proxer.app.media.episode.EpisodeViewModel
 import me.proxer.app.media.list.MediaListFilter
 import me.proxer.app.media.list.MediaListViewModel
+import me.proxer.app.media.person.EntryPersonsViewModel
 import me.proxer.app.media.recommendation.RecommendationViewModel
 import me.proxer.app.media.relation.RelationViewModel
 import me.proxer.app.news.NewsViewModel
@@ -245,11 +247,7 @@ private val viewModelModule = module {
     viewModel { (searchQuery: String) -> ConferenceViewModel(get(), get(), searchQuery) }
     viewModel { (conferenceId: String) -> ConferenceInfoViewModel(get(), conferenceId) }
     viewModel { (initialConference: LocalConference) -> MessengerViewModel(get(), get(), initialConference) }
-    viewModel { ChatRoomViewModel(get()) }
-    viewModel { (chatRoomId: String) -> ChatViewModel(get(), chatRoomId) }
-    viewModel { (chatRoomId: String) -> ChatRoomInfoViewModel(get(), chatRoomId) }
     viewModel { MessengerReportViewModel(get(), get(), get()) }
-    viewModel { ChatReportViewModel(get()) }
 
     viewModel { (searchQuery: String?, category: Category, filterAvailable: Boolean) ->
         BookmarkViewModel(get(), searchQuery, category, filterAvailable)
@@ -281,6 +279,11 @@ private val viewModelModule = module {
         CommentsViewModel(get(), entryId, sortCriteria)
     }
     viewModel { (entryId: String) -> RelationViewModel(get(), entryId) }
+    viewModel { (entryId: String) -> EntryCharactersViewModel(get(), entryId) }
+    viewModel { (entryId: String) -> EntryPersonsViewModel(get(), entryId) }
+    viewModel { (characterId: String) -> CharacterViewModel(get(), characterId) }
+    viewModel { (kind: DirectoryKind) -> DirectoryViewModel(get(), kind) }
+    viewModel { (personId: String) -> PersonViewModel(get(), personId) }
     viewModel { (entryId: String) -> RecommendationViewModel(get(), entryId) }
     viewModel { (entryId: String) -> DiscussionViewModel(get(), entryId) }
 

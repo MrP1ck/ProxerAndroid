@@ -240,12 +240,12 @@ class MainActivity : BaseActivity() {
 
             val section = when (segments.firstOrNull()) {
                 "news" -> MainSection.NEWS
-                "chat" -> MainSection.CHAT
-                "messages" -> MainSection.MESSENGER
+                "chat", "messages" -> MainSection.MESSENGER
                 "reminder" -> MainSection.BOOKMARKS
                 "anime" -> MainSection.ANIME
                 "calendar" -> MainSection.SCHEDULE
                 "manga" -> MainSection.MANGA
+                "novel" -> MainSection.NOVEL
                 else -> null
             }
 
@@ -274,6 +274,12 @@ class MainActivity : BaseActivity() {
             "oneshot" -> "ONESHOT"
             "doujin" -> "DOUJIN"
             "hmanga" -> "HMANGA"
+            else -> null
+        }
+        MainSection.NOVEL -> when (segment) {
+            "lightnovel" -> "LIGHTNOVEL"
+            "webnovel" -> "WEBNOVEL"
+            "visualnovel" -> "VISUALNOVEL"
             else -> null
         }
         else -> null

@@ -3,11 +3,18 @@ package me.proxer.app.ui.preview
 import me.proxer.app.anime.AnimeStream
 import me.proxer.app.anime.AnimeStreamInfo
 import me.proxer.app.anime.resolver.StreamResolutionResult
+import me.proxer.app.chat.prv.ConferenceWithMessage
+import me.proxer.app.chat.prv.LocalConference
+import me.proxer.app.discover.DirectoryEntry
+import me.proxer.app.info.ProfileDetails
+import me.proxer.app.info.ProfileGroup
+import me.proxer.app.info.ProfileLink
 import me.proxer.app.media.comments.ParsedComment
 import me.proxer.app.ui.view.bbcode.toBBTree
-import me.proxer.library.entity.chat.ChatRoom
 import me.proxer.library.entity.info.AdaptionInfo
 import me.proxer.library.entity.info.Entry
+import me.proxer.library.entity.info.EntryCharacter
+import me.proxer.library.entity.info.EntryPerson
 import me.proxer.library.entity.info.EntrySeasonInfo
 import me.proxer.library.entity.info.EntryTranslatorGroup
 import me.proxer.library.entity.info.InfoGenre
@@ -29,9 +36,11 @@ import me.proxer.library.enums.License
 import me.proxer.library.enums.MediaLanguage
 import me.proxer.library.enums.MediaState
 import me.proxer.library.enums.Medium
+import me.proxer.library.enums.MessageAction
 import me.proxer.library.enums.Season
 import me.proxer.library.enums.SynonymType
 import me.proxer.library.enums.UserMediaProgress
+import me.proxer.library.util.ProxerUrls
 import java.time.Instant
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -172,9 +181,43 @@ object PreviewData {
         calendarEntry("3", "One Piece", 1100, CalendarDay.TUESDAY, -30)
     )
 
-    val chatRooms = listOf(
-        ChatRoom("1", "Allgemein", "Hier wird über alles geredet. Regeln: https://proxer.me/wiki", false),
-        ChatRoom("2", "Ankündigungen", "", true)
+    val conferences = listOf(
+        ConferenceWithMessage(
+            LocalConference(
+                id = 1,
+                topic = "Anime-Abend",
+                customTopic = "",
+                participantAmount = 4,
+                image = "",
+                imageType = "",
+                isGroup = true,
+                localIsRead = false,
+                isRead = false,
+                date = Instant.now().minusSeconds(1_800),
+                unreadMessageAmount = 3,
+                lastReadMessageId = "",
+                isFullyLoaded = true
+            ),
+            ConferenceWithMessage.SimpleLocalMessage(1, "Wer schaut heute Frieren?", "2", "Mira", MessageAction.NONE)
+        ),
+        ConferenceWithMessage(
+            LocalConference(
+                id = 2,
+                topic = "Kenji",
+                customTopic = "",
+                participantAmount = 2,
+                image = "",
+                imageType = "",
+                isGroup = false,
+                localIsRead = true,
+                isRead = true,
+                date = Instant.now().minusSeconds(86_400),
+                unreadMessageAmount = 0,
+                lastReadMessageId = "2",
+                isFullyLoaded = true
+            ),
+            ConferenceWithMessage.SimpleLocalMessage(2, "Danke für den Tipp!", "1", "Kenji", MessageAction.NONE)
+        )
     )
 
     val entry = Entry(
@@ -211,6 +254,74 @@ object PreviewData {
             InfoGenre("1", "1", now, "Adventure", ""),
             InfoGenre("2", "2", now, "Drama", ""),
             InfoGenre("3", "3", now, "Fantasy", "")
+        ),
+        mediaFormat = "tv",
+        ranking = 69,
+        cleanedRating = 9.4f,
+        bayesianRating = 9.36f,
+        availableEpisodeAmount = 26,
+        isDeactivatedForApps = true
+    )
+
+    val entryCharacters = listOf(
+        EntryCharacter("1", "Frieren", "main"),
+        EntryCharacter("2", "Fern", "main"),
+        EntryCharacter("3", "Stark", "main"),
+        EntryCharacter("4", "Himmel", "support"),
+        EntryCharacter("5", "Heiter", "support")
+    )
+
+    val entryPersons = listOf(
+        EntryPerson("1", "Kanehito Yamada", "original-creator"),
+        EntryPerson("2", "Keiichirou Saitou", "director"),
+        EntryPerson("3", "Atsumi Tanezaki", "seiyuu"),
+        EntryPerson("4", "Kana Ichinose", "seiyuu")
+    )
+
+    val directoryEntries = listOf(
+        DirectoryEntry("1", "Frieren", ProxerUrls.characterImage("1")),
+        DirectoryEntry("2", "Fern", ProxerUrls.characterImage("2")),
+        DirectoryEntry("3", "Fiona", ProxerUrls.characterImage("3")),
+        DirectoryEntry("4", "Fritz", ProxerUrls.characterImage("4"))
+    )
+
+    val characterProfile = ProfileDetails(
+        name = "Frieren",
+        imageUrl = ProxerUrls.characterImage("1"),
+        facts = listOf("Geschlecht" to "Weiblich", "Geburtstag" to "5. Mai", "Größe" to "160 cm"),
+        names = listOf("Deutsch" to "Frieren", "Japanisch" to "フリーレン"),
+        descriptions = listOf(
+            "Einleitung" to "[b]Frieren[/b] ist eine [i]Elfe[/i] und Magierin, die mit der Heldengruppe den " +
+                "Dämonenkönig besiegt hat.",
+            "Persönlichkeit" to "Frieren wirkt gleichgültig, doch sie lernt langsam, die Menschen zu verstehen."
+        ),
+        groups = listOf(
+            ProfileGroup(
+                "Gesprochen von",
+                listOf(ProfileLink("1", "Atsumi Tanezaki", "Japanisch", ProxerUrls.personImage("3")) {})
+            ),
+            ProfileGroup(
+                "Auftritte",
+                listOf(ProfileLink("1", "Sousou no Frieren", "Hauptcharakter", ProxerUrls.entryImage("1")) {})
+            )
+        )
+    )
+
+    val personProfile = ProfileDetails(
+        name = "Atsumi Tanezaki",
+        imageUrl = ProxerUrls.personImage("3"),
+        facts = listOf("Geschlecht" to "Weiblich", "Geburtstag" to "13. Februar 1994", "Berufe" to "Sprecher"),
+        names = listOf("Name" to "Atsumi Tanezaki (種﨑 敦美)"),
+        descriptions = listOf("Biografie" to "[b]Atsumi Tanezaki[/b] ist eine japanische Synchronsprecherin."),
+        groups = listOf(
+            ProfileGroup(
+                "Werke",
+                listOf(ProfileLink("1", "Sousou no Frieren", "Sprecher", ProxerUrls.entryImage("1")) {})
+            ),
+            ProfileGroup(
+                "Spricht",
+                listOf(ProfileLink("1", "Frieren", "Japanisch", ProxerUrls.characterImage("1")) {})
+            )
         )
     )
 

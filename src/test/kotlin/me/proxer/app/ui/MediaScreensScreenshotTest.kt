@@ -10,8 +10,11 @@ import me.proxer.app.anime.AnimeContent
 import me.proxer.app.anime.StreamActions
 import me.proxer.app.comment.CommentCard
 import me.proxer.app.comment.CommentCardData
+import me.proxer.app.info.ProfileContent
+import me.proxer.app.media.character.CharacterContent
 import me.proxer.app.media.info.MediaInfoActions
 import me.proxer.app.media.info.MediaInfoContent
+import me.proxer.app.media.person.PersonContent
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.preview.PreviewData
 import org.junit.Rule
@@ -41,6 +44,26 @@ class MediaScreensScreenshotTest(private val isDark: Boolean) {
     @Test
     fun mediaInfo() = composeRule.captureScreen("screens", "media_info", isDark) {
         MediaInfoContent(PreviewData.entry, PreviewData.mediaUserInfo, true, MediaInfoActions(), PaddingValues())
+    }
+
+    @Test
+    fun characters() = composeRule.captureScreen("screens", "characters", isDark) {
+        CharacterContent(ContentState(PreviewData.entryCharacters), {}, {}, PaddingValues())
+    }
+
+    @Test
+    fun persons() = composeRule.captureScreen("screens", "persons", isDark) {
+        PersonContent(ContentState(PreviewData.entryPersons), {}, {}, PaddingValues())
+    }
+
+    @Test
+    fun characterProfile() = composeRule.captureScreen("screens", "character_profile", isDark) {
+        ProfileContent(PreviewData.characterProfile, {}, PaddingValues())
+    }
+
+    @Test
+    fun personProfile() = composeRule.captureScreen("screens", "person_profile", isDark) {
+        ProfileContent(PreviewData.personProfile, {}, PaddingValues())
     }
 
     @Test

@@ -20,12 +20,12 @@
         android:enabled="true"
         android:icon="@drawable/ic_shortcut_chat"
         android:shortcutDisabledMessage="@string/shortcut_disabled_message"
-        android:shortcutId="chat"
-        android:shortcutLongLabel="@string/section_chat"
-        android:shortcutShortLabel="@string/section_chat">
+        android:shortcutId="messenger"
+        android:shortcutLongLabel="@string/section_messenger"
+        android:shortcutShortLabel="@string/section_messenger">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="chat"
+            android:data="messages"
             android:targetClass="me.proxer.app.MainActivity"
             android:targetPackage="me.proxer.app" />
     </shortcut>

@@ -35,12 +35,18 @@ data class MediaListFilter(
                 MediaType.OVA,
                 MediaType.HENTAI
             )
-            Category.MANGA, Category.NOVEL -> listOf(
+            Category.MANGA -> listOf(
                 MediaType.ALL_MANGA,
                 MediaType.MANGASERIES,
                 MediaType.ONESHOT,
                 MediaType.DOUJIN,
                 MediaType.HMANGA
+            )
+            Category.NOVEL -> listOf(
+                MediaType.ALL_NOVEL,
+                MediaType.LIGHTNOVEL,
+                MediaType.WEBNOVEL,
+                MediaType.VISUALNOVEL
             )
         }
 

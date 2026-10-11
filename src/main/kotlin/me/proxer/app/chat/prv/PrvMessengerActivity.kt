@@ -51,6 +51,7 @@ import me.proxer.app.ui.components.map
 import me.proxer.app.ui.components.rememberErrorActionHandler
 import me.proxer.app.ui.shell.LocalAppNavigator
 import me.proxer.app.ui.shell.rememberCurrentUser
+import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.intentFor
 import me.proxer.app.util.extension.startActivity
 import me.proxer.app.util.extension.toAppString
@@ -226,6 +227,7 @@ class PrvMessengerActivity : ComposeActivity() {
         val viewModel = koinViewModel<ConferenceViewModel> { parametersOf("") }
         val state = viewModel.collectContentState()
         val onErrorAction = rememberErrorActionHandler(viewModel::load)
+        val userId = koinInject<StorageHelper>().user?.id
 
         ProxerScaffold(
             title = stringResource(R.string.activity_prv_messenger_send_to),
@@ -233,6 +235,7 @@ class PrvMessengerActivity : ComposeActivity() {
         ) { padding ->
             ConferenceList(
                 state = state,
+                userId = userId,
                 isSearching = false,
                 onErrorAction = onErrorAction,
                 onConferenceClick = {
