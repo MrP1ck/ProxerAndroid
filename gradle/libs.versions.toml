@@ -2,7 +2,7 @@
 # App
 appVersionMajor = "2"
 appVersionMinor = "0"
-appVersionPatch = "0"
+appVersionPatch = "1"
 
 minSdk = "23"
 targetSdk = "35"
