@@ -32,10 +32,7 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.getKoin
-import org.koin.core.context.GlobalContext
-import org.koin.core.parameter.ParametersDefinition
 import org.koin.core.parameter.ParametersHolder
-import org.koin.core.qualifier.Qualifier
 import java.util.EnumSet
 import java.util.regex.Pattern.quote
 
@@ -202,8 +199,3 @@ fun CustomTabsHelperFragment.openHttpPage(activity: Activity, url: HttpUrl) {
             }
         }
 }
-
-inline fun <reified T> safeInject(
-    qualifier: Qualifier? = null,
-    noinline parameters: ParametersDefinition? = null
-): Lazy<T> = lazy { GlobalContext.get().get(qualifier, parameters) }

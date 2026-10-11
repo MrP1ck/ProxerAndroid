@@ -17,10 +17,11 @@ import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.await
-import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerApi
 import me.proxer.library.entity.notifications.NotificationInfo
 import me.proxer.library.enums.NotificationFilter
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -30,14 +31,14 @@ import java.util.concurrent.TimeUnit
 class NotificationWorker(
     context: Context,
     workerParams: WorkerParameters
-) : CoroutineWorker(context, workerParams) {
+) : CoroutineWorker(context, workerParams), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         private const val NAME = "NotificationWorker"
 
-        private val bus by safeInject<EventBus>()
-        private val workManager by safeInject<WorkManager>()
-        private val preferenceHelper by safeInject<PreferenceHelper>()
+        private val bus by inject<EventBus>()
+        private val workManager by inject<WorkManager>()
+        private val preferenceHelper by inject<PreferenceHelper>()
 
         fun enqueueIfPossible(delay: Boolean = false) {
             val areNotificationsEnabled = preferenceHelper.areNewsNotificationsEnabled ||
@@ -70,8 +71,8 @@ class NotificationWorker(
         }
     }
 
-    private val api by safeInject<ProxerApi>()
-    private val storageHelper by safeInject<StorageHelper>()
+    private val api by inject<ProxerApi>()
+    private val storageHelper by inject<StorageHelper>()
 
     override suspend fun doWork(): Result = try {
         val notificationInfo = when (storageHelper.isLoggedIn) {

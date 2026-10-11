@@ -15,18 +15,17 @@ import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.Events
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.catchingErrors
-import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerApi
 import me.proxer.library.api.Endpoint
 
 /**
  * @author Ruben Gees
  */
-class CreateConferenceViewModel : ViewModel() {
-
-    private val bus by safeInject<EventBus>()
-    private val api by safeInject<ProxerApi>()
-    private val messengerDao by safeInject<MessengerDao>()
+class CreateConferenceViewModel(
+    private val api: ProxerApi,
+    private val bus: EventBus,
+    private val messengerDao: MessengerDao
+) : ViewModel() {
 
     val isLoading = MutableStateFlow(false)
     val result = Events<LocalConference>()

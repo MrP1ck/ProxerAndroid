@@ -16,9 +16,9 @@ import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.androidUri
 import me.proxer.app.util.extension.fallbackHandleLink
-import me.proxer.app.util.extension.safeInject
 import me.zhanghai.android.customtabshelper.CustomTabsHelperFragment
 import okhttp3.HttpUrl
+import org.koin.android.ext.android.inject
 import kotlin.properties.Delegates
 
 /**
@@ -40,9 +40,9 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
     protected open val themeOverlay: Int?
         @StyleRes get() = null
 
-    protected val bus by safeInject<EventBus>()
-    protected val storageHelper by safeInject<StorageHelper>()
-    protected val preferenceHelper by safeInject<PreferenceHelper>()
+    protected val bus by inject<EventBus>()
+    protected val storageHelper by inject<StorageHelper>()
+    protected val preferenceHelper by inject<PreferenceHelper>()
 
     private var customTabsHelper by Delegates.notNull<CustomTabsHelperFragment>()
 

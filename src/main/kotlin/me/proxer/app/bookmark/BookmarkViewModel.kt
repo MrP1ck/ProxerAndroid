@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedContentViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.Events
 import me.proxer.app.util.data.UniqueQueue
@@ -19,10 +20,11 @@ import kotlin.properties.Delegates
  * @author Ruben Gees
  */
 class BookmarkViewModel(
+    dependencies: ViewModelDependencies,
     searchQuery: String?,
     category: Category?,
     filterAvailable: Boolean
-) : PagedContentViewModel<Bookmark>() {
+) : PagedContentViewModel<Bookmark>(dependencies) {
 
     override val itemsOnPage = 30
 

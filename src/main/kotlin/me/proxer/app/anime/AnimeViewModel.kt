@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import me.proxer.app.anime.resolver.StreamResolutionResult
 import me.proxer.app.anime.resolver.StreamResolverFactory
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.exception.AgeConfirmationRequiredException
 import me.proxer.app.exception.AppRequiredException
 import me.proxer.app.exception.NotLoggedInException
@@ -38,10 +39,11 @@ import kotlin.properties.Delegates
  * @author Ruben Gees
  */
 class AnimeViewModel(
+    dependencies: ViewModelDependencies,
     private val entryId: String,
     private val language: AnimeLanguage,
     episode: Int
-) : BaseViewModel<AnimeStreamInfo>() {
+) : BaseViewModel<AnimeStreamInfo>(dependencies) {
 
     private companion object {
         private val streamComparator = compareBy<AnimeStream, Int?>(nullsLast()) { it.resolutionResult?.let { 0 } }

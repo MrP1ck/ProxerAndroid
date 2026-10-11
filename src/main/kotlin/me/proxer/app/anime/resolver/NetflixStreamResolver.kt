@@ -6,19 +6,20 @@ import me.proxer.app.exception.StreamResolutionException
 import me.proxer.app.util.extension.androidUri
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.isPackageInstalled
-import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toPrefixedUrlOrNull
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Ruben Gees
  */
-object NetflixStreamResolver : StreamResolver() {
+object NetflixStreamResolver : StreamResolver(), KoinComponent {
 
     private const val NETFLIX_PACKAGE = "com.netflix.mediaclient"
 
     override val name = "Netflix"
 
-    private val packageManager by safeInject<PackageManager>()
+    private val packageManager by inject<PackageManager>()
 
     override suspend fun resolve(id: String): StreamResolutionResult {
         if (!packageManager.isPackageInstalled(NETFLIX_PACKAGE)) {

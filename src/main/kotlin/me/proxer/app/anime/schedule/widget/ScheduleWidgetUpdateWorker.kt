@@ -15,11 +15,12 @@ import kotlinx.coroutines.withContext
 import me.proxer.app.R
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction
-import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toLocalDateTime
 import me.proxer.app.widget.WidgetError
 import me.proxer.app.widget.WidgetState
 import me.proxer.library.ProxerApi
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
@@ -33,12 +34,12 @@ import kotlin.coroutines.cancellation.CancellationException
 class ScheduleWidgetUpdateWorker(
     context: Context,
     workerParams: WorkerParameters
-) : CoroutineWorker(context, workerParams) {
+) : CoroutineWorker(context, workerParams), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         private const val NAME = "ScheduleWidgetUpdateWorker"
 
-        private val workManager by safeInject<WorkManager>()
+        private val workManager by inject<WorkManager>()
 
         fun enqueueWork() {
             val workRequest = OneTimeWorkRequestBuilder<ScheduleWidgetUpdateWorker>()
@@ -54,7 +55,7 @@ class ScheduleWidgetUpdateWorker(
         }
     }
 
-    private val api by safeInject<ProxerApi>()
+    private val api by inject<ProxerApi>()
 
     override suspend fun doWork(): Result {
         val previous = scheduleWidgetStore.read(applicationContext)

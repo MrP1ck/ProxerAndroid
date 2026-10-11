@@ -9,20 +9,17 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.extension.awaitNullable
-import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerApi
 import timber.log.Timber
 
 /**
  * @author Ruben Gees
  */
-class LogoutViewModel : ViewModel() {
+class LogoutViewModel(private val api: ProxerApi) : ViewModel() {
 
     val success = MutableStateFlow<Unit?>(null)
     val error = MutableStateFlow<ErrorUtils.ErrorAction?>(null)
     val isLoading = MutableStateFlow(false)
-
-    private val api by safeInject<ProxerApi>()
 
     private var dataJob: Job? = null
 

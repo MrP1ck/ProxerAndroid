@@ -11,17 +11,16 @@ import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.awaitNullable
 import me.proxer.app.util.extension.catchingErrors
-import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toLocalSettings
 import me.proxer.library.ProxerApi
 
 /**
  * @author Ruben Gees
  */
-class ProfileSettingsViewModel : ViewModel() {
-
-    private val api by safeInject<ProxerApi>()
-    private val storageHelper by safeInject<StorageHelper>()
+class ProfileSettingsViewModel(
+    private val api: ProxerApi,
+    private val storageHelper: StorageHelper
+) : ViewModel() {
 
     val data = MutableStateFlow(storageHelper.profileSettings)
     val error = Events<ErrorUtils.ErrorAction>()

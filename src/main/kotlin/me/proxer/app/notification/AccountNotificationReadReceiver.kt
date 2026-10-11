@@ -6,16 +6,17 @@ import android.content.Context
 import android.content.Intent
 import me.proxer.app.util.extension.awaitNullable
 import me.proxer.app.util.extension.launchAsync
-import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerApi
 import me.proxer.library.enums.NotificationFilter
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Ruben Gees
  */
-class AccountNotificationReadReceiver : BroadcastReceiver() {
+class AccountNotificationReadReceiver : BroadcastReceiver(), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         fun getPendingIntent(context: Context): PendingIntent = PendingIntent.getBroadcast(
             context,
             0,
@@ -25,7 +26,7 @@ class AccountNotificationReadReceiver : BroadcastReceiver() {
         )
     }
 
-    private val api by safeInject<ProxerApi>()
+    private val api by inject<ProxerApi>()
 
     override fun onReceive(context: Context, intent: Intent?) {
         launchAsync {

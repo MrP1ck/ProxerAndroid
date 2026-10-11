@@ -39,7 +39,7 @@ class PagedViewModelTest {
 
     @Test
     fun `the first load publishes the first page`() {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         viewModel.load()
 
@@ -49,7 +49,7 @@ class PagedViewModelTest {
 
     @Test
     fun `loading more appends the next page`() {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         viewModel.load()
         viewModel.loadIfPossible()
@@ -60,7 +60,7 @@ class PagedViewModelTest {
 
     @Test
     fun `a short page marks the end and stops loading more`() {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         PagedTestViewModel.source = { page ->
             requestedPages += page
@@ -76,7 +76,7 @@ class PagedViewModelTest {
 
     @Test
     fun `loading more skips items which are already shown`() {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         viewModel.load()
 
@@ -92,7 +92,7 @@ class PagedViewModelTest {
 
     @Test
     fun `refreshing requests the first page and puts new items first`() {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         viewModel.load()
         viewModel.loadIfPossible()
@@ -110,7 +110,7 @@ class PagedViewModelTest {
 
     @Test
     fun `refreshing does not advance the page`() {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         viewModel.load()
         viewModel.refresh()
@@ -121,7 +121,7 @@ class PagedViewModelTest {
 
     @Test
     fun `an error on the first page is a blocking error`() = runTest {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         viewModel.refreshError.flow.test {
             PagedTestViewModel.source = { throw IllegalStateException() }
@@ -136,7 +136,7 @@ class PagedViewModelTest {
 
     @Test
     fun `a failing refresh keeps the data and reports a refresh error`() = runTest {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         viewModel.refreshError.flow.test {
             viewModel.load()
@@ -152,7 +152,7 @@ class PagedViewModelTest {
 
     @Test
     fun `a failing page after the first one is a blocking error`() = runTest {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         viewModel.refreshError.flow.test {
             viewModel.load()
@@ -168,7 +168,7 @@ class PagedViewModelTest {
 
     @Test
     fun `reload starts again at the first page`() {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         viewModel.load()
         viewModel.loadIfPossible()
@@ -180,7 +180,7 @@ class PagedViewModelTest {
 
     @Test
     fun `reload allows loading more again after the end was reached`() {
-        val viewModel = PagedTestViewModel()
+        val viewModel = PagedTestViewModel(environment.dependencies)
 
         PagedTestViewModel.source = { page ->
             requestedPages += page
@@ -202,7 +202,7 @@ class PagedViewModelTest {
     }
 }
 
-private class PagedTestViewModel : PagedViewModel<Int>() {
+private class PagedTestViewModel(dependencies: ViewModelDependencies) : PagedViewModel<Int>(dependencies) {
 
     companion object {
         const val ITEMS_ON_PAGE = 3

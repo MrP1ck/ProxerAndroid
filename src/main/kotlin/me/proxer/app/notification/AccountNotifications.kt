@@ -15,16 +15,17 @@ import me.proxer.app.util.extension.ProxerNotification
 import me.proxer.app.util.extension.androidUri
 import me.proxer.app.util.extension.getQuantityString
 import me.proxer.app.util.extension.notifyIfPermitted
-import me.proxer.app.util.extension.safeInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Ruben Gees
  */
-object AccountNotifications {
+object AccountNotifications : KoinComponent {
 
     private const val ID = 759_234_852
 
-    private val storageHelper by safeInject<StorageHelper>()
+    private val storageHelper by inject<StorageHelper>()
 
     fun showOrUpdate(context: Context, notifications: Collection<ProxerNotification>) {
         when (val notification = buildNotification(context, notifications)) {

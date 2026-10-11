@@ -4,8 +4,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.proxer.app.MainApplication.Companion.USER_AGENT
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.extension.awaitString
-import me.proxer.app.util.extension.safeInject
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -18,7 +18,10 @@ import org.jsoup.nodes.TextNode
 /**
  * @author Ruben Gees
  */
-class ServerStatusViewModel : BaseViewModel<List<ServerStatus>>() {
+class ServerStatusViewModel(
+    dependencies: ViewModelDependencies,
+    private val client: OkHttpClient
+) : BaseViewModel<List<ServerStatus>>(dependencies) {
 
     private companion object {
         private val url = "https://proxer.de".toHttpUrl()
@@ -33,8 +36,6 @@ class ServerStatusViewModel : BaseViewModel<List<ServerStatus>>() {
 
         return withContext(Dispatchers.Default) { scrape(Jsoup.parse(body)) }
     }
-
-    private val client by safeInject<OkHttpClient>()
 
     private fun constructRequest() = Request.Builder()
         .url(url)

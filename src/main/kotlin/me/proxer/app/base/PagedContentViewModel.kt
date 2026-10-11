@@ -6,7 +6,7 @@ import me.proxer.library.api.PagingLimitEndpoint
 /**
  * @author Ruben Gees
  */
-abstract class PagedContentViewModel<T> : PagedViewModel<T>() {
+abstract class PagedContentViewModel<T>(dependencies: ViewModelDependencies) : PagedViewModel<T>(dependencies) {
 
     override suspend fun loadData(): List<T> {
         validate()

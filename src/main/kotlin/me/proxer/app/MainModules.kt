@@ -14,6 +14,7 @@ import me.proxer.app.auth.LoginHandler
 import me.proxer.app.auth.LoginViewModel
 import me.proxer.app.auth.LogoutViewModel
 import me.proxer.app.auth.ProxerLoginTokenManager
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.bookmark.BookmarkViewModel
 import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.chat.prv.conference.ConferenceViewModel
@@ -103,7 +104,8 @@ private const val API_TOKEN_HEADER = "proxer-api-token"
 
 private val headersToRedact = listOf("proxer-api-key", "set-cookie")
 
-private val applicationModules = module {
+/** Preferences, databases and the helpers on top of them. */
+private val storageModule = module {
     single { androidContext().packageManager }
 
     single(named(DEFAULT_PREFERENCES)) {
@@ -130,14 +132,38 @@ private val applicationModules = module {
     single { EventBus() }
 
     single {
+        Room.databaseBuilder(androidContext(), MessengerDatabase::class.java, CHAT_DATABASE_NAME)
+            .addMigrations(MessengerDatabase.MIGRATION_1_2)
+            .build()
+    }
+
+    single {
+        Room.databaseBuilder(androidContext(), TagDatabase::class.java, TAG_DATABASE_NAME)
+            .addMigrations(TagDatabase.MIGRATION_1_2)
+            .build()
+    }
+
+    single { get<MessengerDatabase>().dao() }
+    single { get<TagDatabase>().dao() }
+
+    single {
+        LocalDataInitializer(
+            androidContext(),
+            get(named(DEFAULT_PREFERENCES)),
+            get(named(STORAGE_PREFERENCES))
+        )
+    }
+}
+
+/** The HTTP stack and the Proxer API. */
+private val networkModule = module {
+    single {
         val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).apply {
             init(null as KeyStore?)
         }
 
         trustManagerFactory.trustManagers.filterIsInstance(X509TrustManager::class.java).first()
     }
-
-    single { WorkManager.getInstance(androidContext()) }
 
     single {
         val preferenceHelper = get<PreferenceHelper>()
@@ -196,96 +222,86 @@ private val applicationModules = module {
             .build()
     }
 
-    single { Validators(get(), get()) }
-
-    single {
-        Room.databaseBuilder(androidContext(), MessengerDatabase::class.java, CHAT_DATABASE_NAME)
-            .addMigrations(MessengerDatabase.MIGRATION_1_2)
-            .build()
-    }
-
-    single {
-        Room.databaseBuilder(androidContext(), TagDatabase::class.java, TAG_DATABASE_NAME)
-            .addMigrations(TagDatabase.MIGRATION_1_2)
-            .build()
-    }
-
-    single { get<MessengerDatabase>().dao() }
-    single { get<TagDatabase>().dao() }
-
-    single {
-        LocalDataInitializer(
-            androidContext(),
-            get(named(DEFAULT_PREFERENCES)),
-            get(named(STORAGE_PREFERENCES))
-        )
-    }
-
     single<LoginTokenManager> { ProxerLoginTokenManager(get()) }
+}
+
+/** Everything else the screens and workers need. */
+private val appModule = module {
+    single { WorkManager.getInstance(androidContext()) }
+
+    single { Validators(get(), get()) }
+    single { ViewModelDependencies(get(), get(), get(), get(), get()) }
+
     single { LoginHandler(get(), get(), get()) }
 }
 
 private val viewModelModule = module {
-    viewModel { LoginViewModel() }
-    viewModel { LogoutViewModel() }
+    viewModel { LoginViewModel(get(), get(), get()) }
+    viewModel { LogoutViewModel(get()) }
 
-    viewModel { NewsViewModel() }
-    viewModel { NotificationViewModel() }
+    viewModel { NewsViewModel(get()) }
+    viewModel { NotificationViewModel(get()) }
 
-    viewModel { CreateConferenceViewModel() }
-    viewModel { (searchQuery: String) -> ConferenceViewModel(searchQuery) }
-    viewModel { (conferenceId: String) -> ConferenceInfoViewModel(conferenceId) }
-    viewModel { (initialConference: LocalConference) -> MessengerViewModel(initialConference) }
-    viewModel { ChatRoomViewModel() }
-    viewModel { (chatRoomId: String) -> ChatViewModel(chatRoomId) }
-    viewModel { (chatRoomId: String) -> ChatRoomInfoViewModel(chatRoomId) }
-    viewModel { MessengerReportViewModel() }
-    viewModel { ChatReportViewModel() }
+    viewModel { CreateConferenceViewModel(get(), get(), get()) }
+    viewModel { (searchQuery: String) -> ConferenceViewModel(get(), get(), searchQuery) }
+    viewModel { (conferenceId: String) -> ConferenceInfoViewModel(get(), conferenceId) }
+    viewModel { (initialConference: LocalConference) -> MessengerViewModel(get(), get(), initialConference) }
+    viewModel { ChatRoomViewModel(get()) }
+    viewModel { (chatRoomId: String) -> ChatViewModel(get(), chatRoomId) }
+    viewModel { (chatRoomId: String) -> ChatRoomInfoViewModel(get(), chatRoomId) }
+    viewModel { MessengerReportViewModel(get(), get(), get()) }
+    viewModel { ChatReportViewModel(get()) }
 
     viewModel { (searchQuery: String?, category: Category, filterAvailable: Boolean) ->
-        BookmarkViewModel(searchQuery, category, filterAvailable)
+        BookmarkViewModel(get(), searchQuery, category, filterAvailable)
     }
 
-    viewModel { (initialFilter: MediaListFilter) -> MediaListViewModel(initialFilter) }
+    viewModel { (initialFilter: MediaListFilter) -> MediaListViewModel(get(), initialFilter, get()) }
 
-    viewModel { ScheduleViewModel() }
+    viewModel { ScheduleViewModel(get()) }
 
-    viewModel { (userId: String?, username: String?) -> ProfileAboutViewModel(userId, username) }
-    viewModel { (userId: String?, username: String?) -> ProfileViewModel(userId, username) }
-    viewModel { (userId: String?, username: String?) -> TopTenViewModel(userId, username) }
-    viewModel { (userId: String?, username: String?) -> HistoryViewModel(userId, username) }
-    viewModel { ProfileSettingsViewModel() }
+    viewModel { (userId: String?, username: String?) -> ProfileAboutViewModel(get(), userId, username) }
+    viewModel { (userId: String?, username: String?) -> ProfileViewModel(get(), userId, username) }
+    viewModel { (userId: String?, username: String?) -> TopTenViewModel(get(), userId, username) }
+    viewModel { (userId: String?, username: String?) -> HistoryViewModel(get(), userId, username) }
+    viewModel { ProfileSettingsViewModel(get(), get()) }
 
     viewModel { parameterList ->
-        ProfileMediaListViewModel(parameterList[0], parameterList[1], parameterList[2], parameterList[3])
+        ProfileMediaListViewModel(get(), parameterList[0], parameterList[1], parameterList[2], parameterList[3])
     }
 
     viewModel { (userId: String?, username: String?, category: Category?) ->
-        ProfileCommentViewModel(userId, username, category)
+        ProfileCommentViewModel(get(), userId, username, category)
     }
 
-    viewModel { (id: String, resources: Resources) -> TopicViewModel(id, resources) }
+    viewModel { (id: String, resources: Resources) -> TopicViewModel(get(), id, resources) }
 
-    viewModel { (entryId: String) -> MediaInfoViewModel(entryId) }
-    viewModel { (entryId: String) -> EpisodeViewModel(entryId) }
-    viewModel { (entryId: String, sortCriteria: CommentSortCriteria) -> CommentsViewModel(entryId, sortCriteria) }
-    viewModel { (entryId: String) -> RelationViewModel(entryId) }
-    viewModel { (entryId: String) -> RecommendationViewModel(entryId) }
-    viewModel { (entryId: String) -> DiscussionViewModel(entryId) }
+    viewModel { (entryId: String) -> MediaInfoViewModel(get(), entryId) }
+    viewModel { (entryId: String) -> EpisodeViewModel(get(), entryId) }
+    viewModel { (entryId: String, sortCriteria: CommentSortCriteria) ->
+        CommentsViewModel(get(), entryId, sortCriteria)
+    }
+    viewModel { (entryId: String) -> RelationViewModel(get(), entryId) }
+    viewModel { (entryId: String) -> RecommendationViewModel(get(), entryId) }
+    viewModel { (entryId: String) -> DiscussionViewModel(get(), entryId) }
 
-    viewModel { (industryId: String) -> IndustryInfoViewModel(industryId) }
-    viewModel { (industryId: String) -> IndustryProjectViewModel(industryId) }
-    viewModel { (translatorGroupId: String) -> TranslatorGroupInfoViewModel(translatorGroupId) }
-    viewModel { (translatorGroupId: String) -> TranslatorGroupProjectViewModel(translatorGroupId) }
+    viewModel { (industryId: String) -> IndustryInfoViewModel(get(), industryId) }
+    viewModel { (industryId: String) -> IndustryProjectViewModel(get(), industryId) }
+    viewModel { (translatorGroupId: String) -> TranslatorGroupInfoViewModel(get(), translatorGroupId) }
+    viewModel { (translatorGroupId: String) -> TranslatorGroupProjectViewModel(get(), translatorGroupId) }
 
-    viewModel { (entryId: String, language: Language, episode: Int) -> MangaViewModel(entryId, language, episode) }
-    viewModel { (entryId: String, language: AnimeLanguage, episode: Int) -> AnimeViewModel(entryId, language, episode) }
+    viewModel { (entryId: String, language: Language, episode: Int) ->
+        MangaViewModel(get(), entryId, language, episode)
+    }
+    viewModel { (entryId: String, language: AnimeLanguage, episode: Int) ->
+        AnimeViewModel(get(), entryId, language, episode)
+    }
 
-    viewModel { (id: String?, entryId: String?) -> EditCommentViewModel(id, entryId) }
+    viewModel { (id: String?, entryId: String?) -> EditCommentViewModel(get(), id, entryId) }
 
-    viewModel { ServerStatusViewModel() }
+    viewModel { ServerStatusViewModel(get(), get()) }
 
-    viewModel { LinkCheckViewModel() }
+    viewModel { LinkCheckViewModel(get()) }
 }
 
-val koinModules = listOf(applicationModules, viewModelModule)
+val koinModules = listOf(storageModule, networkModule, appModule, viewModelModule)

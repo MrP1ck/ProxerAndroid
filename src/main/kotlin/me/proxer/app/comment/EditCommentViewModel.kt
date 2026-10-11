@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.Events
 import me.proxer.app.util.extension.await
@@ -21,9 +22,10 @@ import me.proxer.library.enums.UserMediaProgress
  * @author Ruben Gees
  */
 class EditCommentViewModel(
+    dependencies: ViewModelDependencies,
     private val id: String?,
     private val entryId: String?
-) : BaseViewModel<LocalComment>() {
+) : BaseViewModel<LocalComment>(dependencies) {
 
     companion object {
         private const val MAX_LENGTH = 20_000

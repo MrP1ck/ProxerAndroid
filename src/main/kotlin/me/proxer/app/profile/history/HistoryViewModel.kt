@@ -3,6 +3,7 @@ package me.proxer.app.profile.history
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.toLocalEntry
 import me.proxer.app.util.extension.toLocalEntryUcp
@@ -11,9 +12,10 @@ import me.proxer.app.util.extension.toLocalEntryUcp
  * @author Ruben Gees
  */
 class HistoryViewModel(
+    dependencies: ViewModelDependencies,
     private val userId: String?,
     private val username: String?
-) : PagedViewModel<LocalUserHistoryEntry>() {
+) : PagedViewModel<LocalUserHistoryEntry>(dependencies) {
 
     override val itemsOnPage = 50
 

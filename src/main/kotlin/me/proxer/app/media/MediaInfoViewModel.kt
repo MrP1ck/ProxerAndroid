@@ -5,6 +5,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.exception.AgeConfirmationRequiredException
 import me.proxer.app.exception.NotLoggedInException
 import me.proxer.app.util.ErrorUtils
@@ -22,7 +23,10 @@ import me.proxer.library.entity.info.MediaUserInfo
 /**
  * @author Ruben Gees
  */
-class MediaInfoViewModel(private val entryId: String) : BaseViewModel<Entry>() {
+class MediaInfoViewModel(
+    dependencies: ViewModelDependencies,
+    private val entryId: String
+) : BaseViewModel<Entry>(dependencies) {
 
     override suspend fun loadData(): Entry {
         validate()

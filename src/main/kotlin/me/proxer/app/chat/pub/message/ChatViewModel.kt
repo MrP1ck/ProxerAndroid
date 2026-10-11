@@ -9,6 +9,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.Events
 import me.proxer.app.util.extension.await
@@ -25,7 +26,10 @@ import java.util.Queue
 /**
  * @author Ruben Gees
  */
-class ChatViewModel(private val chatRoomId: String) : PagedViewModel<ParsedChatMessage>() {
+class ChatViewModel(
+    dependencies: ViewModelDependencies,
+    private val chatRoomId: String
+) : PagedViewModel<ParsedChatMessage>(dependencies) {
 
     private companion object {
         private const val POLLING_INTERVAL = 3_000L

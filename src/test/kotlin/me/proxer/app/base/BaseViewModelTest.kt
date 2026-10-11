@@ -41,7 +41,7 @@ class BaseViewModelTest {
 
     @Test
     fun `load publishes the data`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
 
@@ -52,7 +52,7 @@ class BaseViewModelTest {
 
     @Test
     fun `load publishes a handled error and clears the data`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
 
@@ -66,7 +66,7 @@ class BaseViewModelTest {
 
     @Test
     fun `is loading until the request finishes and the previous data is cleared meanwhile`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
 
@@ -86,7 +86,7 @@ class BaseViewModelTest {
 
     @Test
     fun `a newer load replaces a pending one`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
         val first = CompletableDeferred<String>()
 
         TestViewModel.source = { first.await() }
@@ -103,7 +103,7 @@ class BaseViewModelTest {
 
     @Test
     fun `loadIfPossible does not load while loading`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
         val pending = CompletableDeferred<String>()
 
         TestViewModel.source = {
@@ -119,7 +119,7 @@ class BaseViewModelTest {
 
     @Test
     fun `loadIfPossible does not load again after an error`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         TestViewModel.source = {
             loads++
@@ -134,7 +134,7 @@ class BaseViewModelTest {
 
     @Test
     fun `loadIfPossible loads when idle`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.loadIfPossible()
 
@@ -143,7 +143,7 @@ class BaseViewModelTest {
 
     @Test
     fun `reload clears the error and loads again`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         TestViewModel.source = { throw IllegalStateException() }
         viewModel.load()
@@ -161,7 +161,7 @@ class BaseViewModelTest {
         TestViewModel.isLoginRequired = true
         TestViewModel.source = { requireLogin() }
 
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
 
@@ -173,7 +173,7 @@ class BaseViewModelTest {
         TestViewModel.isLoginRequired = true
         TestViewModel.source = { requireLogin() }
 
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
         assertEquals(ButtonAction.LOGIN, viewModel.error.value?.buttonAction)
@@ -186,7 +186,7 @@ class BaseViewModelTest {
 
     @Test
     fun `logging in does not reload views which do not require it`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
         environment.logIn()
@@ -198,7 +198,7 @@ class BaseViewModelTest {
     fun `confirming the age reloads views which require it`() {
         TestViewModel.isAgeConfirmationRequired = true
 
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
         environment.preferenceHelper.isAgeRestrictedMediaAllowed = true
@@ -208,7 +208,7 @@ class BaseViewModelTest {
 
     @Test
     fun `a restored network connection retries a network error`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         TestViewModel.source = { throw NotConnectedException() }
         viewModel.load()
@@ -222,7 +222,7 @@ class BaseViewModelTest {
 
     @Test
     fun `a restored network connection is ignored without a network error`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
         environment.bus.post(NetworkConnectedEvent())
@@ -232,7 +232,7 @@ class BaseViewModelTest {
 
     @Test
     fun `a closed view model stops its request`() {
-        val viewModel = TestViewModel()
+        val viewModel = TestViewModel(environment.dependencies)
         var wasCancelled = false
 
         TestViewModel.source = {
@@ -261,7 +261,7 @@ class BaseViewModelTest {
  * The state is read from companion fields because the base class reads the overridden members while it is still
  * being constructed.
  */
-private class TestViewModel : BaseViewModel<String>() {
+private class TestViewModel(dependencies: ViewModelDependencies) : BaseViewModel<String>(dependencies) {
 
     companion object {
         var source: suspend () -> String = { awaitCancellation() }

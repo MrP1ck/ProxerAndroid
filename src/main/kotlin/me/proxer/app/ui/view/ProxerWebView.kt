@@ -13,12 +13,13 @@ import me.proxer.app.MainApplication.Companion.USER_AGENT
 import me.proxer.app.R
 import me.proxer.app.util.extension.proxyIfRequired
 import me.proxer.app.util.extension.resolveColor
-import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toPrefixedUrlOrNull
 import me.proxer.library.util.ProxerUrls
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.MathContext
@@ -121,9 +122,9 @@ class ProxerWebView @JvmOverloads constructor(
         return "rgba($red, $green, $blue, $normalizedAlpha)"
     }
 
-    private class ProxerWebClient(private val onShowPage: (HttpUrl) -> Unit) : WebViewClient() {
+    private class ProxerWebClient(private val onShowPage: (HttpUrl) -> Unit) : WebViewClient(), KoinComponent {
 
-        private val client by safeInject<OkHttpClient>()
+        private val client by inject<OkHttpClient>()
 
         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
             return when (val httpUrl = request.url.toString().toPrefixedUrlOrNull()) {

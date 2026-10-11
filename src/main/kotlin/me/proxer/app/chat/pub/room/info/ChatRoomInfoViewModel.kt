@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseContentViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.library.api.Endpoint
 import me.proxer.library.entity.chat.ChatRoomUser
 import timber.log.Timber
@@ -13,7 +14,10 @@ import timber.log.Timber
 /**
  * @author Ruben Gees
  */
-class ChatRoomInfoViewModel(private val chatRoomId: String) : BaseContentViewModel<List<ChatRoomUser>>() {
+class ChatRoomInfoViewModel(
+    dependencies: ViewModelDependencies,
+    private val chatRoomId: String
+) : BaseContentViewModel<List<ChatRoomUser>>(dependencies) {
 
     private companion object {
         private const val POLLING_INTERVAL = 10_000L

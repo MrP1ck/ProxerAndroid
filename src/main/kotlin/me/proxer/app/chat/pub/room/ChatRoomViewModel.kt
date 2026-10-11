@@ -5,13 +5,14 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.extension.await
 import me.proxer.library.entity.chat.ChatRoom
 
 /**
  * @author Ruben Gees
  */
-class ChatRoomViewModel : BaseViewModel<List<ChatRoom>>() {
+class ChatRoomViewModel(dependencies: ViewModelDependencies) : BaseViewModel<List<ChatRoom>>(dependencies) {
 
     override suspend fun loadData(): List<ChatRoom> {
         validate()

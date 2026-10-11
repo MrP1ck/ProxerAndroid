@@ -5,14 +5,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import me.proxer.app.util.extension.launchAsync
-import me.proxer.app.util.extension.safeInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Ruben Gees
  */
-class MessengerNotificationReadReceiver : BroadcastReceiver() {
+class MessengerNotificationReadReceiver : BroadcastReceiver(), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         private const val CONFERENCE_ID_EXTRA = "conference_id"
 
         fun getPendingIntent(context: Context, conferenceId: Long): PendingIntent {
@@ -29,7 +30,7 @@ class MessengerNotificationReadReceiver : BroadcastReceiver() {
         }
     }
 
-    private val messengerDao by safeInject<MessengerDao>()
+    private val messengerDao by inject<MessengerDao>()
 
     override fun onReceive(context: Context, intent: Intent) {
         val conferenceId = intent.getLongExtra(CONFERENCE_ID_EXTRA, -1L)

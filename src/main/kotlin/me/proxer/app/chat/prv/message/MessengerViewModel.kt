@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.chat.prv.LocalMessage
 import me.proxer.app.chat.prv.sync.MessengerDao
@@ -17,14 +18,15 @@ import me.proxer.app.exception.ChatMessageException
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.Events
 import me.proxer.app.util.extension.catchingErrors
-import me.proxer.app.util.extension.safeInject
 
 /**
  * @author Ruben Gees
  */
-class MessengerViewModel(initialConference: LocalConference) : PagedViewModel<LocalMessage>() {
-
-    private val messengerDao by safeInject<MessengerDao>()
+class MessengerViewModel(
+    dependencies: ViewModelDependencies,
+    private val messengerDao: MessengerDao,
+    initialConference: LocalConference
+) : PagedViewModel<LocalMessage>(dependencies) {
 
     override val itemsOnPage = MessengerWorker.MESSAGES_ON_PAGE
 

@@ -6,12 +6,13 @@ import me.proxer.app.exception.AppRequiredException
 import me.proxer.app.exception.StreamResolutionException
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.isPackageInstalled
-import me.proxer.app.util.extension.safeInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Ruben Gees
  */
-object CrunchyrollStreamResolver : StreamResolver() {
+object CrunchyrollStreamResolver : StreamResolver(), KoinComponent {
 
     private const val CRUNCHYROLL_PACKAGE = "com.crunchyroll.crunchyroid"
 
@@ -19,7 +20,7 @@ object CrunchyrollStreamResolver : StreamResolver() {
 
     override val name = "Crunchyroll"
 
-    private val packageManager by safeInject<PackageManager>()
+    private val packageManager by inject<PackageManager>()
 
     override fun supports(name: String) = name.startsWith(this.name, true)
 

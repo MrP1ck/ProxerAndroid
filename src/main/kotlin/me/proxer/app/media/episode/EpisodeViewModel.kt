@@ -5,6 +5,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.Events
 import me.proxer.app.util.data.send
@@ -17,7 +18,10 @@ import me.proxer.library.enums.MediaLanguage
 /**
  * @author Ruben Gees
  */
-class EpisodeViewModel(private val entryId: String) : BaseViewModel<List<EpisodeRow>>() {
+class EpisodeViewModel(
+    dependencies: ViewModelDependencies,
+    private val entryId: String
+) : BaseViewModel<List<EpisodeRow>>(dependencies) {
 
     override suspend fun loadData(): List<EpisodeRow> {
         validate()

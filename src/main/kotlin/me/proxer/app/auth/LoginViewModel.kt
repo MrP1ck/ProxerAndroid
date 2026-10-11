@@ -13,7 +13,6 @@ import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.await
-import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toLocalSettings
 import me.proxer.library.ProxerApi
 import me.proxer.library.ProxerException
@@ -23,16 +22,16 @@ import timber.log.Timber
 /**
  * @author Ruben Gees
  */
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val api: ProxerApi,
+    private val storageHelper: StorageHelper,
+    private val preferenceHelper: PreferenceHelper
+) : ViewModel() {
 
     val success = MutableStateFlow<Unit?>(null)
     val error = MutableStateFlow<ErrorUtils.ErrorAction?>(null)
     val isLoading = MutableStateFlow(false)
     val isTwoFactorAuthenticationEnabled = MutableStateFlow<Boolean?>(null)
-
-    private val api by safeInject<ProxerApi>()
-    private val storageHelper by safeInject<StorageHelper>()
-    private val preferenceHelper by safeInject<PreferenceHelper>()
 
     private var dataJob: Job? = null
 

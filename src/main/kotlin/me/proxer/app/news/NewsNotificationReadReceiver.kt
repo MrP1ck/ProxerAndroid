@@ -7,16 +7,17 @@ import android.content.Intent
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.extension.awaitNullable
 import me.proxer.app.util.extension.launchAsync
-import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerApi
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.time.Instant
 
 /**
  * @author Ruben Gees
  */
-class NewsNotificationReadReceiver : BroadcastReceiver() {
+class NewsNotificationReadReceiver : BroadcastReceiver(), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         fun getPendingIntent(context: Context): PendingIntent = PendingIntent.getBroadcast(
             context,
             0,
@@ -26,8 +27,8 @@ class NewsNotificationReadReceiver : BroadcastReceiver() {
         )
     }
 
-    private val api by safeInject<ProxerApi>()
-    private val preferenceHelper by safeInject<PreferenceHelper>()
+    private val api by inject<ProxerApi>()
+    private val preferenceHelper by inject<PreferenceHelper>()
 
     override fun onReceive(context: Context, intent: Intent?) {
         launchAsync {

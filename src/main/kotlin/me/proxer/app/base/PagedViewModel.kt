@@ -12,7 +12,7 @@ import timber.log.Timber
 /**
  * @author Ruben Gees
  */
-abstract class PagedViewModel<T> : BaseViewModel<List<T>>() {
+abstract class PagedViewModel<T>(dependencies: ViewModelDependencies) : BaseViewModel<List<T>>(dependencies) {
 
     val refreshError = Events<ErrorUtils.ErrorAction>()
 

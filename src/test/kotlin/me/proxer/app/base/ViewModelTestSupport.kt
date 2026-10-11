@@ -16,6 +16,7 @@ import me.proxer.app.util.data.InstantJsonAdapter
 import me.proxer.app.util.data.LocalDataInitializer
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
+import me.proxer.library.ProxerApi
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.koin.core.context.startKoin
@@ -40,6 +41,9 @@ class ViewModelTestRule : TestWatcher() {
     lateinit var preferenceHelper: PreferenceHelper
         private set
 
+    lateinit var dependencies: ViewModelDependencies
+        private set
+
     override fun starting(description: Description) {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val preferences = context.getSharedPreferences("test_preferences", Context.MODE_PRIVATE)
@@ -55,6 +59,17 @@ class ViewModelTestRule : TestWatcher() {
         preferenceHelper = PreferenceHelper(initializer, preferences)
         storageHelper = StorageHelper(initializer, storagePreferences, moshi)
 
+        val validators = Validators(storageHelper, preferenceHelper)
+
+        // The API is not used by the base ViewModels, the tests provide the data on their own.
+        dependencies = ViewModelDependencies(
+            api = ProxerApi.Builder("test").build(),
+            storageHelper = storageHelper,
+            preferenceHelper = preferenceHelper,
+            validators = validators,
+            bus = bus
+        )
+
         Dispatchers.setMain(UnconfinedTestDispatcher())
 
         startKoin {
@@ -63,7 +78,7 @@ class ViewModelTestRule : TestWatcher() {
                     single { bus }
                     single { preferenceHelper }
                     single { storageHelper }
-                    single { Validators(storageHelper, preferenceHelper) }
+                    single { validators }
                 }
             )
         }

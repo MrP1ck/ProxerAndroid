@@ -23,7 +23,6 @@ import me.proxer.app.util.ErrorUtils.ErrorAction.Companion.ACTION_MESSAGE_DEFAUL
 import me.proxer.app.util.ErrorUtils.ErrorAction.Companion.ACTION_MESSAGE_HIDE
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.androidUri
-import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerException
 import me.proxer.library.ProxerException.ErrorType.CANCELLED
 import me.proxer.library.ProxerException.ErrorType.IO
@@ -126,6 +125,8 @@ import me.proxer.library.ProxerException.ServerErrorType.WIKI_INVALID_PERMISSION
 import me.proxer.library.ProxerException.ServerErrorType.WIKI_INVALID_TITLE
 import me.proxer.library.enums.Device
 import me.proxer.library.util.ProxerUrls
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.io.IOException
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLPeerUnverifiedException
@@ -133,7 +134,7 @@ import javax.net.ssl.SSLPeerUnverifiedException
 /**
  * @author Ruben Gees
  */
-object ErrorUtils {
+object ErrorUtils : KoinComponent {
 
     const val ENTRY_DATA_KEY = "entry"
     const val CHAPTER_TITLE_DATA_KEY = "chapterTitle"
@@ -177,7 +178,7 @@ object ErrorUtils {
         AUTH_CODE_PENDING, AUTH_CODE_INVALID_NAME, AUTH_CODE_DUPLICATE, LIST_NO_ENTRIES_LEFT
     )
 
-    private val storageHelper by safeInject<StorageHelper>()
+    private val storageHelper by inject<StorageHelper>()
 
     fun getMessage(error: Throwable): Int {
         return when (val innermostError = getInnermostError(error)) {

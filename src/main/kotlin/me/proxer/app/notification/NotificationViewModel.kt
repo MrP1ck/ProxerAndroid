@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.Events
 import me.proxer.app.util.data.UniqueQueue
@@ -17,7 +18,7 @@ import me.proxer.library.enums.NotificationFilter
 /**
  * @author Ruben Gees
  */
-class NotificationViewModel : PagedViewModel<ProxerNotification>() {
+class NotificationViewModel(dependencies: ViewModelDependencies) : PagedViewModel<ProxerNotification>(dependencies) {
 
     override val itemsOnPage = 30
 

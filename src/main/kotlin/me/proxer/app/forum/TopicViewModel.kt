@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.toParsedPost
 import me.proxer.app.util.extension.toTopicMetaData
@@ -12,7 +13,11 @@ import me.proxer.app.util.extension.toTopicMetaData
 /**
  * @author Ruben Gees
  */
-class TopicViewModel(private val id: String, private val resources: Resources) : PagedViewModel<ParsedPost>() {
+class TopicViewModel(
+    dependencies: ViewModelDependencies,
+    private val id: String,
+    private val resources: Resources
+) : PagedViewModel<ParsedPost>(dependencies) {
 
     override val itemsOnPage = 10
 

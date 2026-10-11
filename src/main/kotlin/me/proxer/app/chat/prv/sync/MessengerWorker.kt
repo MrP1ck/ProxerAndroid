@@ -29,13 +29,14 @@ import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.awaitNullable
-import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toLocalConference
 import me.proxer.app.util.extension.toLocalMessage
 import me.proxer.library.ProxerApi
 import me.proxer.library.ProxerException
 import me.proxer.library.entity.messenger.Conference
 import me.proxer.library.entity.messenger.Message
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 import java.util.LinkedHashSet
 import java.util.concurrent.TimeUnit
@@ -46,9 +47,9 @@ import java.util.concurrent.TimeUnit
 class MessengerWorker(
     context: Context,
     workerParams: WorkerParameters
-) : CoroutineWorker(context, workerParams) {
+) : CoroutineWorker(context, workerParams), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         const val CONFERENCES_ON_PAGE = 48
         const val MESSAGES_ON_PAGE = 30
 
@@ -59,10 +60,10 @@ class MessengerWorker(
             workManager.getWorkInfosForUniqueWork(NAME).get().all { info -> info.state == WorkInfo.State.RUNNING }
         }
 
-        private val bus by safeInject<EventBus>()
-        private val workManager by safeInject<WorkManager>()
-        private val storageHelper by safeInject<StorageHelper>()
-        private val preferenceHelper by safeInject<PreferenceHelper>()
+        private val bus by inject<EventBus>()
+        private val workManager by inject<WorkManager>()
+        private val storageHelper by inject<StorageHelper>()
+        private val preferenceHelper by inject<PreferenceHelper>()
 
         fun enqueueSynchronizationIfPossible() = when {
             canSchedule() -> enqueueSynchronization()
@@ -123,10 +124,10 @@ class MessengerWorker(
     private val conferenceId: Long
         get() = inputData.getLong(CONFERENCE_ID_ARGUMENT, 0L)
 
-    private val api by safeInject<ProxerApi>()
-    private val storageHelper by safeInject<StorageHelper>()
-    private val messengerDatabase by safeInject<MessengerDatabase>()
-    private val messengerDao by safeInject<MessengerDao>()
+    private val api by inject<ProxerApi>()
+    private val storageHelper by inject<StorageHelper>()
+    private val messengerDatabase by inject<MessengerDatabase>()
+    private val messengerDao by inject<MessengerDao>()
 
     override suspend fun doWork(): Result {
         if (!storageHelper.isLoggedIn) return Result.failure()

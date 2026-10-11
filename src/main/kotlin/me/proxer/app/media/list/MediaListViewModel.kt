@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedContentViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.media.LocalTag
 import me.proxer.app.media.TagDao
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.enumSetOf
 import me.proxer.app.util.extension.isAgeRestricted
-import me.proxer.app.util.extension.safeInject
 import me.proxer.app.util.extension.toLocalDate
 import me.proxer.app.util.extension.toParcelableTag
 import me.proxer.library.api.PagingLimitEndpoint
@@ -32,7 +32,11 @@ import java.time.LocalDate
  *
  * @author Ruben Gees
  */
-class MediaListViewModel(initialFilter: MediaListFilter) : PagedContentViewModel<MediaListEntry>() {
+class MediaListViewModel(
+    dependencies: ViewModelDependencies,
+    initialFilter: MediaListFilter,
+    private val tagDao: TagDao
+) : PagedContentViewModel<MediaListEntry>(dependencies) {
 
     override val itemsOnPage = 30
 
@@ -83,8 +87,6 @@ class MediaListViewModel(initialFilter: MediaListFilter) : PagedContentViewModel
 
     val genreData = MutableStateFlow<List<LocalTag>?>(null)
     val tagData = MutableStateFlow<List<LocalTag>?>(null)
-
-    private val tagDao by safeInject<TagDao>()
 
     private var tagsJob: Job? = null
 

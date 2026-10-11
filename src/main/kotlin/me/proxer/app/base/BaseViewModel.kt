@@ -10,18 +10,12 @@ import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction
-import me.proxer.app.util.Validators
-import me.proxer.app.util.data.EventBus
-import me.proxer.app.util.data.PreferenceHelper
-import me.proxer.app.util.data.StorageHelper
-import me.proxer.app.util.extension.safeInject
-import me.proxer.library.ProxerApi
 import timber.log.Timber
 
 /**
  * @author Ruben Gees
  */
-abstract class BaseViewModel<T> : ViewModel() {
+abstract class BaseViewModel<T>(dependencies: ViewModelDependencies) : ViewModel() {
 
     open val data = MutableStateFlow<T?>(null)
     open val error = MutableStateFlow<ErrorUtils.ErrorAction?>(null)
@@ -30,11 +24,11 @@ abstract class BaseViewModel<T> : ViewModel() {
     protected open val isLoginRequired = true
     protected open val isAgeConfirmationRequired = false
 
-    protected val bus by safeInject<EventBus>()
-    protected val api by safeInject<ProxerApi>()
-    protected val storageHelper by safeInject<StorageHelper>()
-    protected val preferenceHelper by safeInject<PreferenceHelper>()
-    protected val validators by safeInject<Validators>()
+    protected val bus = dependencies.bus
+    protected val api = dependencies.api
+    protected val storageHelper = dependencies.storageHelper
+    protected val preferenceHelper = dependencies.preferenceHelper
+    protected val validators = dependencies.validators
 
     protected var dataJob: Job? = null
 

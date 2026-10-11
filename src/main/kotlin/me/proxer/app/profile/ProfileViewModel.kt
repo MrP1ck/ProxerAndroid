@@ -3,6 +3,7 @@ package me.proxer.app.profile
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.profile.ProfileViewModel.UserInfoWrapper
 import me.proxer.app.util.extension.await
 import me.proxer.library.entity.user.UserInfo
@@ -11,9 +12,10 @@ import me.proxer.library.entity.user.UserInfo
  * @author Ruben Gees
  */
 class ProfileViewModel(
+    dependencies: ViewModelDependencies,
     private val userId: String?,
     private val username: String?
-) : BaseViewModel<UserInfoWrapper>() {
+) : BaseViewModel<UserInfoWrapper>(dependencies) {
 
     override suspend fun loadData(): UserInfoWrapper {
         validate()

@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.comment.LocalComment
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.Events
@@ -21,9 +22,10 @@ import kotlin.properties.Delegates
  * @author Ruben Gees
  */
 class CommentsViewModel(
+    dependencies: ViewModelDependencies,
     private val entryId: String,
     sortCriteria: CommentSortCriteria
-) : PagedViewModel<ParsedComment>() {
+) : PagedViewModel<ParsedComment>(dependencies) {
 
     override val itemsOnPage = 10
 

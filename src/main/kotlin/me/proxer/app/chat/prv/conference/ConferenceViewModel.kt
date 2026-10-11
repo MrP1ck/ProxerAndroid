@@ -7,19 +7,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.chat.prv.ConferenceWithMessage
 import me.proxer.app.chat.prv.sync.MessengerDao
 import me.proxer.app.chat.prv.sync.MessengerErrorEvent
 import me.proxer.app.chat.prv.sync.MessengerWorker
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.extension.safeInject
 
 /**
  * @author Ruben Gees
  */
-class ConferenceViewModel(searchQuery: String) : BaseViewModel<List<ConferenceWithMessage>>() {
-
-    private val messengerDao by safeInject<MessengerDao>()
+class ConferenceViewModel(
+    dependencies: ViewModelDependencies,
+    private val messengerDao: MessengerDao,
+    searchQuery: String
+) : BaseViewModel<List<ConferenceWithMessage>>(dependencies) {
 
     private val searchQueryFlow = MutableStateFlow(searchQuery)
 

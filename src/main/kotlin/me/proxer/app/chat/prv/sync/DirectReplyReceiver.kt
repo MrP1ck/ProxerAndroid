@@ -9,14 +9,15 @@ import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.PENDING_INTENT_FLAG_MUTABLE
 import me.proxer.app.util.extension.getSafeCharSequence
 import me.proxer.app.util.extension.launchAsync
-import me.proxer.app.util.extension.safeInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Ruben Gees
  */
-class DirectReplyReceiver : BroadcastReceiver() {
+class DirectReplyReceiver : BroadcastReceiver(), KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         const val REMOTE_REPLY_EXTRA = "remote_reply"
 
         private const val CONFERENCE_ID_EXTRA = "conference_id"
@@ -35,8 +36,8 @@ class DirectReplyReceiver : BroadcastReceiver() {
         }
     }
 
-    private val messengerDao by safeInject<MessengerDao>()
-    private val storageHelper by safeInject<StorageHelper>()
+    private val messengerDao by inject<MessengerDao>()
+    private val storageHelper by inject<StorageHelper>()
 
     override fun onReceive(context: Context, intent: Intent) {
         val conferenceId = intent.getLongExtra(CONFERENCE_ID_EXTRA, -1)

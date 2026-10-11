@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.exception.AgeConfirmationRequiredException
 import me.proxer.app.exception.NotLoggedInException
 import me.proxer.app.exception.PartialException
@@ -28,10 +29,11 @@ import kotlin.properties.Delegates
  * @author Ruben Gees
  */
 class MangaViewModel(
+    dependencies: ViewModelDependencies,
     private val entryId: String,
     private val language: Language,
     episode: Int
-) : BaseViewModel<MangaChapterInfo>() {
+) : BaseViewModel<MangaChapterInfo>(dependencies) {
 
     override suspend fun loadData(): MangaChapterInfo {
         validate()

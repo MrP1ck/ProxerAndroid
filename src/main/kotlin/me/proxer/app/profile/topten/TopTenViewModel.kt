@@ -6,6 +6,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.profile.topten.TopTenViewModel.ZippedTopTenResult
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.Events
@@ -21,9 +22,10 @@ import me.proxer.library.enums.Category
  * @author Ruben Gees
  */
 class TopTenViewModel(
+    dependencies: ViewModelDependencies,
     private val userId: String?,
     private val username: String?
-) : BaseViewModel<ZippedTopTenResult>() {
+) : BaseViewModel<ZippedTopTenResult>(dependencies) {
 
     override suspend fun loadData(): ZippedTopTenResult {
         validate()

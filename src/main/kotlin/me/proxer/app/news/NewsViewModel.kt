@@ -3,13 +3,14 @@ package me.proxer.app.news
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedContentViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.library.api.PagingLimitEndpoint
 import me.proxer.library.entity.notifications.NewsArticle
 
 /**
  * @author Ruben Gees
  */
-class NewsViewModel : PagedContentViewModel<NewsArticle>() {
+class NewsViewModel(dependencies: ViewModelDependencies) : PagedContentViewModel<NewsArticle>(dependencies) {
 
     override val itemsOnPage = 15
 

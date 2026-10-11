@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedViewModel
+import me.proxer.app.base.ViewModelDependencies
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.data.Events
 import me.proxer.app.util.data.UniqueQueue
@@ -20,11 +21,12 @@ import kotlin.properties.Delegates
  * @author Ruben Gees
  */
 class ProfileMediaListViewModel(
+    dependencies: ViewModelDependencies,
     private val userId: String?,
     private val username: String?,
     category: Category,
     filter: UserMediaListFilterType?
-) : PagedViewModel<LocalUserMediaListEntry>() {
+) : PagedViewModel<LocalUserMediaListEntry>(dependencies) {
 
     override val itemsOnPage = 30
 

@@ -6,7 +6,7 @@ import me.proxer.library.api.Endpoint
 /**
  * @author Ruben Gees
  */
-abstract class BaseContentViewModel<T : Any> : BaseViewModel<T>() {
+abstract class BaseContentViewModel<T : Any>(dependencies: ViewModelDependencies) : BaseViewModel<T>(dependencies) {
 
     override suspend fun loadData(): T {
         validate()

@@ -8,17 +8,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import me.proxer.app.util.extension.await
-import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerApi
 import okhttp3.HttpUrl
 import timber.log.Timber
 
-class LinkCheckViewModel : ViewModel() {
+class LinkCheckViewModel(private val api: ProxerApi) : ViewModel() {
 
     val data = MutableStateFlow<Boolean?>(null)
     val isLoading = MutableStateFlow(false)
-
-    private val api by safeInject<ProxerApi>()
 
     private var checkJob: Job? = null
 
