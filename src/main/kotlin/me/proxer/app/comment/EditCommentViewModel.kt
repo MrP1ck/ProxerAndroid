@@ -27,6 +27,8 @@ class EditCommentViewModel(
     private val entryId: String?
 ) : BaseViewModel<LocalComment>(dependencies) {
 
+    override val isLoginRequired = true
+
     companion object {
         private const val MAX_LENGTH = 20_000
 

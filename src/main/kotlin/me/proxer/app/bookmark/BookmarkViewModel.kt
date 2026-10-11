@@ -26,6 +26,8 @@ class BookmarkViewModel(
     filterAvailable: Boolean
 ) : PagedContentViewModel<Bookmark>(dependencies) {
 
+    override val isLoginRequired = true
+
     override val itemsOnPage = 30
 
     override val endpoint: PagingLimitEndpoint<List<Bookmark>>

@@ -201,7 +201,7 @@ class ChatViewModel(
 
             while (true) {
                 try {
-                    validators.validateLogin()
+                    validate()
 
                     val mergedData = mergeNewDataWithExistingData(loadMessages("0"), "0")
                     val firstId = findFirstRemoteId(mergedData)

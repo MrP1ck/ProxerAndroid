@@ -20,6 +20,8 @@ import me.proxer.library.enums.NotificationFilter
  */
 class NotificationViewModel(dependencies: ViewModelDependencies) : PagedViewModel<ProxerNotification>(dependencies) {
 
+    override val isLoginRequired = true
+
     override val itemsOnPage = 30
 
     override suspend fun loadData(): List<ProxerNotification> {

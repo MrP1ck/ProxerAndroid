@@ -23,6 +23,8 @@ class ConferenceViewModel(
     searchQuery: String
 ) : BaseViewModel<List<ConferenceWithMessage>>(dependencies) {
 
+    override val isLoginRequired = true
+
     private val searchQueryFlow = MutableStateFlow(searchQuery)
 
     var searchQuery: String

@@ -13,6 +13,8 @@ class ConferenceInfoViewModel(
     private val conferenceId: String
 ) : BaseContentViewModel<ConferenceInfo>(dependencies) {
 
+    override val isLoginRequired = true
+
     override val endpoint: Endpoint<ConferenceInfo>
         get() = api.messenger.conferenceInfo(conferenceId)
 }

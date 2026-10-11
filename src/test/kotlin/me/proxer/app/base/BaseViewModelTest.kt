@@ -185,13 +185,25 @@ class BaseViewModelTest {
     }
 
     @Test
-    fun `logging in does not reload views which do not require it`() {
+    fun `logging in reloads every view because the content can depend on the account`() {
         val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
         environment.logIn()
 
-        assertEquals(1, loads)
+        assertEquals("data 2", viewModel.data.value)
+    }
+
+    @Test
+    fun `views which do not require a login load while logged out`() {
+        TestViewModel.source = { "secret" }
+
+        val viewModel = TestViewModel(environment.dependencies)
+
+        viewModel.load()
+
+        assertNull(viewModel.error.value)
+        assertEquals("secret", viewModel.data.value)
     }
 
     @Test
@@ -201,9 +213,12 @@ class BaseViewModelTest {
         val viewModel = TestViewModel(environment.dependencies)
 
         viewModel.load()
+        assertEquals(ButtonAction.AGE_CONFIRMATION, viewModel.error.value?.buttonAction)
+
         environment.preferenceHelper.isAgeRestrictedMediaAllowed = true
 
-        assertEquals("data 2", viewModel.data.value)
+        assertNull(viewModel.error.value)
+        assertEquals("data 1", viewModel.data.value)
     }
 
     @Test
@@ -272,5 +287,9 @@ private class TestViewModel(dependencies: ViewModelDependencies) : BaseViewModel
     override val isLoginRequired get() = Companion.isLoginRequired
     override val isAgeConfirmationRequired get() = Companion.isAgeConfirmationRequired
 
-    override suspend fun loadData() = source()
+    override suspend fun loadData(): String {
+        validate()
+
+        return source()
+    }
 }

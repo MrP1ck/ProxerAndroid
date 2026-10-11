@@ -28,6 +28,8 @@ class MessengerViewModel(
     initialConference: LocalConference
 ) : PagedViewModel<LocalMessage>(dependencies) {
 
+    override val isLoginRequired = true
+
     override val itemsOnPage = MessengerWorker.MESSAGES_ON_PAGE
 
     @Suppress("UNUSED_PARAMETER")

@@ -27,8 +27,6 @@ class ServerStatusViewModel(
         private val url = "https://proxer.de".toHttpUrl()
     }
 
-    override val isLoginRequired = false
-
     override suspend fun loadData(): List<ServerStatus> {
         validate()
 

@@ -16,7 +16,10 @@ import androidx.lifecycle.LifecycleOwner
  * Keeps a connection to the Custom Tabs provider of the device while the owner is started, so pages can be preloaded
  * and opened faster.
  */
-class CustomTabsConnection(private val context: Context) : DefaultLifecycleObserver {
+class CustomTabsConnection(context: Context) : DefaultLifecycleObserver {
+
+    // The browser keeps its callback (and thus this object) alive for a while, so no Activity must be referenced.
+    private val context = context.applicationContext
 
     private var connection: CustomTabsServiceConnection? = null
 

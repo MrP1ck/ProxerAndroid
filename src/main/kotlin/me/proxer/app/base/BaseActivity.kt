@@ -43,7 +43,7 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
     protected val storageHelper by inject<StorageHelper>()
     protected val preferenceHelper by inject<PreferenceHelper>()
 
-    private val customTabsConnection = CustomTabsConnection(this)
+    private val customTabsConnection by lazy { CustomTabsConnection(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // This needs to be called before super.onCreate(), because otherwise Fragments might not see the

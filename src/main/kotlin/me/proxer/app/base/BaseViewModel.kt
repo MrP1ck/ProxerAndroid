@@ -7,7 +7,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import me.proxer.app.R
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction
 import timber.log.Timber
@@ -21,7 +20,11 @@ abstract class BaseViewModel<T>(dependencies: ViewModelDependencies) : ViewModel
     open val error = MutableStateFlow<ErrorUtils.ErrorAction?>(null)
     open val isLoading = MutableStateFlow(false)
 
-    protected open val isLoginRequired = true
+    /**
+     * Whether the screen shows account data, which can not be loaded without being logged in. The other screens show
+     * public content and work for guests as well.
+     */
+    protected open val isLoginRequired = false
     protected open val isAgeConfirmationRequired = false
 
     protected val bus = dependencies.bus
@@ -39,7 +42,8 @@ abstract class BaseViewModel<T>(dependencies: ViewModelDependencies) : ViewModel
 
     init {
         viewModelScope.launch {
-            storageHelper.isLoggedInChanges.collect { if (isLoginRequired || isLoginErrorPresent()) reload() }
+            // What is shown can depend on the account (e.g. age restricted content), so every screen reloads.
+            storageHelper.isLoggedInChanges.collect { reload() }
         }
 
         viewModelScope.launch {
@@ -117,6 +121,4 @@ abstract class BaseViewModel<T>(dependencies: ViewModelDependencies) : ViewModel
         if (isLoginRequired) validators.validateLogin()
         if (isAgeConfirmationRequired) validators.validateAgeConfirmation()
     }
-
-    private fun isLoginErrorPresent() = error.value?.message == R.string.error_invalid_token
 }
