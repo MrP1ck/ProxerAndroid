@@ -15,6 +15,7 @@ import me.proxer.app.util.extension.ProxerNotification
 import me.proxer.app.util.extension.androidUri
 import me.proxer.app.util.extension.getQuantityString
 import me.proxer.app.util.extension.notifyIfPermitted
+import okhttp3.HttpUrl
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -36,6 +37,19 @@ object AccountNotifications : KoinComponent {
 
     fun cancel(context: Context) = NotificationManagerCompat.from(context).cancel(ID)
 
+    /**
+     * The intent to show the page of a notification. It is restricted to this app, otherwise the system would open the
+     * link in the browser. If the app has no screen for the page, the list of notifications is shown instead.
+     */
+    internal fun contentIntent(context: Context, url: HttpUrl): Intent {
+        val intent = Intent(Intent.ACTION_VIEW, url.androidUri()).setPackage(context.packageName)
+
+        return when (intent.resolveActivity(context.packageManager)) {
+            null -> NotificationActivity.getIntent(context)
+            else -> intent
+        }
+    }
+
     private fun buildNotification(context: Context, notifications: Collection<ProxerNotification>): Notification? {
         if (notifications.isEmpty()) {
             return null
@@ -55,7 +69,7 @@ object AccountNotifications : KoinComponent {
                 intent = PendingIntent.getActivity(
                     context,
                     ID,
-                    Intent(Intent.ACTION_VIEW, notifications.first().contentLink.androidUri()),
+                    contentIntent(context, notifications.first().contentLink),
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
