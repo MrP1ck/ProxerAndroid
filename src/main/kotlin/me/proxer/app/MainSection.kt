@@ -6,7 +6,6 @@ package me.proxer.app
  */
 enum class MainSection(val id: Long) {
     NEWS(0L),
-    CHAT(1L),
     MESSENGER(1L),
     BOOKMARKS(2L),
     ANIME(3L),

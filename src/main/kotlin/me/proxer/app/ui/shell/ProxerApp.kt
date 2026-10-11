@@ -33,7 +33,7 @@ import me.proxer.app.R
 import me.proxer.app.anime.schedule.ScheduleScreen
 import me.proxer.app.base.BaseActivity
 import me.proxer.app.bookmark.BookmarkScreen
-import me.proxer.app.chat.ChatScreen
+import me.proxer.app.chat.MessengerScreen
 import me.proxer.app.media.list.MediaListScreen
 import me.proxer.app.news.NewsScreen
 import me.proxer.app.ui.components.LocalSnackbarHostState
@@ -61,7 +61,12 @@ private enum class TopLevelDestination(
         R.drawable.ic_symbol_bookmark,
         R.drawable.ic_symbol_bookmark_filled
     ),
-    CHAT(ChatGraph, R.string.section_chat, R.drawable.ic_symbol_chat, R.drawable.ic_symbol_chat_filled);
+    MESSENGER(
+        MessengerGraph,
+        R.string.section_messenger,
+        R.drawable.ic_symbol_chat,
+        R.drawable.ic_symbol_chat_filled
+    );
 
     val graphClass: KClass<*> get() = graph::class
 }
@@ -147,8 +152,8 @@ fun ProxerApp(
                     composable<BookmarksRoute> { BookmarkScreen() }
                 }
 
-                navigation<ChatGraph>(startDestination = ChatRoute()) {
-                    composable<ChatRoute> { ChatScreen(showMessenger = it.toRoute<ChatRoute>().showMessenger) }
+                navigation<MessengerGraph>(startDestination = MessengerRoute) {
+                    composable<MessengerRoute> { MessengerScreen() }
                 }
             }
         }
@@ -161,7 +166,7 @@ fun ProxerApp(
 
 private fun MainSection.toTopLevelDestination() = when (this) {
     MainSection.NEWS, MainSection.INFO, MainSection.SETTINGS -> TopLevelDestination.NEWS
-    MainSection.CHAT, MainSection.MESSENGER -> TopLevelDestination.CHAT
+    MainSection.MESSENGER -> TopLevelDestination.MESSENGER
     MainSection.BOOKMARKS -> TopLevelDestination.BOOKMARKS
     MainSection.ANIME, MainSection.SCHEDULE -> TopLevelDestination.ANIME
     MainSection.MANGA -> TopLevelDestination.MANGA
@@ -199,10 +204,6 @@ private fun NavController.showSection(request: SectionRequest, navigator: AppNav
                 navigate(MangaRoute(request.type, request.sort)) { popUpTo<MangaRoute> { inclusive = true } }
             }
             false -> navigateToTopLevel(MangaGraph)
-        }
-        MainSection.MESSENGER -> navigate(ChatRoute(showMessenger = true)) {
-            popUpTo(graph.findStartDestination().id) { saveState = true }
-            launchSingleTop = true
         }
         else -> navigateToTopLevel(request.section.toTopLevelDestination().graph)
     }

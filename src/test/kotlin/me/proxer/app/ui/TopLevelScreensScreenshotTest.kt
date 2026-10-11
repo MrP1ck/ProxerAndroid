@@ -5,7 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import me.proxer.app.TestApplication
 import me.proxer.app.anime.schedule.ScheduleContent
 import me.proxer.app.bookmark.BookmarkContent
-import me.proxer.app.chat.ChatRoomList
+import me.proxer.app.chat.ConferenceList
 import me.proxer.app.media.list.MediaListContent
 import me.proxer.app.media.list.MediaListFilter
 import me.proxer.app.news.NewsContent
@@ -73,7 +73,7 @@ class TopLevelScreensScreenshotTest(private val isDark: Boolean) {
     }
 
     @Test
-    fun chatRooms() = composeRule.captureScreen("screens", "chat_rooms", isDark) {
-        ChatRoomList(ContentState(PreviewData.chatRooms), {}, {}, {}, noPadding)
+    fun messenger() = composeRule.captureScreen("screens", "messenger", isDark) {
+        ConferenceList(ContentState(PreviewData.conferences), "1", false, {}, {}, noPadding)
     }
 }

@@ -14,7 +14,6 @@ import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.chat.prv.Participant
 import me.proxer.app.chat.prv.PrvMessengerActivity
 import me.proxer.app.chat.prv.create.CreateConferenceActivity
-import me.proxer.app.chat.pub.message.ChatActivity
 import me.proxer.app.forum.TopicActivity
 import me.proxer.app.info.industry.IndustryActivity
 import me.proxer.app.info.translatorgroup.TranslatorGroupActivity
@@ -98,10 +97,6 @@ class AppNavigator(private val activity: BaseActivity, private val navController
 
     fun openCreateConference(isGroup: Boolean, initialParticipant: Participant? = null) {
         CreateConferenceActivity.navigateTo(activity, isGroup, initialParticipant)
-    }
-
-    fun openChatRoom(id: String, name: String, isReadOnly: Boolean) {
-        ChatActivity.navigateTo(activity, id, name, isReadOnly)
     }
 
     fun openProfile(userId: String?, username: String?, image: String? = null) {

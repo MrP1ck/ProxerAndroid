@@ -11,7 +11,6 @@ import me.proxer.app.anime.AnimeStream
 import me.proxer.app.anime.resolver.StreamResolutionResult
 import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.chat.prv.LocalMessage
-import me.proxer.app.chat.pub.message.ParsedChatMessage
 import me.proxer.app.comment.LocalComment
 import me.proxer.app.forum.ParsedPost
 import me.proxer.app.forum.TopicMetaData
@@ -26,7 +25,6 @@ import me.proxer.app.ui.view.bbcode.BBArgs
 import me.proxer.app.ui.view.bbcode.toBBTree
 import me.proxer.app.ui.view.bbcode.toSimpleBBTree
 import me.proxer.library.entity.anime.Stream
-import me.proxer.library.entity.chat.ChatMessage
 import me.proxer.library.entity.forum.Post
 import me.proxer.library.entity.forum.Topic
 import me.proxer.library.entity.info.Comment
@@ -467,8 +465,6 @@ fun Post.toParsedPost(resources: Resources): ParsedPost {
 }
 
 fun Tag.toParcelableTag() = LocalTag(id, type, name, description, subType, isSpoiler)
-
-fun ChatMessage.toParsedMessage() = ParsedChatMessage(id, userId, username, image, message, action, date.toInstant())
 
 fun UserMediaListEntry.toLocalEntry() = LocalUserMediaListEntry(
     id, name, episodeAmount, medium, state, commentId, commentContent, mediaProgress, episode, rating

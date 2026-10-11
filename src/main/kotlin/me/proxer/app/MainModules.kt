@@ -23,10 +23,6 @@ import me.proxer.app.chat.prv.create.CreateConferenceViewModel
 import me.proxer.app.chat.prv.message.MessengerReportViewModel
 import me.proxer.app.chat.prv.message.MessengerViewModel
 import me.proxer.app.chat.prv.sync.MessengerDatabase
-import me.proxer.app.chat.pub.message.ChatReportViewModel
-import me.proxer.app.chat.pub.message.ChatViewModel
-import me.proxer.app.chat.pub.room.ChatRoomViewModel
-import me.proxer.app.chat.pub.room.info.ChatRoomInfoViewModel
 import me.proxer.app.comment.EditCommentViewModel
 import me.proxer.app.forum.TopicViewModel
 import me.proxer.app.info.industry.IndustryInfoViewModel
@@ -245,11 +241,7 @@ private val viewModelModule = module {
     viewModel { (searchQuery: String) -> ConferenceViewModel(get(), get(), searchQuery) }
     viewModel { (conferenceId: String) -> ConferenceInfoViewModel(get(), conferenceId) }
     viewModel { (initialConference: LocalConference) -> MessengerViewModel(get(), get(), initialConference) }
-    viewModel { ChatRoomViewModel(get()) }
-    viewModel { (chatRoomId: String) -> ChatViewModel(get(), chatRoomId) }
-    viewModel { (chatRoomId: String) -> ChatRoomInfoViewModel(get(), chatRoomId) }
     viewModel { MessengerReportViewModel(get(), get(), get()) }
-    viewModel { ChatReportViewModel(get()) }
 
     viewModel { (searchQuery: String?, category: Category, filterAvailable: Boolean) ->
         BookmarkViewModel(get(), searchQuery, category, filterAvailable)

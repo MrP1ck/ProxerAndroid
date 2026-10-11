@@ -240,8 +240,7 @@ class MainActivity : BaseActivity() {
 
             val section = when (segments.firstOrNull()) {
                 "news" -> MainSection.NEWS
-                "chat" -> MainSection.CHAT
-                "messages" -> MainSection.MESSENGER
+                "chat", "messages" -> MainSection.MESSENGER
                 "reminder" -> MainSection.BOOKMARKS
                 "anime" -> MainSection.ANIME
                 "calendar" -> MainSection.SCHEDULE

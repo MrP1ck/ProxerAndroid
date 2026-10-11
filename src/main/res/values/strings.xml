@@ -5,7 +5,7 @@
 
     <string name="section_anime">Anime</string>
     <string name="section_schedule">Anime-Wochenplan</string>
-    <string name="section_chat">Chat</string>
+    <string name="section_messenger">Messenger</string>
     <string name="section_manga">Manga</string>
     <string name="section_news">News</string>
     <string name="section_bookmarks">Lesezeichen</string>
@@ -53,7 +53,6 @@
     <string name="media_info_spoiler_tags">Spoiler</string>
     <string name="action_create_conference">Neue Unterhaltung</string>
     <string name="chat_search_hint">Unterhaltungen durchsuchen</string>
-    <string name="chat_read_only">Nur lesen</string>
     <string name="bookmark_available">Verfügbar</string>
     <string name="bookmark_unavailable">Noch nicht verfügbar</string>
     <string name="bookmark_filter_available">Nur verfügbare</string>
@@ -221,7 +220,6 @@
     <string name="error_bookmark_deletion">Das Lesezeichen konnte nicht entfernt werden: %s</string>
     <string name="error_media_entry_deletion">Der Eintrag konnte nicht entfernt werden: %s</string>
     <string name="error_topten_entry_removal">Der Eintrag konnte nicht entfernt werden: %s</string>
-    <string name="error_chat_send_message">Die Nachricht konnte nicht versandt werden: %s</string>
     <string name="error_undo">Die Aktion konnte nicht rückgängig gemacht werden: %s</string>
 
     <string name="medium_anime_series">Animeserie</string>
@@ -672,14 +670,7 @@
     <string name="fragment_create_conference_delete_description">Entfernen</string>
     <string name="fragment_create_conference_accept_description">Akzeptieren</string>
 
-    <string name="fragment_chat_container_public">Öffentlich</string>
-    <string name="fragment_chat_container_private">Privat</string>
-
     <string name="fragment_chat_loading_message">Chat wird geladen…</string>
-    <string name="fragment_chat_read_only_message">In diesen Chat kann nicht geschrieben werden</string>
-    <string name="fragment_chat_login_required_message">Du musst dich anmelden um schreiben zu können</string>
-
-    <string name="fragment_chat_room_active_users_title">Aktive Benutzer</string>
 
     <string name="fragment_notification_delete_content_description">Löschen</string>
 

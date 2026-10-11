@@ -179,7 +179,6 @@
 
         <activity android:name=".notification.NotificationActivity" />
 
-        <activity android:name=".chat.pub.message.ChatActivity" />
 
         <activity
             android:name=".chat.prv.PrvMessengerActivity"
@@ -200,7 +199,6 @@
 
         <activity android:name=".chat.prv.conference.info.ConferenceInfoActivity" />
 
-        <activity android:name=".chat.pub.room.info.ChatRoomInfoActivity" />
 
         <activity android:name=".profile.settings.ProfileSettingsActivity" />
 

@@ -3,9 +3,10 @@ package me.proxer.app.ui.preview
 import me.proxer.app.anime.AnimeStream
 import me.proxer.app.anime.AnimeStreamInfo
 import me.proxer.app.anime.resolver.StreamResolutionResult
+import me.proxer.app.chat.prv.ConferenceWithMessage
+import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.media.comments.ParsedComment
 import me.proxer.app.ui.view.bbcode.toBBTree
-import me.proxer.library.entity.chat.ChatRoom
 import me.proxer.library.entity.info.AdaptionInfo
 import me.proxer.library.entity.info.Entry
 import me.proxer.library.entity.info.EntrySeasonInfo
@@ -29,6 +30,7 @@ import me.proxer.library.enums.License
 import me.proxer.library.enums.MediaLanguage
 import me.proxer.library.enums.MediaState
 import me.proxer.library.enums.Medium
+import me.proxer.library.enums.MessageAction
 import me.proxer.library.enums.Season
 import me.proxer.library.enums.SynonymType
 import me.proxer.library.enums.UserMediaProgress
@@ -172,9 +174,43 @@ object PreviewData {
         calendarEntry("3", "One Piece", 1100, CalendarDay.TUESDAY, -30)
     )
 
-    val chatRooms = listOf(
-        ChatRoom("1", "Allgemein", "Hier wird über alles geredet. Regeln: https://proxer.me/wiki", false),
-        ChatRoom("2", "Ankündigungen", "", true)
+    val conferences = listOf(
+        ConferenceWithMessage(
+            LocalConference(
+                id = 1,
+                topic = "Anime-Abend",
+                customTopic = "",
+                participantAmount = 4,
+                image = "",
+                imageType = "",
+                isGroup = true,
+                localIsRead = false,
+                isRead = false,
+                date = Instant.now().minusSeconds(1_800),
+                unreadMessageAmount = 3,
+                lastReadMessageId = "",
+                isFullyLoaded = true
+            ),
+            ConferenceWithMessage.SimpleLocalMessage(1, "Wer schaut heute Frieren?", "2", "Mira", MessageAction.NONE)
+        ),
+        ConferenceWithMessage(
+            LocalConference(
+                id = 2,
+                topic = "Kenji",
+                customTopic = "",
+                participantAmount = 2,
+                image = "",
+                imageType = "",
+                isGroup = false,
+                localIsRead = true,
+                isRead = true,
+                date = Instant.now().minusSeconds(86_400),
+                unreadMessageAmount = 0,
+                lastReadMessageId = "2",
+                isFullyLoaded = true
+            ),
+            ConferenceWithMessage.SimpleLocalMessage(2, "Danke für den Tipp!", "1", "Kenji", MessageAction.NONE)
+        )
     )
 
     val entry = Entry(

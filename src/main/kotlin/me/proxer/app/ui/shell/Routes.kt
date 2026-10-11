@@ -18,7 +18,7 @@ data object MangaGraph
 data object BookmarksGraph
 
 @Serializable
-data object ChatGraph
+data object MessengerGraph
 
 @Serializable
 data object NewsRoute
@@ -43,4 +43,4 @@ data object ScheduleRoute
 data object BookmarksRoute
 
 @Serializable
-data class ChatRoute(val showMessenger: Boolean = false)
+data object MessengerRoute
