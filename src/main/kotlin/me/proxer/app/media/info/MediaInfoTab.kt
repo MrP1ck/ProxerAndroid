@@ -17,17 +17,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -49,6 +52,7 @@ import me.proxer.app.ui.components.COVER_ASPECT_RATIO
 import me.proxer.app.ui.components.ChipRow
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.ContentStateHost
+import me.proxer.app.ui.components.InfoRow
 import me.proxer.app.ui.components.LanguageFlag
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.ObserveAsEvents
@@ -69,6 +73,7 @@ import me.proxer.app.util.extension.toStartAppString
 import me.proxer.app.util.extension.toTypeAppString
 import me.proxer.library.entity.info.Entry
 import me.proxer.library.entity.info.EntryTranslatorGroup
+import me.proxer.library.entity.info.InfoTag
 import me.proxer.library.entity.info.MediaUserInfo
 import me.proxer.library.entity.list.IndustryCore
 import me.proxer.library.enums.Category
@@ -159,10 +164,17 @@ fun MediaInfoContent(
     contentPadding: PaddingValues
 ) {
     val context = LocalContext.current
+    var detail by remember { mutableStateOf<Pair<String, String>?>(null) }
 
     LazyColumn(contentPadding = contentPadding.plus(PaddingValues(bottom = 16.dp))) {
         item(key = "header") {
             MediaHeader(entry, onCoverClick = actions.onCoverClick)
+        }
+
+        if (entry.isDeactivatedForApps) {
+            item(key = "deactivated") {
+                DeactivatedNotice()
+            }
         }
 
         if (showUserActions) {
@@ -193,7 +205,7 @@ fun MediaInfoContent(
 
                 ChipRow(Modifier.padding(horizontal = 16.dp)) {
                     entry.genres.forEach { genre ->
-                        AssistChip(onClick = { actions.onMessage(genre.description) }, label = { Text(genre.name) })
+                        AssistChip(onClick = { detail = genre.name to genre.description }, label = { Text(genre.name) })
                     }
                 }
             }
@@ -201,7 +213,7 @@ fun MediaInfoContent(
 
         if (entry.tags.isNotEmpty()) {
             item(key = "tags") {
-                Tags(entry, onTagClick = actions.onMessage)
+                Tags(entry, onTagClick = { tag -> detail = tag.name to tag.description })
             }
         }
 
@@ -265,6 +277,37 @@ fun MediaInfoContent(
             }
         }
     }
+
+    detail?.let { (title, description) ->
+        AlertDialog(
+            onDismissRequest = { detail = null },
+            title = { Text(title) },
+            text = { Text(description.ifBlank { stringResource(R.string.media_info_no_description) }) },
+            confirmButton = { TextButton(onClick = { detail = null }) { Text(stringResource(R.string.action_close)) } }
+        )
+    }
+}
+
+@Composable
+private fun DeactivatedNotice() {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(painterResource(R.drawable.ic_symbol_info), contentDescription = null)
+
+            Text(stringResource(R.string.media_info_deactivated_for_apps), style = MaterialTheme.typography.bodyMedium)
+        }
+    }
 }
 
 @Composable
@@ -324,6 +367,14 @@ private fun MediaHeader(entry: Entry, onCoverClick: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                entry.bayesianRating?.takeIf { it > 0 }?.let { bayesianRating ->
+                    Text(
+                        text = stringResource(R.string.media_info_bayesian_rating, bayesianRating),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -440,7 +491,23 @@ private fun GeneralInfo(entry: Entry, onAdaptionClick: () -> Unit) {
             InfoRow(stringResource(R.string.fragment_media_info_season_title), seasons.joinToString("\n"))
         }
 
+        entry.mediaFormat?.takeIf { it.isNotBlank() }?.let {
+            InfoRow(stringResource(R.string.media_info_format_title), it.uppercase())
+        }
+
         InfoRow(stringResource(R.string.fragment_media_info_status_title), entry.state.toAppString(context))
+
+        entry.ranking?.takeIf { it > 0 }?.let {
+            InfoRow(stringResource(R.string.media_info_ranking_title), "#$it")
+        }
+
+        entry.availableEpisodeAmount?.takeIf { entry.episodeAmount > 0 }?.let {
+            InfoRow(
+                stringResource(R.string.media_info_available_title),
+                stringResource(R.string.media_info_available_content, it, entry.episodeAmount)
+            )
+        }
+
         InfoRow(stringResource(R.string.fragment_media_info_license_title), entry.license.toAppString(context))
 
         if (entry.adaptionInfo.id != "0") {
@@ -456,34 +523,7 @@ private fun GeneralInfo(entry: Entry, onAdaptionClick: () -> Unit) {
 }
 
 @Composable
-private fun InfoRow(title: String, content: String, isSelectable: Boolean = false, onClick: (() -> Unit)? = null) {
-    Row(Modifier.fillMaxWidth()) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(112.dp)
-        )
-
-        val contentModifier = Modifier
-            .weight(1f)
-            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
-
-        val contentText: @Composable () -> Unit = {
-            Text(
-                text = content,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (onClick != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                modifier = contentModifier
-            )
-        }
-
-        if (isSelectable) SelectionContainer(contentModifier) { contentText() } else contentText()
-    }
-}
-
-@Composable
-private fun Tags(entry: Entry, onTagClick: (String) -> Unit) {
+private fun Tags(entry: Entry, onTagClick: (InfoTag) -> Unit) {
     var showUnrated by rememberSaveable { mutableStateOf(false) }
     var showSpoilers by rememberSaveable { mutableStateOf(false) }
 
@@ -507,7 +547,7 @@ private fun Tags(entry: Entry, onTagClick: (String) -> Unit) {
         )
 
         tags.forEach { tag ->
-            AssistChip(onClick = { onTagClick(tag.description) }, label = { Text(tag.name) })
+            AssistChip(onClick = { onTagClick(tag) }, label = { Text(tag.name) })
         }
     }
 }

@@ -26,6 +26,8 @@ class MediaActivity : ComposeActivity() {
         private const val COMMENTS_SUB_SECTION = "comments"
         private const val EPISODES_SUB_SECTION = "episodes"
         private const val EPISODES_ALTERNATIVE_SUB_SECTION = "list"
+        private const val CHARACTERS_SUB_SECTION = "character"
+        private const val PERSONS_SUB_SECTION = "people"
         private const val RELATIONS_SUB_SECTION = "relation"
         private const val RECOMMENDATIONS_SUB_SECTION = "recommendations"
         private const val DISCUSSIONS_SUB_SECTION = "forum"
@@ -66,6 +68,8 @@ class MediaActivity : ComposeActivity() {
             Intent.ACTION_VIEW -> when (intent.data?.pathSegments?.getOrNull(2)) {
                 COMMENTS_SUB_SECTION -> MediaTab.COMMENTS
                 EPISODES_SUB_SECTION, EPISODES_ALTERNATIVE_SUB_SECTION -> MediaTab.EPISODES
+                CHARACTERS_SUB_SECTION -> MediaTab.CHARACTERS
+                PERSONS_SUB_SECTION -> MediaTab.PERSONS
                 RELATIONS_SUB_SECTION -> MediaTab.RELATIONS
                 RECOMMENDATIONS_SUB_SECTION -> MediaTab.RECOMMENDATIONS
                 DISCUSSIONS_SUB_SECTION -> MediaTab.DISCUSSIONS

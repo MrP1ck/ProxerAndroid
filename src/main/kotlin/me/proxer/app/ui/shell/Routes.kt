@@ -18,7 +18,7 @@ data object MangaGraph
 data object BookmarksGraph
 
 @Serializable
-data object ChatGraph
+data object MessengerGraph
 
 @Serializable
 data object NewsRoute
@@ -31,10 +31,11 @@ data object NewsRoute
 data class AnimeRoute(val type: String? = null, val sort: String? = null)
 
 /**
- * The manga list. See [AnimeRoute] for the parameters.
+ * The manga list, which can be switched to novels. See [AnimeRoute] for the parameters. [category] is the name of the
+ * Category to start with.
  */
 @Serializable
-data class MangaRoute(val type: String? = null, val sort: String? = null)
+data class MangaRoute(val type: String? = null, val sort: String? = null, val category: String = "MANGA")
 
 @Serializable
 data object ScheduleRoute
@@ -43,4 +44,4 @@ data object ScheduleRoute
 data object BookmarksRoute
 
 @Serializable
-data class ChatRoute(val showMessenger: Boolean = false)
+data object MessengerRoute
