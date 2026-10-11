@@ -92,7 +92,7 @@ gradlew.bat assembleDebug
 ```
 
 The dependencies are declared in the version catalog `gradle/libs.versions.toml` and come from Google's Maven
-repository, Maven Central and JitPack (see `settings.gradle`).
+repository, Maven Central and JitPack (see `settings.gradle.kts`).
 
 ### Screenshots
 
