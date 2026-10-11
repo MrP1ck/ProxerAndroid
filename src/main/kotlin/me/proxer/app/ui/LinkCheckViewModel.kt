@@ -1,50 +1,44 @@
 package me.proxer.app.ui
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
-import me.proxer.app.util.extension.buildSingle
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.library.ProxerApi
 import okhttp3.HttpUrl
+import timber.log.Timber
 
 class LinkCheckViewModel : ViewModel() {
 
-    val data = MutableLiveData<Boolean?>()
-    val isLoading = MutableLiveData<Boolean?>()
+    val data = MutableStateFlow<Boolean?>(null)
+    val isLoading = MutableStateFlow(false)
 
     private val api by safeInject<ProxerApi>()
 
-    private var checkDisposable: Disposable? = null
-
-    override fun onCleared() {
-        checkDisposable?.dispose()
-        checkDisposable = null
-
-        super.onCleared()
-    }
+    private var checkJob: Job? = null
 
     fun check(link: HttpUrl) {
-        checkDisposable?.dispose()
+        checkJob?.cancel()
+        checkJob = viewModelScope.launch {
+            isLoading.value = true
+            data.value = null
 
-        checkDisposable = api.messenger.checkLink(link).buildSingle()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {
-                isLoading.value = true
-                data.value = null
+            try {
+                data.value = api.messenger.checkLink(link).await().isSecure
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (@Suppress("TooGenericExceptionCaught") checkError: Throwable) {
+                Timber.e(checkError)
+
+                data.value = false
+            } finally {
+                if (isActive) isLoading.value = false
             }
-            .doAfterTerminate { isLoading.value = false }
-            .subscribeAndLogErrors(
-                {
-                    data.value = it.isSecure
-                },
-                {
-                    data.value = false
-                }
-            )
+        }
     }
 }

@@ -51,8 +51,8 @@ import me.proxer.app.R
 import me.proxer.app.ui.components.COVER_ASPECT_RATIO
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.LanguageFlag
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.PagedGrid
 import me.proxer.app.ui.components.ProxerAsyncImage
 import me.proxer.app.ui.components.ProxerScaffold
@@ -104,7 +104,7 @@ fun BookmarkScreen(
         viewModel.searchQuery = query.trim()
     }
 
-    LiveDataEffect(viewModel.undoData) {
+    ObserveAsEvents(viewModel.undoData) {
         val result = snackbarHostState?.showSnackbar(
             message = context.getString(R.string.fragment_bookmark_delete_message),
             actionLabel = context.getString(R.string.action_undo),
@@ -114,13 +114,13 @@ fun BookmarkScreen(
         if (result == SnackbarResult.ActionPerformed) viewModel.undo()
     }
 
-    LiveDataEffect(viewModel.itemDeletionError) {
+    ObserveAsEvents(viewModel.itemDeletionError) {
         snackbarHostState?.showSnackbar(
             context.getString(R.string.error_bookmark_deletion, context.getString(it.message))
         )
     }
 
-    LiveDataEffect(viewModel.undoError) {
+    ObserveAsEvents(viewModel.undoError) {
         snackbarHostState?.showSnackbar(context.getString(R.string.error_undo, context.getString(it.message)))
     }
 

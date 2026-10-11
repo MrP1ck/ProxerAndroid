@@ -15,8 +15,6 @@ fun rememberCurrentUser(): State<LocalUser?> {
     val storageHelper = koinInject<StorageHelper>()
 
     return produceState(storageHelper.user, storageHelper) {
-        val disposable = storageHelper.isLoggedInObservable.subscribe { value = storageHelper.user }
-
-        awaitDispose { disposable.dispose() }
+        storageHelper.isLoggedInChanges.collect { value = storageHelper.user }
     }
 }

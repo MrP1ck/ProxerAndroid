@@ -13,18 +13,18 @@ import androidx.room.Transaction
 abstract class TagDao {
 
     @Transaction
-    open fun replaceTags(tags: List<LocalTag>): List<Long> {
+    open suspend fun replaceTags(tags: List<LocalTag>): List<Long> {
         clear()
 
         return insertTags(tags)
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertTags(tags: List<LocalTag>): List<Long>
+    abstract suspend fun insertTags(tags: List<LocalTag>): List<Long>
 
     @Query("SELECT * FROM tags")
-    abstract fun getTags(): List<LocalTag>
+    abstract suspend fun getTags(): List<LocalTag>
 
     @Query("DELETE FROM tags")
-    abstract fun clear()
+    abstract suspend fun clear()
 }

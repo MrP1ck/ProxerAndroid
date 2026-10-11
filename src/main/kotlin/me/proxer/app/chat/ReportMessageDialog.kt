@@ -13,7 +13,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -23,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.proxer.app.R
 import me.proxer.app.util.extension.toast
 
@@ -32,9 +32,9 @@ import me.proxer.app.util.extension.toast
 @Composable
 fun ReportMessageDialog(viewModel: ReportViewModel, id: String, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val isLoading by viewModel.isLoading.observeAsState(false)
-    val result by viewModel.data.observeAsState()
-    val error by viewModel.error.observeAsState()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val result by viewModel.data.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
 
     var message by rememberSaveable { mutableStateOf("") }
     var isInvalid by rememberSaveable { mutableStateOf(false) }

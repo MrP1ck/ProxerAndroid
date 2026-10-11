@@ -1,26 +1,25 @@
 package me.proxer.app.media.list
 
-import androidx.lifecycle.MutableLiveData
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedContentViewModel
 import me.proxer.app.media.LocalTag
 import me.proxer.app.media.TagDao
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.enumSetOf
 import me.proxer.app.util.extension.isAgeRestricted
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.app.util.extension.toLocalDate
 import me.proxer.app.util.extension.toParcelableTag
 import me.proxer.library.api.PagingLimitEndpoint
 import me.proxer.library.entity.list.MediaListEntry
-import me.proxer.library.entity.list.Tag
 import me.proxer.library.enums.MediaType
 import me.proxer.library.enums.TagRateFilter
 import me.proxer.library.enums.TagSpoilerFilter
@@ -82,64 +81,50 @@ class MediaListViewModel(initialFilter: MediaListFilter) : PagedContentViewModel
         }
     }
 
-    val genreData = MutableLiveData<List<LocalTag>>()
-    val tagData = MutableLiveData<List<LocalTag>>()
+    val genreData = MutableStateFlow<List<LocalTag>?>(null)
+    val tagData = MutableStateFlow<List<LocalTag>?>(null)
 
     private val tagDao by safeInject<TagDao>()
 
-    private var tagsDisposable: Disposable? = null
-
-    override fun onCleared() {
-        tagsDisposable?.dispose()
-        tagsDisposable = null
-
-        super.onCleared()
-    }
+    private var tagsJob: Job? = null
 
     override fun areItemsTheSame(old: MediaListEntry, new: MediaListEntry) = old == new
 
     fun loadTags() {
-        tagsDisposable?.dispose()
-        tagsDisposable = Single
-            .fromCallable { tagDao.getTags() }
-            .flatMap { cachedTags ->
-                when {
-                    shouldUpdateTags() || cachedTags.isEmpty() ->
-                        tagSingle()
-                            .map { remoteTags -> remoteTags.map { it.toParcelableTag() } }
-                            .doOnSuccess {
-                                tagDao.replaceTags(it)
+        tagsJob?.cancel()
+        tagsJob = viewModelScope.launch {
+            catchingErrors {
+                val cachedTags = tagDao.getTags()
 
-                                preferenceHelper.lastTagUpdateDate = Instant.now()
-                            }
-                    else -> Single.just(cachedTags)
+                val tags = when {
+                    shouldUpdateTags() || cachedTags.isEmpty() -> loadRemoteTags().also {
+                        tagDao.replaceTags(it)
+                        preferenceHelper.lastTagUpdateDate = Instant.now()
+                    }
+                    else -> cachedTags
                 }
-            }
-            .map {
+
                 val tagsToFilter = when (filter.value.type) {
                     MediaType.HENTAI, MediaType.HMANGA -> enumSetOf(TagType.TAG, TagType.H_TAG)
                     else -> enumSetOf(TagType.TAG)
                 }
 
-                val genreTags = it.filter { tag -> tag.type == TagType.GENRE }
-                val entryTags = it.filter { tag -> tag.type in tagsToFilter }
+                val genreTags = tags.filter { tag -> tag.type == TagType.GENRE }
+                val entryTags = tags.filter { tag -> tag.type in tagsToFilter }
 
                 TagContainer(genreTags, entryTags)
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeAndLogErrors { tags ->
+            }.onSuccess { tags ->
                 genreData.value = tags.genreTags
                 tagData.value = tags.entryTags
             }
+        }
     }
 
-    private fun tagSingle(): Single<List<Tag>> {
-        return Single.zip(
-            api.list.tagList().buildSingle(),
-            api.list.tagList().type(TagType.H_TAG).buildSingle(),
-            { first: List<Tag>, second: List<Tag> -> first + second }
-        )
+    private suspend fun loadRemoteTags(): List<LocalTag> = coroutineScope {
+        val tags = async { api.list.tagList().await() }
+        val hentaiTags = async { api.list.tagList().type(TagType.H_TAG).await() }
+
+        (tags.await() + hentaiTags.await()).map { it.toParcelableTag() }
     }
 
     private fun shouldUpdateTags() = preferenceHelper.lastTagUpdateDate.toLocalDate()

@@ -9,7 +9,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import io.reactivex.subjects.PublishSubject
 import me.proxer.app.MainApplication.Companion.USER_AGENT
 import me.proxer.app.R
 import me.proxer.app.util.extension.proxyIfRequired
@@ -39,8 +38,10 @@ class ProxerWebView @JvmOverloads constructor(
         private val imageHttpRegex = Regex("<img.*?src=\"http://.*?\".*?>", RegexOption.DOT_MATCHES_ALL)
     }
 
-    val showPageSubject = PublishSubject.create<HttpUrl>()
-    val loadingFinishedSubject = PublishSubject.create<Unit>()
+    /**
+     * Called when the user clicks a link in the content.
+     */
+    var onShowPage: ((HttpUrl) -> Unit)? = null
 
     init {
         setBackgroundColor(Color.TRANSPARENT)
@@ -57,9 +58,7 @@ class ProxerWebView @JvmOverloads constructor(
         isHorizontalScrollBarEnabled = false
         isVerticalScrollBarEnabled = false
 
-        webViewClient = ProxerWebClient()
-            .also { it.showPageSubject.subscribe(showPageSubject) }
-            .also { it.loadingFinishedSubject.subscribe(loadingFinishedSubject) }
+        webViewClient = ProxerWebClient { onShowPage?.invoke(it) }
     }
 
     fun loadHtml(html: String) {
@@ -122,22 +121,15 @@ class ProxerWebView @JvmOverloads constructor(
         return "rgba($red, $green, $blue, $normalizedAlpha)"
     }
 
-    private class ProxerWebClient : WebViewClient() {
-
-        val showPageSubject = PublishSubject.create<HttpUrl>()
-        val loadingFinishedSubject = PublishSubject.create<Unit>()
+    private class ProxerWebClient(private val onShowPage: (HttpUrl) -> Unit) : WebViewClient() {
 
         private val client by safeInject<OkHttpClient>()
-
-        override fun onPageFinished(view: WebView?, url: String?) {
-            loadingFinishedSubject.onNext(Unit)
-        }
 
         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
             return when (val httpUrl = request.url.toString().toPrefixedUrlOrNull()) {
                 null -> super.shouldOverrideUrlLoading(view, request)
                 else -> {
-                    showPageSubject.onNext(httpUrl)
+                    onShowPage(httpUrl)
 
                     true
                 }

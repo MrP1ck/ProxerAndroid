@@ -1,12 +1,11 @@
 package me.proxer.app.forum
 
 import android.content.res.Resources
-import androidx.lifecycle.MutableLiveData
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import me.proxer.app.base.PagedViewModel
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.toParsedPost
 import me.proxer.app.util.extension.toTopicMetaData
 
@@ -17,18 +16,18 @@ class TopicViewModel(private val id: String, private val resources: Resources) :
 
     override val itemsOnPage = 10
 
-    override val dataSingle: Single<List<ParsedPost>>
-        get() = Single.fromCallable { validate() }
-            .flatMap {
-                api.forum.topic(id)
-                    .page(page)
-                    .limit(itemsOnPage)
-                    .buildSingle()
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSuccess { metaData.value = it.toTopicMetaData() }
-            .observeOn(Schedulers.computation())
-            .map { it.posts.map { post -> post.toParsedPost(resources) } }
+    override suspend fun loadData(): List<ParsedPost> {
+        validate()
 
-    val metaData = MutableLiveData<TopicMetaData>()
+        val topic = api.forum.topic(id)
+            .page(page)
+            .limit(itemsOnPage)
+            .await()
+
+        metaData.value = topic.toTopicMetaData()
+
+        return withContext(Dispatchers.Default) { topic.posts.map { post -> post.toParsedPost(resources) } }
+    }
+
+    val metaData = MutableStateFlow<TopicMetaData?>(null)
 }

@@ -72,12 +72,12 @@ import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.base.ComposeActivity
 import me.proxer.app.ui.components.ErrorState
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LoadingState
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.MediaControlInfo
 import me.proxer.app.ui.components.MediaControlTexts
 import me.proxer.app.ui.components.MediaControls
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.TopAppBarTitle
 import me.proxer.app.ui.components.UpButton
 import me.proxer.app.ui.components.collectContentState
@@ -219,11 +219,11 @@ class MangaActivity : ComposeActivity() {
             if (chapterInfo != null) areControlsVisible = false
         }
 
-        LiveDataEffect(viewModel.userStateData) {
+        ObserveAsEvents(viewModel.userStateData) {
             snackbarHostState.showSnackbar(context.getString(R.string.fragment_set_user_info_success))
         }
 
-        LiveDataEffect(viewModel.userStateError) {
+        ObserveAsEvents(viewModel.userStateError) {
             snackbarHostState.showErrorSnackbar(
                 context = context,
                 error = it,

@@ -1,10 +1,11 @@
 package me.proxer.app.settings.status
 
-import io.reactivex.Single
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.proxer.app.MainApplication.Companion.USER_AGENT
 import me.proxer.app.base.BaseViewModel
+import me.proxer.app.util.extension.awaitString
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toBodySingle
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -25,11 +26,13 @@ class ServerStatusViewModel : BaseViewModel<List<ServerStatus>>() {
 
     override val isLoginRequired = false
 
-    override val dataSingle: Single<List<ServerStatus>>
-        get() = Single.fromCallable { validate() }
-            .flatMap { client.newCall(constructRequest()).toBodySingle() }
-            .map { Jsoup.parse(it) }
-            .map { scrape(it) }
+    override suspend fun loadData(): List<ServerStatus> {
+        validate()
+
+        val body = client.newCall(constructRequest()).awaitString()
+
+        return withContext(Dispatchers.Default) { scrape(Jsoup.parse(body)) }
+    }
 
     private val client by safeInject<OkHttpClient>()
 

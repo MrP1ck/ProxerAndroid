@@ -1,24 +1,21 @@
 package me.proxer.app.chat.prv.create
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.rubengees.rxbus.RxBus
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.chat.prv.Participant
 import me.proxer.app.chat.prv.sync.MessengerDao
 import me.proxer.app.chat.prv.sync.MessengerErrorEvent
 import me.proxer.app.chat.prv.sync.MessengerWorker
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.data.EventBus
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.library.ProxerApi
 import me.proxer.library.api.Endpoint
 
@@ -27,71 +24,39 @@ import me.proxer.library.api.Endpoint
  */
 class CreateConferenceViewModel : ViewModel() {
 
-    val isLoading = MutableLiveData<Boolean>()
-    val result = ResettingMutableLiveData<LocalConference>()
-    val error = ResettingMutableLiveData<ErrorUtils.ErrorAction>()
-
-    private val bus by safeInject<RxBus>()
+    private val bus by safeInject<EventBus>()
     private val api by safeInject<ProxerApi>()
     private val messengerDao by safeInject<MessengerDao>()
 
-    private var newConferenceId: Long? = null
+    val isLoading = MutableStateFlow(false)
+    val result = Events<LocalConference>()
+    val error = Events<ErrorUtils.ErrorAction>()
 
-    private var creationDisposable: Disposable? = null
-    private var disposables = CompositeDisposable()
+    private var newConferenceId: Long? = null
+    private var creationJob: Job? = null
 
     init {
-        disposables += bus.register(MessengerWorker.SynchronizationEvent::class.java)
-            .flatMap {
-                newConferenceId.let { newConferenceId ->
-                    when (newConferenceId) {
-                        null -> Observable.never()
-                        else -> messengerDao.findConference(newConferenceId).let { foundConference ->
-                            when (foundConference) {
-                                null -> Observable.never()
-                                else -> Observable.just(foundConference)
-                            }
-                        }
-                    }
+        viewModelScope.launch {
+            bus.events<MessengerWorker.SynchronizationEvent>().collect {
+                val foundConference = newConferenceId?.let { id -> messengerDao.findConference(id) }
+
+                if (foundConference != null) {
+                    newConferenceId = null
+                    isLoading.value = false
+                    result.send(foundConference)
                 }
             }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                newConferenceId = null
+        }
 
-                isLoading.value = false
-                error.value = null
-                result.value = it
-            }
-
-        disposables += bus.register(MessengerErrorEvent::class.java)
-            .flatMap {
-                newConferenceId.let { newConferenceId ->
-                    when (newConferenceId) {
-                        null -> Observable.never()
-                        else -> Observable.just(ErrorUtils.handle(it.error))
-                    }
+        viewModelScope.launch {
+            bus.events<MessengerErrorEvent>().collect {
+                if (newConferenceId != null) {
+                    newConferenceId = null
+                    isLoading.value = false
+                    error.send(ErrorUtils.handle(it.error))
                 }
             }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                newConferenceId = null
-
-                isLoading.value = false
-                result.value = null
-                error.value = it
-            }
-    }
-
-    override fun onCleared() {
-        creationDisposable?.dispose()
-        disposables.dispose()
-
-        creationDisposable = null
-
-        super.onCleared()
+        }
     }
 
     fun createGroup(topic: String, firstMessage: String, participants: List<Participant>) = createConference(
@@ -107,26 +72,21 @@ class CreateConferenceViewModel : ViewModel() {
     )
 
     private fun createConference(endpoint: Endpoint<String>) {
-        creationDisposable?.dispose()
-        creationDisposable = endpoint.buildSingle()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {
-                newConferenceId = null
-                isLoading.value = true
-                result.value = null
-                error.value = null
-            }
-            .subscribeAndLogErrors(
-                {
+        creationJob?.cancel()
+        creationJob = viewModelScope.launch {
+            newConferenceId = null
+            isLoading.value = true
+
+            catchingErrors { endpoint.await() }
+                .onSuccess {
                     newConferenceId = it.toLong()
 
                     MessengerWorker.enqueueSynchronization()
-                },
-                {
-                    isLoading.value = false
-                    error.value = ErrorUtils.handle(it)
                 }
-            )
+                .onFailure {
+                    isLoading.value = false
+                    error.send(ErrorUtils.handle(it))
+                }
+        }
     }
 }

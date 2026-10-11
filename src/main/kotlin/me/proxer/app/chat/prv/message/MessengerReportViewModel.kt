@@ -1,10 +1,10 @@
 package me.proxer.app.chat.prv.message
 
-import io.reactivex.Single
+import androidx.room.withTransaction
 import me.proxer.app.chat.ReportViewModel
 import me.proxer.app.chat.prv.sync.MessengerDao
 import me.proxer.app.chat.prv.sync.MessengerDatabase
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.awaitNullable
 import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerApi
 
@@ -14,17 +14,16 @@ class MessengerReportViewModel : ReportViewModel() {
     private val messengerDao by safeInject<MessengerDao>()
     private val messengerDatabase by safeInject<MessengerDatabase>()
 
-    override fun reportSingle(id: String, message: String): Single<Unit> {
-        return api.messenger.report(id, message).buildSingle()
-            .map {
-                messengerDatabase.runInTransaction {
-                    val conference = messengerDao.getConference(id.toLong())
+    override suspend fun report(id: String, message: String) {
+        api.messenger.report(id, message).awaitNullable()
 
-                    if (!conference.isGroup) {
-                        messengerDao.deleteMessagesByConferenceId(id)
-                        messengerDao.deleteConferenceById(id)
-                    }
-                }
+        messengerDatabase.withTransaction {
+            val conference = messengerDao.getConference(id.toLong())
+
+            if (!conference.isGroup) {
+                messengerDao.deleteMessagesByConferenceId(id)
+                messengerDao.deleteConferenceById(id)
             }
+        }
     }
 }

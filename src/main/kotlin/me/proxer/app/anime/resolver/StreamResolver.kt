@@ -1,7 +1,6 @@
 package me.proxer.app.anime.resolver
 
 import com.squareup.moshi.Moshi
-import io.reactivex.Single
 import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerApi
 import okhttp3.OkHttpClient
@@ -21,5 +20,5 @@ abstract class StreamResolver {
     protected val moshi by safeInject<Moshi>()
 
     open fun supports(name: String) = name.equals(this.name, true)
-    abstract fun resolve(id: String): Single<StreamResolutionResult>
+    abstract suspend fun resolve(id: String): StreamResolutionResult
 }

@@ -1,8 +1,7 @@
 package me.proxer.app.anime.schedule
 
-import io.reactivex.Single
 import me.proxer.app.base.BaseViewModel
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.await
 import me.proxer.library.entity.media.CalendarEntry
 import me.proxer.library.enums.CalendarDay
 
@@ -11,13 +10,11 @@ import me.proxer.library.enums.CalendarDay
  */
 class ScheduleViewModel : BaseViewModel<Map<CalendarDay, List<CalendarEntry>>>() {
 
-    override val dataSingle: Single<Map<CalendarDay, List<CalendarEntry>>>
-        get() = Single.fromCallable { validate() }
-            .flatMap { api.media.calendar().buildSingle() }
-            .map { calendarEntries -> calendarEntries.groupBy { it.weekDay } }
-            .map { groupedCalendarEntries ->
-                groupedCalendarEntries.mapValues { (_, calendarEntries) ->
-                    calendarEntries.sortedBy { it.date }
-                }
-            }
+    override suspend fun loadData(): Map<CalendarDay, List<CalendarEntry>> {
+        validate()
+
+        return api.media.calendar().await()
+            .groupBy { it.weekDay }
+            .mapValues { (_, calendarEntries) -> calendarEntries.sortedBy { it.date } }
+    }
 }

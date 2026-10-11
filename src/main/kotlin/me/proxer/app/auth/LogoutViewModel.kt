@@ -1,56 +1,52 @@
 package me.proxer.app.auth
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.awaitNullable
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.library.ProxerApi
+import timber.log.Timber
 
 /**
  * @author Ruben Gees
  */
 class LogoutViewModel : ViewModel() {
 
-    val success = MutableLiveData<Unit?>()
-    val error = MutableLiveData<ErrorUtils.ErrorAction?>()
-    val isLoading = MutableLiveData<Boolean?>()
+    val success = MutableStateFlow<Unit?>(null)
+    val error = MutableStateFlow<ErrorUtils.ErrorAction?>(null)
+    val isLoading = MutableStateFlow(false)
 
     private val api by safeInject<ProxerApi>()
 
-    private var dataDisposable: Disposable? = null
-
-    override fun onCleared() {
-        dataDisposable?.dispose()
-        dataDisposable = null
-
-        super.onCleared()
-    }
+    private var dataJob: Job? = null
 
     fun logout() {
-        if (isLoading.value != true) {
-            dataDisposable?.dispose()
-            dataDisposable = api.user.logout()
-                .buildSingle()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe {
-                    error.value = null
-                    isLoading.value = true
+        if (!isLoading.value) {
+            dataJob?.cancel()
+            dataJob = viewModelScope.launch {
+                error.value = null
+                isLoading.value = true
+
+                try {
+                    api.user.logout().awaitNullable()
+
+                    success.value = Unit
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (@Suppress("TooGenericExceptionCaught") logoutError: Throwable) {
+                    Timber.e(logoutError)
+
+                    error.value = ErrorUtils.handle(logoutError)
+                } finally {
+                    if (isActive) isLoading.value = false
                 }
-                .doAfterTerminate { isLoading.value = false }
-                .subscribeAndLogErrors(
-                    {
-                        success.value = Unit
-                    },
-                    {
-                        error.value = ErrorUtils.handle(it)
-                    }
-                )
+            }
         }
     }
 }

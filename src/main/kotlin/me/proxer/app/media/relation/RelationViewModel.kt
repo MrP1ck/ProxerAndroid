@@ -1,6 +1,5 @@
 package me.proxer.app.media.relation
 
-import io.reactivex.Single
 import me.proxer.app.base.BaseContentViewModel
 import me.proxer.library.api.Endpoint
 import me.proxer.library.entity.info.Relation
@@ -14,7 +13,5 @@ class RelationViewModel(private val entryId: String) : BaseContentViewModel<List
         get() = api.info.relations(entryId)
             .includeHentai(preferenceHelper.isAgeRestrictedMediaAllowed && storageHelper.isLoggedIn)
 
-    override val dataSingle: Single<List<Relation>>
-        get() = super.dataSingle
-            .map { relations -> relations.filterNot { it.id == entryId } }
+    override suspend fun loadData() = super.loadData().filterNot { it.id == entryId }
 }

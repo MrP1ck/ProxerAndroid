@@ -1,26 +1,25 @@
 package me.proxer.app.manga
 
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
 import me.proxer.app.exception.AgeConfirmationRequiredException
 import me.proxer.app.exception.NotLoggedInException
 import me.proxer.app.exception.PartialException
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.buildPartialErrorSingle
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.data.send
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.awaitPartial
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.isAgeRestricted
 import me.proxer.app.util.extension.isOfficial
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.app.util.extension.toMediaLanguage
 import me.proxer.app.util.extension.toPrefixedHttpUrl
 import me.proxer.library.api.Endpoint
-import me.proxer.library.entity.info.EntryCore
 import me.proxer.library.enums.Category
 import me.proxer.library.enums.Language
 import kotlin.properties.Delegates
@@ -34,60 +33,52 @@ class MangaViewModel(
     episode: Int
 ) : BaseViewModel<MangaChapterInfo>() {
 
-    override val dataSingle: Single<MangaChapterInfo>
-        get() = Single.fromCallable { validate() }
-            .flatMap { entrySingle() }
-            .doOnSuccess {
-                if (it.isAgeRestricted && !preferenceHelper.isAgeRestrictedMediaAllowed) {
-                    throw AgeConfirmationRequiredException()
-                }
-            }
-            .flatMap { entry ->
-                chapterSingle(entry)
-                    .doOnSuccess {
-                        if (!it.chapter.isOfficial && !storageHelper.isLoggedIn) {
-                            throw NotLoggedInException()
-                        }
-                    }
-                    .map { data ->
-                        if (data.chapter.isOfficial) {
-                            throw PartialException(
-                                MangaLinkException(data.chapter.title, data.chapter.server.toPrefixedHttpUrl()),
-                                entry
-                            )
-                        } else if (data.chapter.pages == null) {
-                            throw PartialException(MangaNotAvailableException(), entry)
-                        }
+    override suspend fun loadData(): MangaChapterInfo {
+        validate()
 
-                        data
-                    }
-            }
+        val entry = api.info.entryCore(entryId).await()
 
-    val userStateData = ResettingMutableLiveData<Unit?>()
-    val userStateError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
+        if (entry.isAgeRestricted && !preferenceHelper.isAgeRestrictedMediaAllowed) {
+            throw AgeConfirmationRequiredException()
+        }
+
+        val chapter = api.manga.chapter(entryId, episode, language).awaitPartial(entry)
+
+        if (!chapter.isOfficial && !storageHelper.isLoggedIn) {
+            throw NotLoggedInException()
+        }
+
+        val data = MangaChapterInfo(chapter, entry.name, entry.episodeAmount)
+
+        if (data.chapter.isOfficial) {
+            throw PartialException(
+                MangaLinkException(data.chapter.title, data.chapter.server.toPrefixedHttpUrl()),
+                entry
+            )
+        } else if (data.chapter.pages == null) {
+            throw PartialException(MangaNotAvailableException(), entry)
+        }
+
+        return data
+    }
+
+    val userStateData = Events<Unit>()
+    val userStateError = Events<ErrorUtils.ErrorAction>()
 
     var episode by Delegates.observable(episode) { _, old, new ->
         if (old != new) reload()
     }
 
-    private var cachedEntryCore: EntryCore? = null
-
-    private var userStateDisposable: Disposable? = null
+    private var userStateJob: Job? = null
 
     init {
-        disposables += preferenceHelper.isAgeRestrictedMediaAllowedObservable
-            .subscribe {
+        viewModelScope.launch {
+            preferenceHelper.isAgeRestrictedMediaAllowedChanges.collect {
                 if (error.value?.buttonAction == ButtonAction.AGE_CONFIRMATION) {
                     reload()
                 }
             }
-    }
-
-    override fun onCleared() {
-        userStateDisposable?.dispose()
-        userStateDisposable = null
-
-        super.onCleared()
+        }
     }
 
     fun setEpisode(value: Int, trigger: Boolean = true) {
@@ -104,31 +95,17 @@ class MangaViewModel(
         api.ucp.setBookmark(entryId, episode, language.toMediaLanguage(), Category.MANGA)
     )
 
-    private fun entrySingle(): Single<EntryCore> = when (cachedEntryCore != null) {
-        true -> Single.just(cachedEntryCore)
-        false -> api.info.entryCore(entryId).buildSingle()
-    }
-
-    private fun chapterSingle(entry: EntryCore) = api.manga.chapter(entryId, episode, language)
-        .buildPartialErrorSingle(entry)
-        .map { MangaChapterInfo(it, entry.name, entry.episodeAmount) }
-
     @Suppress("ForbiddenVoid")
     private fun updateUserState(endpoint: Endpoint<Unit?>) {
-        userStateDisposable?.dispose()
-        userStateDisposable = Single.fromCallable { validators.validateLogin() }
-            .flatMap { endpoint.buildSingle() }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeAndLogErrors(
-                {
-                    userStateError.value = null
-                    userStateData.value = Unit
-                },
-                {
-                    userStateData.value = null
-                    userStateError.value = ErrorUtils.handle(it)
-                }
-            )
+        userStateJob?.cancel()
+        userStateJob = viewModelScope.launch {
+            catchingErrors {
+                validators.validateLogin()
+
+                endpoint.awaitNullable()
+            }
+                .onSuccess { userStateData.send() }
+                .onFailure { userStateError.send(ErrorUtils.handle(it)) }
+        }
     }
 }

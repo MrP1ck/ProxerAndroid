@@ -5,13 +5,13 @@ import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.os.bundleOf
-import com.rubengees.rxbus.RxBus
-import com.uber.autodispose.android.lifecycle.scope
-import com.uber.autodispose.autoDisposable
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.settings.theme.ThemeContainer
 import me.proxer.app.settings.theme.applyThemeContainer
 import me.proxer.app.util.compat.TaskDescriptionCompat
+import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.androidUri
@@ -40,7 +40,7 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
     protected open val themeOverlay: Int?
         @StyleRes get() = null
 
-    protected val bus by safeInject<RxBus>()
+    protected val bus by safeInject<EventBus>()
     protected val storageHelper by safeInject<StorageHelper>()
     protected val preferenceHelper by safeInject<PreferenceHelper>()
 
@@ -62,9 +62,9 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
 
         customTabsHelper = CustomTabsHelperFragment.attachTo(this)
 
-        preferenceHelper.themeObservable
-            .autoDisposable(this.scope())
-            .subscribe { onThemeChanged(it) }
+        lifecycleScope.launch {
+            preferenceHelper.themeChanges.collect { onThemeChanged(it) }
+        }
     }
 
     /**

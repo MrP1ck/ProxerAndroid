@@ -1,12 +1,11 @@
 package me.proxer.app.anime.resolver
 
-import io.reactivex.Single
 import me.proxer.app.MainApplication.Companion.GENERIC_USER_AGENT
 import me.proxer.app.exception.StreamResolutionException
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.toBodySingle
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitString
+import me.proxer.app.util.extension.retryWithDelay
 import me.proxer.app.util.extension.toPrefixedUrlOrNull
-import me.proxer.app.util.extension.toSingle
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
 
@@ -15,44 +14,44 @@ import okhttp3.Request
  */
 object YourUploadStreamResolver : StreamResolver() {
 
+    private const val HEAD_ATTEMPTS = 4
+
     private val regex = Regex("file: '(.*?)'")
 
     override val name = "YourUpload"
 
-    override fun resolve(id: String): Single<StreamResolutionResult> = api.anime.link(id)
-        .buildSingle()
-        .flatMap { url ->
+    override suspend fun resolve(id: String): StreamResolutionResult {
+        val url = api.anime.link(id).await()
+
+        val body = client
+            .newCall(
+                Request.Builder()
+                    .get()
+                    .url(url.toPrefixedUrlOrNull() ?: throw StreamResolutionException())
+                    .header("User-Agent", GENERIC_USER_AGENT)
+                    .header("Connection", "close")
+                    .build()
+            )
+            .awaitString()
+
+        val regexResult = regex.find(body) ?: throw StreamResolutionException()
+        val fileUrl = regexResult.groupValues[1].toHttpUrlOrNull() ?: throw StreamResolutionException()
+
+        val videoUrl = retryWithDelay(HEAD_ATTEMPTS, 0) {
             client
                 .newCall(
                     Request.Builder()
-                        .get()
-                        .url(url.toPrefixedUrlOrNull() ?: throw StreamResolutionException())
+                        .head()
+                        .url(fileUrl)
+                        .header("Referer", url)
                         .header("User-Agent", GENERIC_USER_AGENT)
                         .header("Connection", "close")
                         .build()
                 )
-                .toBodySingle()
-                .map {
-                    val regexResult = regex.find(it) ?: throw StreamResolutionException()
+                .await()
+                .use { it.networkResponse?.request?.url }
+        } ?: throw StreamResolutionException()
 
-                    regexResult.groupValues[1].toHttpUrlOrNull()
-                        ?: throw StreamResolutionException()
-                }
-                .flatMap { fileUrl ->
-                    client
-                        .newCall(
-                            Request.Builder()
-                                .head()
-                                .url(fileUrl)
-                                .header("Referer", url)
-                                .header("User-Agent", GENERIC_USER_AGENT)
-                                .header("Connection", "close")
-                                .build()
-                        )
-                        .toSingle()
-                        .retry(3)
-                }
-                .map { it.networkResponse?.request?.url ?: throw StreamResolutionException() }
-                .map { StreamResolutionResult.Video(it, "video/mp4", url, internalPlayerOnly = true) }
-        }
+        return StreamResolutionResult.Video(videoUrl, "video/mp4", url, internalPlayerOnly = true)
+    }
 }

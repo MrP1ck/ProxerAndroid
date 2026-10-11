@@ -24,8 +24,8 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import me.proxer.app.R
 import me.proxer.app.base.ComposeActivity
 import me.proxer.app.ui.components.DialogButton
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.PagedList
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.collectContentState
@@ -82,7 +82,7 @@ class NotificationActivity : ComposeActivity() {
         ) { padding ->
             val snackbarHostState = LocalSnackbarHostState.current
 
-            LiveDataEffect(viewModel.deletionError) {
+            ObserveAsEvents(viewModel.deletionError) {
                 snackbarHostState?.showErrorSnackbar(
                     context = context,
                     error = it,

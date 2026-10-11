@@ -19,8 +19,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import me.proxer.app.R
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.PagedGrid
 import me.proxer.app.ui.components.RemovableCoverCard
 import me.proxer.app.ui.components.collectContentState
@@ -57,7 +57,7 @@ fun ProfileMediaListTab(
     val onErrorAction = rememberErrorActionHandler(viewModel::load)
     var filter by rememberSaveable { mutableStateOf(viewModel.filter) }
 
-    LiveDataEffect(viewModel.itemDeletionError) {
+    ObserveAsEvents(viewModel.itemDeletionError) {
         snackbarHostState?.showSnackbar(
             context.getString(R.string.error_media_entry_deletion, context.getString(it.message))
         )

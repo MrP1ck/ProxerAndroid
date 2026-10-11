@@ -1,15 +1,17 @@
 package me.proxer.app.media.comments
 
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.proxer.app.base.PagedViewModel
 import me.proxer.app.comment.LocalComment
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.toParsedComment
 import me.proxer.library.enums.CommentSortCriteria
 import org.threeten.bp.Instant
@@ -25,46 +27,41 @@ class CommentsViewModel(
 
     override val itemsOnPage = 10
 
-    override val dataSingle: Single<List<ParsedComment>>
-        get() = Single.fromCallable { validate() }
-            .flatMap {
-                api.info.comments(entryId)
-                    .sort(sortCriteria)
-                    .page(page)
-                    .limit(itemsOnPage)
-                    .buildSingle()
-            }
-            .observeOn(Schedulers.computation())
-            .map { it.map { comment -> comment.toParsedComment() } }
+    override suspend fun loadData(): List<ParsedComment> {
+        validate()
+
+        val comments = api.info.comments(entryId)
+            .sort(sortCriteria)
+            .page(page)
+            .limit(itemsOnPage)
+            .await()
+
+        return withContext(Dispatchers.Default) { comments.map { comment -> comment.toParsedComment() } }
+    }
 
     var sortCriteria by Delegates.observable(sortCriteria) { _, old, new ->
         if (old != new) reload()
     }
 
-    val itemDeletionError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
+    val itemDeletionError = Events<ErrorUtils.ErrorAction>()
 
-    private var deleteDisposable: Disposable? = null
+    private var deleteJob: Job? = null
 
     fun deleteComment(comment: ParsedComment) {
-        deleteDisposable?.dispose()
+        deleteJob?.cancel()
+        deleteJob = viewModelScope.launch {
+            catchingErrors {
+                api.comment.update(comment.id)
+                    .comment("")
+                    .rating(0)
+                    .awaitNullable()
 
-        deleteDisposable = api.comment.update(comment.id)
-            .comment("")
-            .rating(0)
-            .buildSingle()
-            .doOnSuccess { storageHelper.deleteCommentDraft(comment.entryId) }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeAndLogErrors(
-                {
-                    data.value = data.value?.filter { it.id != comment.id }
-                },
-                {
-                    itemDeletionError.value = ErrorUtils.handle(it)
-                }
-            )
+                storageHelper.deleteCommentDraft(comment.entryId)
+            }
+                .onSuccess { data.value = data.value?.filter { it.id != comment.id } }
+                .onFailure { itemDeletionError.send(ErrorUtils.handle(it)) }
+        }
     }
-
     fun updateComment(comment: LocalComment) {
         data.value = data.value?.map {
             if (it.id == comment.id) {

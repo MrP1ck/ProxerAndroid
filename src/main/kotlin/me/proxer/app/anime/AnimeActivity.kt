@@ -53,11 +53,11 @@ import me.proxer.app.anime.resolver.StreamResolutionResult
 import me.proxer.app.base.ComposeActivity
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.ErrorState
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LoadingState
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.MediaControlTexts
 import me.proxer.app.ui.components.MediaControls
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.ProxerAsyncImage
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.TopAppBarTitle
@@ -185,7 +185,7 @@ class AnimeActivity : ComposeActivity() {
             intent.putExtra(EPISODE_EXTRA, newEpisode)
         }
 
-        LiveDataEffect(viewModel.resolutionResult) { result ->
+        ObserveAsEvents(viewModel.resolutionResult) { result ->
             when (result) {
                 is StreamResolutionResult.Video -> result.play(
                     context,
@@ -241,18 +241,18 @@ class AnimeActivity : ComposeActivity() {
         ) { padding ->
             val snackbarHostState = LocalSnackbarHostState.current
 
-            LiveDataEffect(viewModel.resolutionError) { error ->
+            ObserveAsEvents(viewModel.resolutionError) { error ->
                 when (error) {
                     is AppRequiredErrorAction -> error.showDialog(this@AnimeActivity)
                     else -> snackbarHostState?.showErrorSnackbar(context, error, onErrorAction)
                 }
             }
 
-            LiveDataEffect(viewModel.userStateData) {
+            ObserveAsEvents(viewModel.userStateData) {
                 snackbarHostState?.showSnackbar(context.getString(R.string.fragment_set_user_info_success))
             }
 
-            LiveDataEffect(viewModel.userStateError) {
+            ObserveAsEvents(viewModel.userStateError) {
                 snackbarHostState?.showErrorSnackbar(
                     context = context,
                     error = it,

@@ -1,13 +1,14 @@
 package me.proxer.app.base
 
-import io.reactivex.Single
-import io.reactivex.subjects.SingleSubject
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancel
 import me.proxer.app.TestApplication
 import me.proxer.app.exception.NotConnectedException
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction
 import me.proxer.app.util.Validators
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -33,7 +34,7 @@ class BaseViewModelTest {
     @Before
     fun setUp() {
         loads = 0
-        TestViewModel.source = { Single.fromCallable { "data ${++loads}" } }
+        TestViewModel.source = { "data ${++loads}" }
         TestViewModel.isLoginRequired = false
         TestViewModel.isAgeConfirmationRequired = false
     }
@@ -43,7 +44,6 @@ class BaseViewModelTest {
         val viewModel = TestViewModel()
 
         viewModel.load()
-        idleMainLooper()
 
         assertEquals("data 1", viewModel.data.value)
         assertNull(viewModel.error.value)
@@ -55,11 +55,9 @@ class BaseViewModelTest {
         val viewModel = TestViewModel()
 
         viewModel.load()
-        idleMainLooper()
 
-        TestViewModel.source = { Single.error(IllegalStateException("broken")) }
+        TestViewModel.source = { error("broken") }
         viewModel.load()
-        idleMainLooper()
 
         assertNull(viewModel.data.value)
         assertNotNull(viewModel.error.value)
@@ -71,19 +69,16 @@ class BaseViewModelTest {
         val viewModel = TestViewModel()
 
         viewModel.load()
-        idleMainLooper()
 
-        val pending = SingleSubject.create<String>()
-        TestViewModel.source = { pending }
+        val pending = CompletableDeferred<String>()
+        TestViewModel.source = { pending.await() }
 
         viewModel.load()
-        idleMainLooper()
 
         assertEquals(true, viewModel.isLoading.value)
         assertNull(viewModel.data.value)
 
-        pending.onSuccess("done")
-        idleMainLooper()
+        pending.complete("done")
 
         assertEquals(false, viewModel.isLoading.value)
         assertEquals("done", viewModel.data.value)
@@ -92,37 +87,32 @@ class BaseViewModelTest {
     @Test
     fun `a newer load replaces a pending one`() {
         val viewModel = TestViewModel()
-        val first = SingleSubject.create<String>()
+        val first = CompletableDeferred<String>()
 
-        TestViewModel.source = { first }
+        TestViewModel.source = { first.await() }
         viewModel.load()
-        idleMainLooper()
 
-        TestViewModel.source = { Single.just("second") }
+        TestViewModel.source = { "second" }
         viewModel.load()
-        idleMainLooper()
 
-        first.onSuccess("first")
-        idleMainLooper()
+        first.complete("first")
 
         assertEquals("second", viewModel.data.value)
-        assertFalse(first.hasObservers())
+        assertEquals(false, viewModel.isLoading.value)
     }
 
     @Test
     fun `loadIfPossible does not load while loading`() {
         val viewModel = TestViewModel()
-        val pending = SingleSubject.create<String>()
+        val pending = CompletableDeferred<String>()
 
         TestViewModel.source = {
             loads++
-            pending
+            pending.await()
         }
 
         viewModel.load()
-        idleMainLooper()
         viewModel.loadIfPossible()
-        idleMainLooper()
 
         assertEquals(1, loads)
     }
@@ -133,13 +123,11 @@ class BaseViewModelTest {
 
         TestViewModel.source = {
             loads++
-            Single.error(IllegalStateException())
+            error("broken")
         }
 
         viewModel.load()
-        idleMainLooper()
         viewModel.loadIfPossible()
-        idleMainLooper()
 
         assertEquals(1, loads)
     }
@@ -149,7 +137,6 @@ class BaseViewModelTest {
         val viewModel = TestViewModel()
 
         viewModel.loadIfPossible()
-        idleMainLooper()
 
         assertEquals("data 1", viewModel.data.value)
     }
@@ -158,14 +145,12 @@ class BaseViewModelTest {
     fun `reload clears the error and loads again`() {
         val viewModel = TestViewModel()
 
-        TestViewModel.source = { Single.error(IllegalStateException()) }
+        TestViewModel.source = { throw IllegalStateException() }
         viewModel.load()
-        idleMainLooper()
         assertNotNull(viewModel.error.value)
 
-        TestViewModel.source = { Single.just("fixed") }
+        TestViewModel.source = { "fixed" }
         viewModel.reload()
-        idleMainLooper()
 
         assertNull(viewModel.error.value)
         assertEquals("fixed", viewModel.data.value)
@@ -174,12 +159,11 @@ class BaseViewModelTest {
     @Test
     fun `login required views fail with a login action while logged out`() {
         TestViewModel.isLoginRequired = true
-        TestViewModel.source = { Single.fromCallable { requireLogin() } }
+        TestViewModel.source = { requireLogin() }
 
         val viewModel = TestViewModel()
 
         viewModel.load()
-        idleMainLooper()
 
         assertEquals(ButtonAction.LOGIN, viewModel.error.value?.buttonAction)
     }
@@ -187,16 +171,14 @@ class BaseViewModelTest {
     @Test
     fun `logging in reloads a login required view`() {
         TestViewModel.isLoginRequired = true
-        TestViewModel.source = { Single.fromCallable { requireLogin() } }
+        TestViewModel.source = { requireLogin() }
 
         val viewModel = TestViewModel()
 
         viewModel.load()
-        idleMainLooper()
         assertEquals(ButtonAction.LOGIN, viewModel.error.value?.buttonAction)
 
         environment.logIn()
-        idleMainLooper()
 
         assertNull(viewModel.error.value)
         assertEquals("secret", viewModel.data.value)
@@ -207,9 +189,7 @@ class BaseViewModelTest {
         val viewModel = TestViewModel()
 
         viewModel.load()
-        idleMainLooper()
         environment.logIn()
-        idleMainLooper()
 
         assertEquals(1, loads)
     }
@@ -221,9 +201,7 @@ class BaseViewModelTest {
         val viewModel = TestViewModel()
 
         viewModel.load()
-        idleMainLooper()
         environment.preferenceHelper.isAgeRestrictedMediaAllowed = true
-        idleMainLooper()
 
         assertEquals("data 2", viewModel.data.value)
     }
@@ -232,14 +210,12 @@ class BaseViewModelTest {
     fun `a restored network connection retries a network error`() {
         val viewModel = TestViewModel()
 
-        TestViewModel.source = { Single.error(NotConnectedException()) }
+        TestViewModel.source = { throw NotConnectedException() }
         viewModel.load()
-        idleMainLooper()
         assertEquals(ButtonAction.NETWORK_SETTINGS, viewModel.error.value?.buttonAction)
 
-        TestViewModel.source = { Single.just("online") }
+        TestViewModel.source = { "online" }
         environment.bus.post(NetworkConnectedEvent())
-        idleMainLooper()
 
         assertEquals("online", viewModel.data.value)
     }
@@ -249,9 +225,7 @@ class BaseViewModelTest {
         val viewModel = TestViewModel()
 
         viewModel.load()
-        idleMainLooper()
         environment.bus.post(NetworkConnectedEvent())
-        idleMainLooper()
 
         assertEquals(1, loads)
     }
@@ -259,16 +233,21 @@ class BaseViewModelTest {
     @Test
     fun `a closed view model stops its request`() {
         val viewModel = TestViewModel()
-        val pending = SingleSubject.create<String>()
+        var wasCancelled = false
 
-        TestViewModel.source = { pending }
+        TestViewModel.source = {
+            try {
+                awaitCancellation()
+            } finally {
+                wasCancelled = true
+            }
+        }
         viewModel.load()
-        idleMainLooper()
-        assertTrue(pending.hasObservers())
+        assertEquals(true, viewModel.isLoading.value)
 
-        viewModel.clear()
+        viewModel.viewModelScope.cancel()
 
-        assertFalse(pending.hasObservers())
+        assertTrue(wasCancelled)
     }
 
     private fun requireLogin(): String {
@@ -285,14 +264,13 @@ class BaseViewModelTest {
 private class TestViewModel : BaseViewModel<String>() {
 
     companion object {
-        var source: () -> Single<String> = { Single.never() }
+        var source: suspend () -> String = { awaitCancellation() }
         var isLoginRequired = false
         var isAgeConfirmationRequired = false
     }
 
     override val isLoginRequired get() = Companion.isLoginRequired
     override val isAgeConfirmationRequired get() = Companion.isAgeConfirmationRequired
-    override val dataSingle get() = source()
 
-    fun clear() = onCleared()
+    override suspend fun loadData() = source()
 }

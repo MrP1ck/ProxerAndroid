@@ -1,6 +1,8 @@
 package me.proxer.app.base
 
-import io.reactivex.Single
+import app.cash.turbine.test
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.test.runTest
 import me.proxer.app.TestApplication
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -31,7 +33,7 @@ class PagedViewModelTest {
         PagedTestViewModel.source = { page ->
             requestedPages += page
 
-            Single.just(List(PagedTestViewModel.ITEMS_ON_PAGE) { page * PagedTestViewModel.ITEMS_ON_PAGE + it })
+            List(PagedTestViewModel.ITEMS_ON_PAGE) { page * PagedTestViewModel.ITEMS_ON_PAGE + it }
         }
     }
 
@@ -40,7 +42,6 @@ class PagedViewModelTest {
         val viewModel = PagedTestViewModel()
 
         viewModel.load()
-        idleMainLooper()
 
         assertEquals(listOf(0, 1, 2), viewModel.data.value)
         assertEquals(listOf(0), requestedPages)
@@ -51,9 +52,7 @@ class PagedViewModelTest {
         val viewModel = PagedTestViewModel()
 
         viewModel.load()
-        idleMainLooper()
         viewModel.loadIfPossible()
-        idleMainLooper()
 
         assertEquals(listOf(0, 1, 2, 3, 4, 5), viewModel.data.value)
         assertEquals(listOf(0, 1), requestedPages)
@@ -65,12 +64,11 @@ class PagedViewModelTest {
 
         PagedTestViewModel.source = { page ->
             requestedPages += page
-            Single.just(listOf(0, 1))
+
+            listOf(0, 1)
         }
         viewModel.load()
-        idleMainLooper()
         viewModel.loadIfPossible()
-        idleMainLooper()
 
         assertEquals(listOf(0, 1), viewModel.data.value)
         assertEquals(listOf(0), requestedPages)
@@ -81,14 +79,13 @@ class PagedViewModelTest {
         val viewModel = PagedTestViewModel()
 
         viewModel.load()
-        idleMainLooper()
 
         PagedTestViewModel.source = { page ->
             requestedPages += page
-            Single.just(listOf(2, 3, 4))
+
+            listOf(2, 3, 4)
         }
         viewModel.loadIfPossible()
-        idleMainLooper()
 
         assertEquals(listOf(0, 1, 2, 3, 4), viewModel.data.value)
     }
@@ -98,16 +95,14 @@ class PagedViewModelTest {
         val viewModel = PagedTestViewModel()
 
         viewModel.load()
-        idleMainLooper()
         viewModel.loadIfPossible()
-        idleMainLooper()
 
         PagedTestViewModel.source = { page ->
             requestedPages += page
-            Single.just(listOf(100, 0, 1))
+
+            listOf(100, 0, 1)
         }
         viewModel.refresh()
-        idleMainLooper()
 
         assertEquals(listOf(100, 0, 1, 2, 3, 4, 5), viewModel.data.value)
         assertEquals(0, requestedPages.last())
@@ -118,60 +113,57 @@ class PagedViewModelTest {
         val viewModel = PagedTestViewModel()
 
         viewModel.load()
-        idleMainLooper()
         viewModel.refresh()
-        idleMainLooper()
         viewModel.loadIfPossible()
-        idleMainLooper()
 
         assertEquals(listOf(0, 0, 1), requestedPages)
     }
 
     @Test
-    fun `an error on the first page is a blocking error`() {
+    fun `an error on the first page is a blocking error`() = runTest {
         val viewModel = PagedTestViewModel()
 
-        PagedTestViewModel.source = { Single.error(IllegalStateException()) }
-        viewModel.load()
-        idleMainLooper()
+        viewModel.refreshError.flow.test {
+            PagedTestViewModel.source = { throw IllegalStateException() }
+            viewModel.load()
 
-        assertNotNull(viewModel.error.value)
-        assertNull(viewModel.refreshError.value)
-        assertNull(viewModel.data.value)
+            assertNotNull(viewModel.error.value)
+            assertNull(viewModel.data.value)
+
+            expectNoEvents()
+        }
     }
 
     @Test
-    fun `a failing refresh keeps the data and reports a refresh error`() {
+    fun `a failing refresh keeps the data and reports a refresh error`() = runTest {
         val viewModel = PagedTestViewModel()
-        val refreshErrors = mutableListOf<Any?>()
 
-        viewModel.refreshError.observeForever { if (it != null) refreshErrors += it }
+        viewModel.refreshError.flow.test {
+            viewModel.load()
 
-        viewModel.load()
-        idleMainLooper()
+            PagedTestViewModel.source = { throw IllegalStateException() }
+            viewModel.refresh()
 
-        PagedTestViewModel.source = { Single.error(IllegalStateException()) }
-        viewModel.refresh()
-        idleMainLooper()
-
-        assertEquals(listOf(0, 1, 2), viewModel.data.value)
-        assertNull(viewModel.error.value)
-        assertEquals(1, refreshErrors.size)
+            assertNotNull(awaitItem())
+            assertEquals(listOf(0, 1, 2), viewModel.data.value)
+            assertNull(viewModel.error.value)
+        }
     }
 
     @Test
-    fun `a failing page after the first one is a blocking error`() {
+    fun `a failing page after the first one is a blocking error`() = runTest {
         val viewModel = PagedTestViewModel()
 
-        viewModel.load()
-        idleMainLooper()
+        viewModel.refreshError.flow.test {
+            viewModel.load()
 
-        PagedTestViewModel.source = { Single.error(IllegalStateException()) }
-        viewModel.loadIfPossible()
-        idleMainLooper()
+            PagedTestViewModel.source = { throw IllegalStateException() }
+            viewModel.loadIfPossible()
 
-        assertNotNull(viewModel.error.value)
-        assertNull(viewModel.refreshError.value)
+            assertNotNull(viewModel.error.value)
+
+            expectNoEvents()
+        }
     }
 
     @Test
@@ -179,11 +171,8 @@ class PagedViewModelTest {
         val viewModel = PagedTestViewModel()
 
         viewModel.load()
-        idleMainLooper()
         viewModel.loadIfPossible()
-        idleMainLooper()
         viewModel.reload()
-        idleMainLooper()
 
         assertEquals(listOf(0, 1, 2), viewModel.data.value)
         assertEquals(listOf(0, 1, 0), requestedPages)
@@ -195,21 +184,19 @@ class PagedViewModelTest {
 
         PagedTestViewModel.source = { page ->
             requestedPages += page
-            Single.just(listOf(0))
+
+            listOf(0)
         }
         viewModel.load()
-        idleMainLooper()
         viewModel.reload()
-        idleMainLooper()
 
         PagedTestViewModel.source = { page ->
             requestedPages += page
-            Single.just(listOf(0, 1, 2))
+
+            listOf(0, 1, 2)
         }
         viewModel.reload()
-        idleMainLooper()
         viewModel.loadIfPossible()
-        idleMainLooper()
 
         assertEquals(listOf(0, 1), requestedPages.takeLast(2))
     }
@@ -220,10 +207,11 @@ private class PagedTestViewModel : PagedViewModel<Int>() {
     companion object {
         const val ITEMS_ON_PAGE = 3
 
-        var source: (page: Int) -> Single<List<Int>> = { Single.never() }
+        var source: suspend (page: Int) -> List<Int> = { awaitCancellation() }
     }
 
     override val isLoginRequired = false
     override val itemsOnPage = ITEMS_ON_PAGE
-    override val dataSingle get() = source(page)
+
+    override suspend fun loadData() = source(page)
 }

@@ -1,9 +1,9 @@
 package me.proxer.app.profile.history
 
-import io.reactivex.Single
-import io.reactivex.rxkotlin.plusAssign
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedViewModel
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.toLocalEntry
 import me.proxer.app.util.extension.toLocalEntryUcp
 
@@ -17,27 +17,27 @@ class HistoryViewModel(
 
     override val itemsOnPage = 50
 
-    override val dataSingle: Single<List<LocalUserHistoryEntry>>
-        get() = Single.fromCallable { validate() }
-            .flatMap {
-                when (storageHelper.user?.matches(userId, username) == true) {
-                    true ->
-                        api.ucp.history()
-                            .page(page)
-                            .limit(itemsOnPage)
-                            .buildSingle()
-                            .map { entries -> entries.map { it.toLocalEntryUcp() } }
-                    false ->
-                        api.user.history(userId, username)
-                            .includeHentai(preferenceHelper.isAgeRestrictedMediaAllowed && storageHelper.isLoggedIn)
-                            .page(page)
-                            .limit(itemsOnPage)
-                            .buildSingle()
-                            .map { entries -> entries.map { it.toLocalEntry() } }
-                }
-            }
+    override suspend fun loadData(): List<LocalUserHistoryEntry> {
+        validate()
+
+        return when (storageHelper.user?.matches(userId, username) == true) {
+            true ->
+                api.ucp.history()
+                    .page(page)
+                    .limit(itemsOnPage)
+                    .await()
+                    .map { it.toLocalEntryUcp() }
+            false ->
+                api.user.history(userId, username)
+                    .includeHentai(preferenceHelper.isAgeRestrictedMediaAllowed && storageHelper.isLoggedIn)
+                    .page(page)
+                    .limit(itemsOnPage)
+                    .await()
+                    .map { it.toLocalEntry() }
+        }
+    }
 
     init {
-        disposables += storageHelper.isLoggedInObservable.subscribe { reload() }
+        viewModelScope.launch { storageHelper.isLoggedInChanges.collect { reload() } }
     }
 }

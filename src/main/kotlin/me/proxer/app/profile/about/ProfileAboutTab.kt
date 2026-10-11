@@ -93,7 +93,7 @@ fun ProfileAboutTab(
                     AndroidView(
                         factory = { viewContext ->
                             ProxerWebView(viewContext).apply {
-                                showPageSubject.subscribe { navigator.showPage(it) }
+                                onShowPage = { navigator.showPage(it) }
                             }
                         },
                         update = { it.loadHtml(about.about) },

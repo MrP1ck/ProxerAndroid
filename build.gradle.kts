@@ -151,7 +151,6 @@ android {
             excludes += listOf(
                 "META-INF/*.kotlin_module",
                 "META-INF/*.version",
-                "META-INF/rxkotlin.properties",
                 "META-INF/proguard/**",
                 "META-INF/README.md",
                 "META-INF/nanohttpd/**",
@@ -230,7 +229,6 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.compose.material3)
     implementation(libs.compose.material3.adaptive.navigation.suite)
-    implementation(libs.compose.runtime.livedata)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -252,24 +250,13 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.process)
-    implementation(libs.androidx.lifecycle.common.java8)
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.rxjava2)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.sharetarget)
     implementation(libs.androidx.security.crypto)
-
-    implementation(libs.rxjava)
-    implementation(libs.rxkotlin)
-    implementation(libs.rxandroid)
-    implementation(libs.rx.preferences)
-    implementation(libs.rxbus)
-    implementation(libs.autodispose.ktx)
-    implementation(libs.autodispose.android.archcomponents.ktx)
 
     implementation(libs.material)
     implementation(libs.aboutlibraries.compose)
@@ -294,7 +281,6 @@ dependencies {
     implementation(libs.okio)
     implementation(libs.moshi)
     implementation(libs.moshi.adapters)
-    implementation(libs.koptional.rxjava2)
     implementation(libs.jsoup)
 
     implementation(libs.strictmodecompat)
@@ -330,10 +316,6 @@ configurations.configureEach {
             .using(module("com.squareup.moshi:moshi:${libs.versions.moshi.get()}"))
         substitute(module("com.google.android:flexbox"))
             .using(module("com.google.android.flexbox:flexbox:${libs.versions.flexbox.get()}"))
-        substitute(module("com.gojuno.koptional:koptional"))
-            .using(module("com.github.gojuno.koptional:koptional:${libs.versions.koptional.get()}"))
-        substitute(module("com.gojuno.koptional:koptional-rxjava2-extensions"))
-            .using(module("com.github.gojuno.koptional:koptional-rxjava2-extensions:${libs.versions.koptional.get()}"))
     }
 }
 

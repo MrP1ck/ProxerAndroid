@@ -6,8 +6,6 @@ import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import androidx.work.WorkManager
-import com.f2prateek.rx.preferences2.RxSharedPreferences
-import com.rubengees.rxbus.RxBus
 import com.squareup.moshi.Moshi
 import me.proxer.app.MainApplication.Companion.USER_AGENT
 import me.proxer.app.anime.AnimeViewModel
@@ -56,6 +54,7 @@ import me.proxer.app.profile.topten.TopTenViewModel
 import me.proxer.app.settings.status.ServerStatusViewModel
 import me.proxer.app.ui.LinkCheckViewModel
 import me.proxer.app.util.Validators
+import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.InstantJsonAdapter
 import me.proxer.app.util.data.LocalDataInitializer
 import me.proxer.app.util.data.PreferenceHelper
@@ -92,9 +91,6 @@ import javax.net.ssl.X509TrustManager
 const val DEFAULT_PREFERENCES = "defaultPreferences"
 private const val STORAGE_PREFERENCES = "storagePreferences"
 
-private const val DEFAULT_RX_PREFERENCES = "defaultRxPreferences"
-private const val STORAGE_RX_PREFERENCES = "storageRxPreferences"
-
 private const val STORAGE_PREFERENCES_NAME = "me.proxer.encrypted_preferences"
 
 private const val CHAT_DATABASE_NAME = "chat.db"
@@ -128,13 +124,10 @@ private val applicationModules = module {
         )
     }
 
-    single(named(DEFAULT_RX_PREFERENCES)) { RxSharedPreferences.create(get(named(DEFAULT_PREFERENCES))) }
-    single(named(STORAGE_RX_PREFERENCES)) { RxSharedPreferences.create(get(named(STORAGE_PREFERENCES))) }
+    single { PreferenceHelper(get(), get(named(DEFAULT_PREFERENCES))) }
+    single { StorageHelper(get(), get(named(STORAGE_PREFERENCES)), get()) }
 
-    single { PreferenceHelper(get(), get(named(DEFAULT_RX_PREFERENCES)), get(named(DEFAULT_PREFERENCES))) }
-    single { StorageHelper(get(), get(named(STORAGE_RX_PREFERENCES)), get(named(STORAGE_PREFERENCES)), get()) }
-
-    single { RxBus() }
+    single { EventBus() }
 
     single {
         val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).apply {

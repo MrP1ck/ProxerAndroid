@@ -15,8 +15,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import me.proxer.app.R
 import me.proxer.app.ui.components.ContentStateHost
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.RemovableCoverCard
 import me.proxer.app.ui.components.SectionHeader
 import me.proxer.app.ui.components.collectContentState
@@ -45,7 +45,7 @@ fun TopTenTab(
     val state = viewModel.collectContentState()
     val onErrorAction = rememberErrorActionHandler(viewModel::load)
 
-    LiveDataEffect(viewModel.itemDeletionError) {
+    ObserveAsEvents(viewModel.itemDeletionError) {
         snackbarHostState?.showSnackbar(
             context.getString(R.string.error_topten_entry_removal, context.getString(it.message))
         )

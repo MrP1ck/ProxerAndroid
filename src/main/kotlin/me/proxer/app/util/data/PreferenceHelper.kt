@@ -2,7 +2,7 @@ package me.proxer.app.util.data
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.f2prateek.rx.preferences2.RxSharedPreferences
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +19,6 @@ import org.threeten.bp.Instant
 @Suppress("UseDataClass")
 class PreferenceHelper(
     initializer: LocalDataInitializer,
-    rxSharedPreferences: RxSharedPreferences,
     private val sharedPreferences: SharedPreferences
 ) {
 
@@ -104,12 +103,12 @@ class PreferenceHelper(
             sharedPreferences.edit { putBoolean(LINK_CHECK, value) }
         }
 
-    val isAgeRestrictedMediaAllowedObservable = rxSharedPreferences.getBoolean(AGE_CONFIRMATION, false)
-        .asObservable()
-        .skip(1)
-        .distinctUntilChanged()
-        .publish()
-        .autoConnect()
+    /**
+     * Emits when the age confirmation changes, but not the current state.
+     */
+    val isAgeRestrictedMediaAllowedChanges: Flow<Boolean> = sharedPreferences.changes(AGE_CONFIRMATION) {
+        getBoolean(AGE_CONFIRMATION, false)
+    }
 
     val areBookmarksAutomatic
         get() = sharedPreferences.getBoolean(AUTO_BOOKMARK, false)
@@ -171,18 +170,17 @@ class PreferenceHelper(
     private val mutableThemeFlow = MutableStateFlow(themeContainer)
 
     /**
-     * The current theme. Unlike [themeObservable], this emits the current value immediately, which is what Compose
-     * needs to switch the theme without recreating the Activity.
+     * The current theme. Emits the current value immediately, which is what Compose needs to switch the theme without
+     * recreating the Activity.
      */
     val themeFlow: StateFlow<ThemeContainer> = mutableThemeFlow.asStateFlow()
 
-    val themeObservable = rxSharedPreferences.getString(THEME, DEFAULT_THEME)
-        .asObservable()
-        .skip(1)
-        .map { ThemeContainer.fromPreferenceString(it) }
-        .distinctUntilChanged()
-        .publish()
-        .autoConnect()
+    /**
+     * Emits when the theme changes, but not the current theme.
+     */
+    val themeChanges: Flow<ThemeContainer> = sharedPreferences.changes(THEME) {
+        ThemeContainer.fromPreferenceString(getSafeString(THEME, DEFAULT_THEME))
+    }
 
     val httpLogLevel
         get() = when (sharedPreferences.getString(HTTP_LOG_LEVEL, "0")) {

@@ -4,11 +4,10 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
 import me.proxer.app.util.data.PreferenceHelper
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.launchAsync
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.library.ProxerApi
 import org.threeten.bp.Instant
 
@@ -31,19 +30,16 @@ class NewsNotificationReadReceiver : BroadcastReceiver() {
     private val preferenceHelper by safeInject<PreferenceHelper>()
 
     override fun onReceive(context: Context, intent: Intent?) {
-        Completable
-            .fromAction {
-                NewsNotifications.cancel(context)
+        launchAsync {
+            NewsNotifications.cancel(context)
 
-                preferenceHelper.lastNewsDate = Instant.now()
+            preferenceHelper.lastNewsDate = Instant.now()
 
-                api.notifications.news()
-                    .markAsRead(true)
-                    .limit(0)
-                    .build()
-                    .execute()
-            }
-            .subscribeOn(Schedulers.io())
-            .subscribeAndLogErrors()
+            api.notifications.news()
+                .markAsRead(true)
+                .limit(0)
+                .build()
+                .awaitNullable()
+        }
     }
 }

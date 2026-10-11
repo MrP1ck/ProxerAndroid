@@ -2,10 +2,8 @@ package me.proxer.app.util.data
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.f2prateek.rx.preferences2.RxSharedPreferences
 import com.squareup.moshi.Moshi
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlinx.coroutines.flow.Flow
 import me.proxer.app.auth.LocalUser
 import me.proxer.app.profile.settings.LocalProfileSettings
 import me.proxer.library.enums.AnimeLanguage
@@ -17,7 +15,6 @@ import org.threeten.bp.Instant
  */
 class StorageHelper(
     initializer: LocalDataInitializer,
-    rxPreferences: RxSharedPreferences,
     private val sharedPreferences: SharedPreferences,
     private val moshi: Moshi
 ) {
@@ -98,14 +95,10 @@ class StorageHelper(
     val isLoggedIn: Boolean
         get() = sharedPreferences.getString(USER, null) != null
 
-    val isLoggedInObservable: Observable<Boolean> = rxPreferences.getString(USER)
-        .asObservable()
-        .skip(1)
-        .map { it.isNotBlank() }
-        .distinctUntilChanged()
-        .publish()
-        .autoConnect()
-        .observeOn(AndroidSchedulers.mainThread())
+    /**
+     * Emits when the user logs in or out, but not the current state.
+     */
+    val isLoggedInChanges: Flow<Boolean> = sharedPreferences.changes(USER) { getString(USER, null) != null }
 
     var lastNotificationsDate: Instant
         get() = Instant.ofEpochMilli(sharedPreferences.getLong(LAST_NOTIFICATIONS_DATE, 0L))

@@ -1,8 +1,7 @@
 package me.proxer.app.anime.resolver
 
 import androidx.core.text.parseAsHtml
-import io.reactivex.Single
-import me.proxer.app.util.extension.buildSingle
+import me.proxer.app.util.extension.await
 
 /**
  * @author Ruben Gees
@@ -12,7 +11,7 @@ object MessageStreamResolver : StreamResolver() {
     override val name = "Nachricht"
     override val resolveEarly = true
 
-    override fun resolve(id: String): Single<StreamResolutionResult> = api.anime.link(id)
-        .buildSingle()
-        .map { StreamResolutionResult.Message(it.trim().parseAsHtml().trim()) }
+    override suspend fun resolve(id: String): StreamResolutionResult {
+        return StreamResolutionResult.Message(api.anime.link(id).await().trim().parseAsHtml().trim())
+    }
 }

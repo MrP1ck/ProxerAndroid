@@ -1,105 +1,111 @@
 package me.proxer.app.base
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.rubengees.rxbus.RxBus
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction.ButtonAction
 import me.proxer.app.util.Validators
+import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.subscribeAndLogErrors
 import me.proxer.library.ProxerApi
+import timber.log.Timber
 
 /**
  * @author Ruben Gees
  */
 abstract class BaseViewModel<T> : ViewModel() {
 
-    open val data = MutableLiveData<T?>()
-    open val error = MutableLiveData<ErrorUtils.ErrorAction?>()
-    open val isLoading = MutableLiveData<Boolean?>()
+    open val data = MutableStateFlow<T?>(null)
+    open val error = MutableStateFlow<ErrorUtils.ErrorAction?>(null)
+    open val isLoading = MutableStateFlow(false)
 
     protected open val isLoginRequired = true
     protected open val isAgeConfirmationRequired = false
 
-    protected val bus by safeInject<RxBus>()
+    protected val bus by safeInject<EventBus>()
     protected val api by safeInject<ProxerApi>()
     protected val storageHelper by safeInject<StorageHelper>()
     protected val preferenceHelper by safeInject<PreferenceHelper>()
     protected val validators by safeInject<Validators>()
 
-    protected var dataDisposable: Disposable? = null
-    protected val disposables = CompositeDisposable()
+    protected var dataJob: Job? = null
 
-    protected abstract val dataSingle: Single<T>
+    /**
+     * Loads the data. Runs in [viewModelScope], so it must not block the main thread.
+     */
+    protected abstract suspend fun loadData(): T
 
     init {
-        disposables += storageHelper.isLoggedInObservable
-            .subscribe { if (isLoginRequired || isLoginErrorPresent()) reload() }
+        viewModelScope.launch {
+            storageHelper.isLoggedInChanges.collect { if (isLoginRequired || isLoginErrorPresent()) reload() }
+        }
 
-        disposables += preferenceHelper.isAgeRestrictedMediaAllowedObservable
-            .subscribe { if (isAgeConfirmationRequired) reload() }
+        viewModelScope.launch {
+            preferenceHelper.isAgeRestrictedMediaAllowedChanges.collect { if (isAgeConfirmationRequired) reload() }
+        }
 
-        disposables += bus.register(CaptchaSolvedEvent::class.java)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
+        viewModelScope.launch {
+            bus.events<CaptchaSolvedEvent>().collect {
                 if (error.value?.buttonAction == ButtonAction.CAPTCHA) {
                     refresh()
                 }
             }
+        }
 
-        disposables += bus.register(NetworkConnectedEvent::class.java)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
+        viewModelScope.launch {
+            bus.events<NetworkConnectedEvent>().collect {
                 if (error.value?.buttonAction == ButtonAction.NETWORK_SETTINGS) {
                     refresh()
                 }
             }
-    }
-
-    override fun onCleared() {
-        dataDisposable?.dispose()
-        disposables.dispose()
-
-        dataDisposable = null
-
-        super.onCleared()
+        }
     }
 
     open fun load() {
-        dataDisposable?.dispose()
-        dataDisposable = dataSingle
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {
-                isLoading.value = true
+        dataJob?.cancel()
+        dataJob = viewModelScope.launch {
+            isLoading.value = true
+            error.value = null
+            data.value = null
+
+            try {
+                val result = loadData()
+
                 error.value = null
+                data.value = result
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (@Suppress("TooGenericExceptionCaught") loadError: Throwable) {
+                Timber.e(loadError)
+
                 data.value = null
+                error.value = ErrorUtils.handle(loadError)
+            } finally {
+                // A cancelled load is replaced by a newer one, which is responsible for the state.
+                if (isActive) isLoading.value = false
             }
-            .doAfterTerminate { isLoading.value = false }
-            .subscribeAndLogErrors(
-                {
-                    error.value = null
-                    data.value = it
-                },
-                {
-                    data.value = null
-                    error.value = ErrorUtils.handle(it)
-                }
-            )
+        }
+    }
+
+    /**
+     * Loads the data if nothing was requested yet, e.g. when the screen is shown for the first time.
+     */
+    fun loadIfNeeded() {
+        if (!isLoading.value && data.value == null && error.value == null) {
+            load()
+        }
     }
 
     open fun loadIfPossible() {
-        if (isLoading.value != true && error.value == null) {
+        if (!isLoading.value && error.value == null) {
             load()
         }
     }

@@ -1,18 +1,18 @@
 package me.proxer.app.profile.topten
 
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.Singles
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
 import me.proxer.app.profile.topten.TopTenViewModel.ZippedTopTenResult
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
+import me.proxer.app.util.data.Events
 import me.proxer.app.util.data.UniqueQueue
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.toLocalEntry
 import me.proxer.app.util.extension.toLocalEntryUcp
 import me.proxer.library.enums.Category
@@ -25,95 +25,71 @@ class TopTenViewModel(
     private val username: String?
 ) : BaseViewModel<ZippedTopTenResult>() {
 
-    override val dataSingle: Single<ZippedTopTenResult>
-        get() = Single.fromCallable { validate() }
-            .flatMap {
-                when (storageHelper.user?.matches(userId, username) == true) {
-                    true ->
-                        api.ucp.topTen().buildSingle()
-                            .map { entries -> entries.map { it.toLocalEntryUcp() } }
-                            .map {
-                                val animeList = it.filter { entry -> entry.category == Category.ANIME }
-                                val mangaList = it.filter { entry -> entry.category == Category.MANGA }
+    override suspend fun loadData(): ZippedTopTenResult {
+        validate()
 
-                                ZippedTopTenResult(animeList, mangaList)
-                            }
-                    false -> {
-                        val includeHentai = preferenceHelper.isAgeRestrictedMediaAllowed && storageHelper.isLoggedIn
+        return when (storageHelper.user?.matches(userId, username) == true) {
+            true -> {
+                val entries = api.ucp.topTen().await().map { it.toLocalEntryUcp() }
 
-                        Singles.zip(
-                            partialSingle(includeHentai, Category.ANIME),
-                            partialSingle(includeHentai, Category.MANGA),
-                            zipper = { animeEntries, mangaEntries ->
-                                ZippedTopTenResult(animeEntries, mangaEntries)
-                            }
-                        )
-                    }
-                }
+                ZippedTopTenResult(
+                    animeEntries = entries.filter { entry -> entry.category == Category.ANIME },
+                    mangaEntries = entries.filter { entry -> entry.category == Category.MANGA }
+                )
             }
+            false -> coroutineScope {
+                val includeHentai = preferenceHelper.isAgeRestrictedMediaAllowed && storageHelper.isLoggedIn
+                val animeEntries = async { loadPartial(includeHentai, Category.ANIME) }
+                val mangaEntries = async { loadPartial(includeHentai, Category.MANGA) }
 
-    val itemDeletionError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
-
-    private val deletionQueue = UniqueQueue<LocalTopTenEntry>()
-    private var deletionDisposable: Disposable? = null
-
-    init {
-        disposables += storageHelper.isLoggedInObservable.subscribe { reload() }
+                ZippedTopTenResult(animeEntries.await(), mangaEntries.await())
+            }
+        }
     }
 
-    override fun onCleared() {
-        deletionDisposable?.dispose()
-        deletionDisposable = null
+    val itemDeletionError = Events<ErrorUtils.ErrorAction>()
 
-        super.onCleared()
+    private val deletionQueue = UniqueQueue<LocalTopTenEntry>()
+    private var deletionJob: Job? = null
+
+    init {
+        viewModelScope.launch { storageHelper.isLoggedInChanges.collect { reload() } }
     }
 
     fun addItemToDelete(item: LocalTopTenEntry) {
         deletionQueue.add(item)
 
-        if (deletionDisposable?.isDisposed != false) {
-            doItemDeletion()
+        if (deletionJob?.isActive != true) {
+            startItemDeletion()
         }
     }
 
-    private fun partialSingle(includeHentai: Boolean, category: Category) = api.user.topTen(userId, username)
+    private suspend fun loadPartial(includeHentai: Boolean, category: Category) = api.user.topTen(userId, username)
         .includeHentai(includeHentai)
         .category(category)
-        .buildSingle()
-        .map { entries -> entries.map { it.toLocalEntry() } }
+        .await()
+        .map { entries -> entries.toLocalEntry() }
 
-    private fun doItemDeletion() {
-        deletionDisposable?.dispose()
+    private fun startItemDeletion() {
+        deletionJob = viewModelScope.launch {
+            while (true) {
+                val item = deletionQueue.poll() ?: break
+                val result = catchingErrors { api.ucp.deleteFavorite(item.id).awaitNullable() }
 
-        deletionQueue.poll()?.let { item ->
-            deletionDisposable = api.ucp.deleteFavorite(item.id)
-                .buildSingle()
-                .map {
-                    data.value.let { currentData ->
-                        if (currentData != null) {
-                            val filteredAnimeEntries = currentData.animeEntries.filterNot { newItem -> newItem == item }
-                            val filteredMangaEntries = currentData.mangaEntries.filterNot { newItem -> newItem == item }
-
-                            ZippedTopTenResult(filteredAnimeEntries, filteredMangaEntries)
-                        } else {
-                            null
-                        }
+                result.onSuccess {
+                    data.value = data.value?.let { currentData ->
+                        ZippedTopTenResult(
+                            currentData.animeEntries.filterNot { newItem -> newItem == item },
+                            currentData.mangaEntries.filterNot { newItem -> newItem == item }
+                        )
                     }
                 }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeAndLogErrors(
-                    {
-                        data.value = it
 
-                        doItemDeletion()
-                    },
-                    {
-                        deletionQueue.clear()
-
-                        itemDeletionError.value = ErrorUtils.handle(it)
-                    }
-                )
+                result.onFailure {
+                    deletionQueue.clear()
+                    itemDeletionError.send(ErrorUtils.handle(it))
+                }
+            }
         }
     }
 

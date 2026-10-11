@@ -29,7 +29,7 @@ object MessengerShortcuts {
 
     private val messengerDao by safeInject<MessengerDao>()
 
-    fun updateShareTargets(context: Context) {
+    suspend fun updateShareTargets(context: Context) {
         val componentName = ComponentName(context, MainActivity::class.java)
 
         val shortcutsLeft = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {

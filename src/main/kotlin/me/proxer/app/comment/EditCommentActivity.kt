@@ -42,7 +42,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -64,13 +63,14 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.proxer.app.R
 import me.proxer.app.base.ComposeActivity
 import me.proxer.app.ui.components.BBCodeText
 import me.proxer.app.ui.components.ContentStateHost
 import me.proxer.app.ui.components.EmptyState
-import me.proxer.app.ui.components.LiveDataEffect
 import me.proxer.app.ui.components.LocalSnackbarHostState
+import me.proxer.app.ui.components.ObserveAsEvents
 import me.proxer.app.ui.components.ProxerScaffold
 import me.proxer.app.ui.components.TopAppBarTitle
 import me.proxer.app.ui.components.UpButton
@@ -114,7 +114,7 @@ class EditCommentActivity : ComposeActivity() {
         val context = LocalContext.current
         val state = viewModel.collectContentState()
         val onErrorAction = rememberErrorActionHandler(viewModel::load)
-        val isUpdate by viewModel.isUpdate.observeAsState(false)
+        val isUpdate by viewModel.isUpdate.collectAsStateWithLifecycle()
 
         var text by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue()) }
         var isPreviewVisible by rememberSaveable { mutableStateOf(false) }
@@ -127,7 +127,7 @@ class EditCommentActivity : ComposeActivity() {
             }
         }
 
-        LiveDataEffect(viewModel.publishResult) {
+        ObserveAsEvents(viewModel.publishResult) {
             setResult(Activity.RESULT_OK, Intent().putExtra(COMMENT_EXTRA, it))
             toast(R.string.fragment_edit_comment_published)
             finish()
@@ -165,7 +165,7 @@ class EditCommentActivity : ComposeActivity() {
         ) { padding ->
             val snackbarHostState = LocalSnackbarHostState.current
 
-            LiveDataEffect(viewModel.publishError) {
+            ObserveAsEvents(viewModel.publishError) {
                 snackbarHostState?.showErrorSnackbar(
                     context = context,
                     error = it,

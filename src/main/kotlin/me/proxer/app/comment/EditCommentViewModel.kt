@@ -1,16 +1,16 @@
 package me.proxer.app.comment
 
-import androidx.lifecycle.MutableLiveData
-import com.gojuno.koptional.rxjava2.filterSome
-import com.gojuno.koptional.toOptional
-import io.reactivex.Single
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import me.proxer.app.base.BaseViewModel
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.data.Events
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.toLocalComment
 import me.proxer.library.ProxerException
 import me.proxer.library.ProxerException.ServerErrorType
@@ -45,76 +45,31 @@ class EditCommentViewModel(
         }
     }
 
-    override val dataSingle: Single<LocalComment>
-        get() = Single.fromCallable { validate() }
-            .flatMap { api.comment.comment(id, entryId).buildSingle() }
-            .map { it.toLocalComment() }
-            .onErrorResumeNext { error: Throwable ->
-                when (error.isInvalidCommentError) {
-                    true -> Single.just(defaultComment)
-                    false -> Single.error<Nothing>(error)
-                }
-            }
-            .doOnSuccess { isUpdate.postValue(it.id.isNotBlank() && it.content.isNotBlank()) }
-            .map {
-                val safeEntryId = entryId
+    override suspend fun loadData(): LocalComment {
+        validate()
 
-                if (safeEntryId != null && isUpdate.value == false) {
-                    storageHelper.getCommentDraft(safeEntryId)?.let { draft -> it.copy(content = draft) } ?: it
-                } else {
-                    it
-                }
-            }
+        val comment = try {
+            api.comment.comment(id, entryId).await().toLocalComment()
+        } catch (error: ProxerException) {
+            if (error.isInvalidCommentError) defaultComment else throw error
+        }
 
-    private val publishSingle
-        get() = data.value
-            .let { comment ->
-                when {
-                    comment == null || comment.content.isBlank() && comment.overallRating == 0 -> null
-                    comment.content.length > MAX_LENGTH -> Single.error(CommentTooLongException())
+        isUpdate.value = comment.id.isNotBlank() && comment.content.isNotBlank()
 
-                    comment.mediaProgress == UserMediaProgress.WILL_WATCH ->
-                        Single
-                            .error(CommentInvalidProgressException())
+        val safeEntryId = entryId
 
-                    comment.id.isNotEmpty() ->
-                        api.comment.update(comment.id)
-                            .comment(comment.content.trim())
-                            .rating(comment.overallRating)
-                            .buildSingle()
-
-                    else -> when (val it = entryId) {
-                        null -> null
-                        else ->
-                            api.comment.create(it)
-                                .comment(comment.content.trim())
-                                .rating(comment.overallRating)
-                                .buildSingle()
-                    }
-                }
-            }
-            ?.let {
-                Single.fromCallable { validate() }
-                    .flatMap { _ -> it }
-            }
-
-    val isUpdate = MutableLiveData(id.isNullOrBlank().not())
-
-    val publishResult = ResettingMutableLiveData<LocalComment?>()
-    val publishError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
-
-    private var updateDisposable: Disposable? = null
-    private var publishDisposable: Disposable? = null
-
-    override fun onCleared() {
-        updateDisposable?.dispose()
-        publishDisposable?.dispose()
-
-        updateDisposable = null
-        publishDisposable = null
-
-        super.onCleared()
+        return if (safeEntryId != null && !isUpdate.value) {
+            storageHelper.getCommentDraft(safeEntryId)?.let { draft -> comment.copy(content = draft) } ?: comment
+        } else {
+            comment
+        }
     }
+
+    val isUpdate = MutableStateFlow(id.isNullOrBlank().not())
+    val publishResult = Events<LocalComment>()
+    val publishError = Events<ErrorUtils.ErrorAction>()
+
+    private var publishJob: Job? = null
 
     fun updateRating(rating: Float) {
         require(rating in 0.0..5.0)
@@ -123,33 +78,49 @@ class EditCommentViewModel(
     }
 
     fun updateContent(newContent: String) {
-        updateDisposable?.dispose()
-
-        updateDisposable = Single.just(data.value.toOptional())
-            .filterSome()
-            .map { it.copy(content = newContent) }
-            .subscribeOn(Schedulers.computation())
-            .subscribeAndLogErrors { data.postValue(it) }
+        data.value = data.value?.copy(content = newContent)
     }
 
     fun publish() {
-        publishDisposable?.dispose()
+        val comment = data.value
 
-        publishDisposable = publishSingle
-            ?.doOnSubscribe { isLoading.postValue(true) }
-            ?.doOnSubscribe { publishResult.postValue(null) }
-            ?.doOnSubscribe { publishError.postValue(null) }
-            ?.doAfterTerminate { isLoading.postValue(false) }
-            ?.subscribeOn(Schedulers.io())
-            ?.subscribeAndLogErrors(
-                {
-                    publishResult.postValue(data.value)
-                    data.postValue(null)
-                },
-                {
-                    publishError.postValue(ErrorUtils.handle(it))
+        if (comment == null || comment.content.isBlank() && comment.overallRating == 0) return
+
+        val isCreatable = comment.id.isNotEmpty() || entryId != null
+        val isValid = comment.content.length <= MAX_LENGTH && comment.mediaProgress != UserMediaProgress.WILL_WATCH
+
+        if (isValid && !isCreatable) return
+
+        publishJob?.cancel()
+        publishJob = viewModelScope.launch {
+            isLoading.value = true
+
+            catchingErrors {
+                validate()
+
+                when {
+                    comment.content.length > MAX_LENGTH -> throw CommentTooLongException()
+                    comment.mediaProgress == UserMediaProgress.WILL_WATCH -> throw CommentInvalidProgressException()
+                    comment.id.isNotEmpty() ->
+                        api.comment.update(comment.id)
+                            .comment(comment.content.trim())
+                            .rating(comment.overallRating)
+                            .awaitNullable()
+                    else ->
+                        api.comment.create(requireNotNull(entryId))
+                            .comment(comment.content.trim())
+                            .rating(comment.overallRating)
+                            .awaitNullable()
                 }
-            )
+            }
+                .onSuccess {
+                    publishResult.send(data.value ?: comment)
+                    data.value = null
+                }
+                .onFailure { publishError.send(ErrorUtils.handle(it)) }
+
+            if (isActive) isLoading.value = false
+        }
     }
 
     private val Throwable.isInvalidCommentError

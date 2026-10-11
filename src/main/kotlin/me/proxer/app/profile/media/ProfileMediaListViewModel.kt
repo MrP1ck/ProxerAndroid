@@ -1,16 +1,15 @@
 package me.proxer.app.profile.media
 
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedViewModel
 import me.proxer.app.util.ErrorUtils
-import me.proxer.app.util.data.ResettingMutableLiveData
+import me.proxer.app.util.data.Events
 import me.proxer.app.util.data.UniqueQueue
-import me.proxer.app.util.extension.buildSingle
-import me.proxer.app.util.extension.subscribeAndLogErrors
+import me.proxer.app.util.extension.await
+import me.proxer.app.util.extension.awaitNullable
+import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.toLocalEntry
 import me.proxer.app.util.extension.toLocalEntryUcp
 import me.proxer.library.enums.Category
@@ -29,32 +28,34 @@ class ProfileMediaListViewModel(
 
     override val itemsOnPage = 30
 
-    override val dataSingle: Single<List<LocalUserMediaListEntry>>
-        get() = Single.fromCallable { validate() }
-            .flatMap {
-                when (storageHelper.user?.matches(userId, username) == true) {
-                    true ->
-                        api.ucp.mediaList()
-                            .includeHentai(preferenceHelper.isAgeRestrictedMediaAllowed && storageHelper.isLoggedIn)
-                            .category(category)
-                            .filter(filter)
-                            .page(page)
-                            .limit(itemsOnPage)
-                            .buildSingle()
-                            .map { entries -> entries.map { it.toLocalEntryUcp() } }
-                    false ->
-                        api.user.mediaList(userId, username)
-                            .includeHentai(preferenceHelper.isAgeRestrictedMediaAllowed && storageHelper.isLoggedIn)
-                            .category(category)
-                            .filter(filter)
-                            .page(page)
-                            .limit(itemsOnPage)
-                            .buildSingle()
-                            .map { entries -> entries.map { it.toLocalEntry() } }
-                }
-            }
+    override suspend fun loadData(): List<LocalUserMediaListEntry> {
+        validate()
 
-    val itemDeletionError = ResettingMutableLiveData<ErrorUtils.ErrorAction?>()
+        val includeHentai = preferenceHelper.isAgeRestrictedMediaAllowed && storageHelper.isLoggedIn
+
+        return when (storageHelper.user?.matches(userId, username) == true) {
+            true ->
+                api.ucp.mediaList()
+                    .includeHentai(includeHentai)
+                    .category(category)
+                    .filter(filter)
+                    .page(page)
+                    .limit(itemsOnPage)
+                    .await()
+                    .map { it.toLocalEntryUcp() }
+            false ->
+                api.user.mediaList(userId, username)
+                    .includeHentai(includeHentai)
+                    .category(category)
+                    .filter(filter)
+                    .page(page)
+                    .limit(itemsOnPage)
+                    .await()
+                    .map { it.toLocalEntry() }
+        }
+    }
+
+    val itemDeletionError = Events<ErrorUtils.ErrorAction>()
 
     var category by Delegates.observable(category) { _, old, new ->
         if (old != new) reload()
@@ -65,47 +66,33 @@ class ProfileMediaListViewModel(
     }
 
     private val deletionQueue = UniqueQueue<LocalUserMediaListEntry>()
-    private var deletionDisposable: Disposable? = null
+    private var deletionJob: Job? = null
 
     init {
-        disposables += storageHelper.isLoggedInObservable.subscribe { reload() }
-    }
-
-    override fun onCleared() {
-        deletionDisposable?.dispose()
-        deletionDisposable = null
-
-        super.onCleared()
+        viewModelScope.launch { storageHelper.isLoggedInChanges.collect { reload() } }
     }
 
     fun addItemToDelete(item: LocalUserMediaListEntry) {
         deletionQueue.add(item)
 
-        if (deletionDisposable?.isDisposed != false) {
-            doItemDeletion()
+        if (deletionJob?.isActive != true) {
+            startItemDeletion()
         }
     }
 
-    private fun doItemDeletion() {
-        deletionDisposable?.dispose()
+    private fun startItemDeletion() {
+        deletionJob = viewModelScope.launch {
+            while (true) {
+                val item = deletionQueue.poll() ?: break
+                val result = catchingErrors { api.ucp.deleteComment(item.commentId).awaitNullable() }
 
-        deletionQueue.poll()?.let { item ->
-            deletionDisposable = api.ucp.deleteComment(item.commentId)
-                .buildSingle()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeAndLogErrors(
-                    {
-                        data.value = data.value?.filterNot { newItem -> newItem == item }
+                result.onSuccess { data.value = data.value?.filterNot { newItem -> newItem == item } }
 
-                        doItemDeletion()
-                    },
-                    {
-                        deletionQueue.clear()
-
-                        itemDeletionError.value = ErrorUtils.handle(it)
-                    }
-                )
+                result.onFailure {
+                    deletionQueue.clear()
+                    itemDeletionError.send(ErrorUtils.handle(it))
+                }
+            }
         }
     }
 }

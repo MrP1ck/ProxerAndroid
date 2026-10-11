@@ -3,13 +3,15 @@ package me.proxer.app.base
 import android.content.Context
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
-import com.f2prateek.rx.preferences2.RxSharedPreferences
-import com.rubengees.rxbus.RxBus
 import com.squareup.moshi.Moshi
-import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import me.proxer.app.auth.LocalUser
 import me.proxer.app.util.Validators
+import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.InstantJsonAdapter
 import me.proxer.app.util.data.LocalDataInitializer
 import me.proxer.app.util.data.PreferenceHelper
@@ -24,11 +26,12 @@ import org.threeten.bp.Instant
 
 /**
  * Provides the dependencies of the base ViewModels (with plain SharedPreferences instead of the encrypted ones) and
- * runs the network work synchronously. Results are delivered to the (paused) main looper, see [idleMainLooper].
+ * runs coroutines on the main dispatcher immediately.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class ViewModelTestRule : TestWatcher() {
 
-    lateinit var bus: RxBus
+    lateinit var bus: EventBus
         private set
 
     lateinit var storageHelper: StorageHelper
@@ -48,16 +51,11 @@ class ViewModelTestRule : TestWatcher() {
         val initializer = LocalDataInitializer(context, preferences, storagePreferences)
         val moshi = Moshi.Builder().add(Instant::class.java, InstantJsonAdapter()).build()
 
-        bus = RxBus()
-        preferenceHelper = PreferenceHelper(initializer, RxSharedPreferences.create(preferences), preferences)
-        storageHelper = StorageHelper(
-            initializer,
-            RxSharedPreferences.create(storagePreferences),
-            storagePreferences,
-            moshi
-        )
+        bus = EventBus()
+        preferenceHelper = PreferenceHelper(initializer, preferences)
+        storageHelper = StorageHelper(initializer, storagePreferences, moshi)
 
-        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
+        Dispatchers.setMain(UnconfinedTestDispatcher())
 
         startKoin {
             modules(
@@ -73,7 +71,7 @@ class ViewModelTestRule : TestWatcher() {
 
     override fun finished(description: Description) {
         stopKoin()
-        RxJavaPlugins.reset()
+        Dispatchers.resetMain()
     }
 
     fun logIn() {
