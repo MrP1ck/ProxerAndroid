@@ -15,8 +15,10 @@ This fork contains fixes on top of the last official release (1.11.5):
   presets and a pure black option), a bottom navigation bar on phones and a navigation rail on tablets, edge-to-edge
   screens, Glance widgets and a themed launcher icon. The stream player uses Media3 and supports
   picture-in-picture.
-- The toolchain is current: Gradle 8, the Android Gradle Plugin 8, Kotlin 2 and KSP. Android 6.0 or newer is
-  required.
+- The toolchain is current: Gradle 9, the Android Gradle Plugin 9 (with the Kotlin DSL), Kotlin 2 and KSP. Android 6.0
+  or newer is required.
+- The code is modernized: Kotlin coroutines and Flow instead of RxJava and LiveData, java.time instead of ThreeTenABP
+  and constructor injection for the ViewModels.
 
 Download the app from the [releases of this fork](https://github.com/MrP1ck/ProxerAndroid/releases/latest) or build it
 yourself. The official releases on Google Play and in the Proxer App Store are the old version 1.11.5.

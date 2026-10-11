@@ -45,6 +45,7 @@ import me.proxer.app.util.extension.decodedName
 import me.proxer.library.entity.manga.Chapter
 import me.proxer.library.entity.manga.Page
 import me.proxer.library.util.ProxerUrls
+import me.saket.telephoto.zoomable.EnabledZoomGestures
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
@@ -213,7 +214,7 @@ private fun MangaPage(url: String, isVertical: Boolean, onTap: (Offset) -> Unit,
                 contentScale = if (isVertical) ContentScale.FillWidth else ContentScale.Fit,
                 // In the vertical list the zoom layer would take over vertical drags from the list, so it is disabled
                 // there and taps are detected separately.
-                gesturesEnabled = !isVertical,
+                gestures = if (isVertical) EnabledZoomGestures.None else EnabledZoomGestures.ZoomAndPan,
                 onClick = { offset -> coordinates?.let { onTap(it.localToRoot(offset)) } },
                 modifier = Modifier
                     .fillMaxSize()

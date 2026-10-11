@@ -10,8 +10,8 @@ import me.proxer.app.R
  */
 enum class ThemeVariant(
     val preferenceId: String,
-    @StringRes val variantName: Int?,
-    @AppCompatDelegate.NightMode val value: Int
+    @param:StringRes val variantName: Int?,
+    @param:AppCompatDelegate.NightMode val value: Int
 ) {
     LIGHT("0", R.string.theme_variant_light, AppCompatDelegate.MODE_NIGHT_NO),
     DARK("1", R.string.theme_variant_dark, AppCompatDelegate.MODE_NIGHT_YES),
