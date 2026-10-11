@@ -247,7 +247,13 @@ object PreviewData {
             InfoGenre("1", "1", now, "Adventure", ""),
             InfoGenre("2", "2", now, "Drama", ""),
             InfoGenre("3", "3", now, "Fantasy", "")
-        )
+        ),
+        mediaFormat = "tv",
+        ranking = 69,
+        cleanedRating = 9.4f,
+        bayesianRating = 9.36f,
+        availableEpisodeAmount = 26,
+        isDeactivatedForApps = true
     )
 
     val mediaUserInfo = MediaUserInfo(

@@ -499,6 +499,13 @@
     <string name="fragment_media_info_industries">Industrie</string>
     <string name="fragment_media_info_season_title">Season</string>
     <string name="fragment_media_info_status_title">Status</string>
+    <string name="media_info_format_title">Format</string>
+    <string name="media_info_ranking_title">Rang</string>
+    <string name="media_info_available_title">Verfügbar</string>
+    <string name="media_info_available_content">%1$d von %2$d</string>
+    <string name="media_info_bayesian_rating">Gewichtet: %1$.2f</string>
+    <string name="media_info_no_description">Keine Beschreibung vorhanden</string>
+    <string name="media_info_deactivated_for_apps">Dieser Eintrag ist in Apps deaktiviert und nur auf der Website verfügbar.</string>
     <string name="fragment_media_info_tags">Tags</string>
     <string name="fragment_media_info_note">Vermerken</string>
     <string name="fragment_media_info_favor">Favorisieren</string>
@@ -882,6 +889,7 @@
 
     <string name="action_search">Suchen</string>
     <string name="action_filter">Filter</string>
+    <string name="action_close">Schließen</string>
     <string name="action_sort">Sortierung</string>
     <string name="action_share">Teilen</string>
     <string name="action_answer">Antworten</string>
