@@ -114,6 +114,7 @@ fun AccountSheet(onDismiss: () -> Unit) {
                 }
             }
 
+            SheetItem(R.drawable.ic_symbol_public, R.string.section_discover) { dismissAnd(navigator::openDiscover) }
             SheetItem(R.drawable.ic_symbol_settings, R.string.section_settings) { dismissAnd(navigator::openSettings) }
             SheetItem(R.drawable.ic_symbol_info, R.string.section_info) { dismissAnd(navigator::openAbout) }
 

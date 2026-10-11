@@ -26,10 +26,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.launch
 import me.proxer.app.R
+import me.proxer.app.media.character.CharacterTab
 import me.proxer.app.media.comments.CommentsTab
 import me.proxer.app.media.discussion.DiscussionTab
 import me.proxer.app.media.episode.EpisodeTab
 import me.proxer.app.media.info.MediaInfoTab
+import me.proxer.app.media.person.PersonTab
 import me.proxer.app.media.recommendation.RecommendationTab
 import me.proxer.app.media.relation.RelationTab
 import me.proxer.app.ui.components.ProxerScaffold
@@ -48,6 +50,8 @@ enum class MediaTab(@StringRes val title: Int) {
     INFO(R.string.section_media_info),
     COMMENTS(R.string.section_comments),
     EPISODES(R.string.category_anime_episodes_title),
+    CHARACTERS(R.string.section_characters),
+    PERSONS(R.string.section_persons),
     RELATIONS(R.string.section_relations),
     RECOMMENDATIONS(R.string.section_recommendations),
     DISCUSSIONS(R.string.section_discussions);
@@ -62,8 +66,8 @@ enum class MediaTab(@StringRes val title: Int) {
 }
 
 /**
- * The details of an anime, manga or novel: the info, comments, episodes, relations, recommendations and discussions in
- * tabs.
+ * The details of an anime, manga or novel: the info, comments, episodes, characters, persons, relations,
+ * recommendations and discussions in tabs.
  */
 @Composable
 fun MediaScreen(
@@ -155,6 +159,8 @@ fun MediaScreen(
                 MediaTab.INFO, null -> MediaInfoTab(viewModel, infoState, padding)
                 MediaTab.COMMENTS -> CommentsTab(entryId, name, category, padding)
                 MediaTab.EPISODES -> EpisodeTab(entryId, name, entry?.languages, category, padding)
+                MediaTab.CHARACTERS -> CharacterTab(entryId, padding)
+                MediaTab.PERSONS -> PersonTab(entryId, padding)
                 MediaTab.RELATIONS -> RelationTab(entryId, padding)
                 MediaTab.RECOMMENDATIONS -> RecommendationTab(entryId, padding)
                 MediaTab.DISCUSSIONS -> DiscussionTab(entryId, padding)

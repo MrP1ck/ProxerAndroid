@@ -4,10 +4,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import me.proxer.app.base.ComposeActivity
+import me.proxer.app.ui.shell.LocalAppNavigator
 import me.proxer.app.util.extension.getSafeStringExtra
 import me.proxer.app.util.extension.intentFor
 import me.proxer.app.util.extension.startActivity
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 /**
  * Hosts the [TopicScreen] of a forum thread. Also handles the deep links to threads.
@@ -61,6 +64,20 @@ class TopicActivity : ComposeActivity() {
 
     @Composable
     override fun Content() {
+        val navigator = LocalAppNavigator.current
+        val data = intent.data
+
+        // The overview of the Touzai articles has no native screen, only single articles do.
+        if (data != null && data.path == TOUZAI_PATH && data.getQueryParameter("id") == null) {
+            LaunchedEffect(data) {
+                data.toString().toHttpUrlOrNull()?.let { navigator.showPage(it, forceBrowser = true) }
+
+                finish()
+            }
+
+            return
+        }
+
         TopicScreen(
             id = id,
             categoryId = categoryId,

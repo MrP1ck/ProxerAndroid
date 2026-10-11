@@ -46,3 +46,16 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ProxerAndroid"
+
+// The API library is built from the sibling checkout of the fork (or the directory given by -PproxerLib.path), since
+// it contains endpoints the published artifact is missing. Pass -PproxerLib.remote=true to resolve the artifact
+// declared in the version catalog instead.
+val localProxerLib = file(providers.gradleProperty("proxerLib.path").orElse("../ProxerLibJava").get())
+
+if (localProxerLib.isDirectory && providers.gradleProperty("proxerLib.remote").orNull != "true") {
+    includeBuild(localProxerLib) {
+        dependencySubstitution {
+            substitute(module("com.github.proxer:ProxerLibJava")).using(project(":library"))
+        }
+    }
+}

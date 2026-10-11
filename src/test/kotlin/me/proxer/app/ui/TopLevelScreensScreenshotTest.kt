@@ -5,7 +5,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import me.proxer.app.TestApplication
 import me.proxer.app.anime.schedule.ScheduleContent
 import me.proxer.app.bookmark.BookmarkContent
-import me.proxer.app.chat.ChatRoomList
+import me.proxer.app.chat.ConferenceList
+import me.proxer.app.discover.DirectoryKind
+import me.proxer.app.discover.DirectoryScreen
+import me.proxer.app.discover.DiscoverScreen
 import me.proxer.app.media.list.MediaListContent
 import me.proxer.app.media.list.MediaListFilter
 import me.proxer.app.news.NewsContent
@@ -61,6 +64,23 @@ class TopLevelScreensScreenshotTest(private val isDark: Boolean) {
     }
 
     @Test
+    fun novelList() = composeRule.captureScreen("screens", "novel_list", isDark) {
+        MediaListContent(
+            category = Category.NOVEL,
+            state = ContentState(PreviewData.mediaListEntries),
+            filter = MediaListFilter(MediaType.ALL_NOVEL),
+            onTypeChange = {},
+            onFilterClick = {},
+            onLoadMore = {},
+            onRefresh = {},
+            onErrorAction = {},
+            onEntryClick = {},
+            contentPadding = noPadding,
+            onCategoryChange = {}
+        )
+    }
+
+    @Test
     fun bookmarks() = composeRule.captureScreen("screens", "bookmarks", isDark) {
         BookmarkContent(
             ContentState(PreviewData.bookmarks), null, false, false, {}, {}, {}, {}, {}, {}, {}, {}, noPadding
@@ -73,7 +93,26 @@ class TopLevelScreensScreenshotTest(private val isDark: Boolean) {
     }
 
     @Test
-    fun chatRooms() = composeRule.captureScreen("screens", "chat_rooms", isDark) {
-        ChatRoomList(ContentState(PreviewData.chatRooms), {}, {}, {}, noPadding)
+    fun messenger() = composeRule.captureScreen("screens", "messenger", isDark) {
+        ConferenceList(ContentState(PreviewData.conferences), "1", false, {}, {}, noPadding)
+    }
+
+    @Test
+    fun discover() = composeRule.captureScreen("screens", "discover", isDark) {
+        DiscoverScreen(onUp = {}, onDirectoryClick = {}, onWebsiteClick = {})
+    }
+
+    @Test
+    fun directory() = composeRule.captureScreen("screens", "directory", isDark) {
+        DirectoryScreen(
+            kind = DirectoryKind.CHARACTERS,
+            state = ContentState(PreviewData.directoryEntries),
+            onFilterChange = { _, _ -> },
+            onEntryClick = {},
+            onNavigateUp = {},
+            onLoadMore = {},
+            onRefresh = {},
+            onErrorAction = {}
+        )
     }
 }

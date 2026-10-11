@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,6 +21,9 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -65,7 +69,8 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 /**
- * The anime or manga list with search, type filter, sorting and the extended search criteria.
+ * The anime, manga or novel list with search, type filter, sorting and the extended search criteria. If
+ * [onCategoryChange] is set, a switch between manga and novels is shown above the type filter.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,6 +78,7 @@ fun MediaListScreen(
     category: Category,
     initialType: String?,
     initialSort: String?,
+    onCategoryChange: ((Category) -> Unit)? = null,
     viewModel: MediaListViewModel = koinViewModel(
         key = "media_list_$category",
         parameters = { parametersOf(MediaListFilter.initial(category, initialType, initialSort)) }
@@ -93,9 +99,7 @@ fun MediaListScreen(
     ProxerScaffold(
         topBar = {
             SearchableTopAppBar(
-                title = stringResource(
-                    if (category == Category.ANIME) R.string.section_anime else R.string.section_manga
-                ),
+                title = stringResource(category.sectionTitle()),
                 isSearching = isSearching,
                 query = query,
                 onQueryChange = { query = it },
@@ -132,6 +136,7 @@ fun MediaListScreen(
             category = category,
             state = state,
             filter = filter,
+            onCategoryChange = onCategoryChange,
             onTypeChange = { viewModel.updateFilter(filter.copy(type = it)) },
             onFilterClick = {
                 if (genres == null || tags == null) viewModel.loadTags()
@@ -168,13 +173,18 @@ fun MediaListContent(
     onRefresh: () -> Unit,
     onErrorAction: (ErrorAction) -> Unit,
     onEntryClick: (MediaListEntry) -> Unit,
-    contentPadding: PaddingValues
+    contentPadding: PaddingValues,
+    onCategoryChange: ((Category) -> Unit)? = null
 ) {
     Column(
         Modifier
             .fillMaxSize()
             .padding(top = contentPadding.calculateTopPadding())
     ) {
+        if (onCategoryChange != null) {
+            CategorySwitch(category, onCategoryChange)
+        }
+
         TypeChips(category, filter, onTypeChange, onFilterClick)
 
         PagedGrid(
@@ -193,6 +203,29 @@ fun MediaListContent(
             MediaEntryCard(entry, category, onClick = { onEntryClick(entry) })
         }
     }
+}
+
+@Composable
+private fun CategorySwitch(category: Category, onCategoryChange: (Category) -> Unit) {
+    val categories = listOf(Category.MANGA, Category.NOVEL)
+
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp)) {
+        categories.forEachIndexed { index, item ->
+            SegmentedButton(
+                selected = category == item,
+                onClick = { onCategoryChange(item) },
+                shape = SegmentedButtonDefaults.itemShape(index, categories.size),
+                label = { Text(stringResource(item.sectionTitle())) }
+            )
+        }
+    }
+}
+
+@StringRes
+private fun Category.sectionTitle() = when (this) {
+    Category.ANIME -> R.string.section_anime
+    Category.MANGA -> R.string.section_manga
+    Category.NOVEL -> R.string.section_novel
 }
 
 @Composable
@@ -304,7 +337,8 @@ private fun MediaEntryCard(entry: MediaListEntry, category: Category, onClick: (
 
 @StringRes
 private fun MediaType.label() = when (this) {
-    MediaType.ALL_ANIME, MediaType.ALL_MANGA, MediaType.ALL, MediaType.ALL_WITH_HENTAI -> R.string.action_filter_all
+    MediaType.ALL_ANIME, MediaType.ALL_MANGA, MediaType.ALL_NOVEL, MediaType.ALL, MediaType.ALL_WITH_HENTAI ->
+        R.string.action_filter_all
     MediaType.ANIMESERIES -> R.string.action_filter_anime_series
     MediaType.MOVIE -> R.string.action_filter_movies
     MediaType.OVA -> R.string.action_filter_ova
@@ -313,6 +347,9 @@ private fun MediaType.label() = when (this) {
     MediaType.ONESHOT -> R.string.action_filter_one_shots
     MediaType.DOUJIN -> R.string.action_filter_doujin
     MediaType.HMANGA -> R.string.action_filter_hmanga
+    MediaType.LIGHTNOVEL -> R.string.medium_lightnovel
+    MediaType.WEBNOVEL -> R.string.medium_webnovel
+    MediaType.VISUALNOVEL -> R.string.medium_visualnovel
 }
 
 @StringRes

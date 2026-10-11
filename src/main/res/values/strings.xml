@@ -5,8 +5,77 @@
 
     <string name="section_anime">Anime</string>
     <string name="section_schedule">Anime-Wochenplan</string>
-    <string name="section_chat">Chat</string>
+    <string name="section_messenger">Messenger</string>
     <string name="section_manga">Manga</string>
+    <string name="section_novel">Novel</string>
+    <string name="section_discover">Entdecken</string>
+    <string name="section_translator_groups">Subgruppen</string>
+    <string name="section_industries">Firmen</string>
+    <string name="discover_directories">Verzeichnisse</string>
+    <string name="discover_website">Auf der Website</string>
+    <string name="discover_touzai">Touzai</string>
+    <string name="discover_proxcast">ProxCast</string>
+    <string name="discover_reviews">Rezensionen</string>
+    <string name="discover_discord">Discord</string>
+    <string name="discover_status">Serverstatus</string>
+    <string name="directory_all">Alle</string>
+    <string name="directory_search_hint_characters">Charaktere durchsuchen</string>
+    <string name="directory_search_hint_persons">Personen durchsuchen</string>
+    <string name="directory_search_hint_translator_groups">Gruppen durchsuchen</string>
+    <string name="directory_search_hint_industries">Firmen durchsuchen</string>
+    <string name="section_characters">Charaktere</string>
+    <string name="section_persons">Personen</string>
+    <string name="error_no_data_characters">Für dieses Werk sind keine Charaktere eingetragen</string>
+    <string name="error_no_data_persons">Für dieses Werk sind keine Personen eingetragen</string>
+    <string name="profile_names">Weitere Namen</string>
+    <string name="profile_name_default">Name</string>
+    <string name="profile_gender">Geschlecht</string>
+    <string name="profile_gender_male">Männlich</string>
+    <string name="profile_gender_female">Weiblich</string>
+    <string name="profile_birthday">Geburtstag</string>
+    <string name="profile_blood_type">Blutgruppe</string>
+    <string name="profile_height">Größe</string>
+    <string name="profile_weight">Gewicht</string>
+    <string name="profile_birthplace">Geburtsort</string>
+    <string name="profile_nationality">Nationalität</string>
+    <string name="profile_residence">Wohnort</string>
+    <string name="profile_occupations">Berufe</string>
+    <string name="profile_voiced_by">Gesprochen von</string>
+    <string name="profile_voices">Spricht</string>
+    <string name="profile_appears_in">Auftritte</string>
+    <string name="profile_works">Werke</string>
+    <string name="profile_centimeters">%s cm</string>
+    <string name="profile_kilograms">%s kg</string>
+    <string name="profile_birthday_day_month">%1$d. %2$s</string>
+    <string name="profile_birthday_full">%1$d. %2$s %3$d</string>
+    <string name="profile_name_with_alternative">%1$s (%2$s)</string>
+    <string name="character_type_main">Hauptcharakter</string>
+    <string name="character_type_support">Nebencharakter</string>
+    <string name="character_group_main">Hauptcharaktere</string>
+    <string name="character_group_support">Nebencharaktere</string>
+    <string name="person_type_seiyuu">Sprecher</string>
+    <string name="person_type_original_creator">Originalautor</string>
+    <string name="person_type_director">Regie</string>
+    <string name="person_type_author" tools:ignore="Typos">Autor</string>
+    <string name="person_type_author_art" tools:ignore="Typos">Autor und Zeichner</string>
+    <string name="person_type_art">Zeichner</string>
+    <string name="person_type_mangaka">Mangaka</string>
+    <string name="person_type_misc">Sonstige</string>
+    <string name="profile_subject_intro">Einleitung</string>
+    <string name="profile_subject_appearance">Aussehen</string>
+    <string name="profile_subject_personality">Persönlichkeit</string>
+    <string name="profile_subject_trivia">Wissenswertes</string>
+    <string name="profile_subject_skills">Fähigkeiten</string>
+    <string name="profile_subject_past">Vergangenheit</string>
+    <string name="profile_subject_present">Gegenwart</string>
+    <string name="profile_subject_biography">Biografie</string>
+    <string name="profile_subject_awards">Auszeichnungen</string>
+    <string name="share_character">Schau dir den Charakter %1$s auf Proxer.Me, deiner Anime und Manga Community
+        an: %2$s
+    </string>
+    <string name="share_person">Schau dir die Person %1$s auf Proxer.Me, deiner Anime und Manga Community
+        an: %2$s
+    </string>
     <string name="section_news">News</string>
     <string name="section_bookmarks">Lesezeichen</string>
     <string name="section_guest">Gast</string>
@@ -53,7 +122,6 @@
     <string name="media_info_spoiler_tags">Spoiler</string>
     <string name="action_create_conference">Neue Unterhaltung</string>
     <string name="chat_search_hint">Unterhaltungen durchsuchen</string>
-    <string name="chat_read_only">Nur lesen</string>
     <string name="bookmark_available">Verfügbar</string>
     <string name="bookmark_unavailable">Noch nicht verfügbar</string>
     <string name="bookmark_filter_available">Nur verfügbare</string>
@@ -221,7 +289,6 @@
     <string name="error_bookmark_deletion">Das Lesezeichen konnte nicht entfernt werden: %s</string>
     <string name="error_media_entry_deletion">Der Eintrag konnte nicht entfernt werden: %s</string>
     <string name="error_topten_entry_removal">Der Eintrag konnte nicht entfernt werden: %s</string>
-    <string name="error_chat_send_message">Die Nachricht konnte nicht versandt werden: %s</string>
     <string name="error_undo">Die Aktion konnte nicht rückgängig gemacht werden: %s</string>
 
     <string name="medium_anime_series">Animeserie</string>
@@ -500,6 +567,13 @@
     <string name="fragment_media_info_industries">Industrie</string>
     <string name="fragment_media_info_season_title">Season</string>
     <string name="fragment_media_info_status_title">Status</string>
+    <string name="media_info_format_title">Format</string>
+    <string name="media_info_ranking_title">Rang</string>
+    <string name="media_info_available_title">Verfügbar</string>
+    <string name="media_info_available_content">%1$d von %2$d</string>
+    <string name="media_info_bayesian_rating">Gewichtet: %1$.2f</string>
+    <string name="media_info_no_description">Keine Beschreibung vorhanden</string>
+    <string name="media_info_deactivated_for_apps">Dieser Eintrag ist in Apps deaktiviert und nur auf der Website verfügbar.</string>
     <string name="fragment_media_info_tags">Tags</string>
     <string name="fragment_media_info_note">Vermerken</string>
     <string name="fragment_media_info_favor">Favorisieren</string>
@@ -672,14 +746,7 @@
     <string name="fragment_create_conference_delete_description">Entfernen</string>
     <string name="fragment_create_conference_accept_description">Akzeptieren</string>
 
-    <string name="fragment_chat_container_public">Öffentlich</string>
-    <string name="fragment_chat_container_private">Privat</string>
-
     <string name="fragment_chat_loading_message">Chat wird geladen…</string>
-    <string name="fragment_chat_read_only_message">In diesen Chat kann nicht geschrieben werden</string>
-    <string name="fragment_chat_login_required_message">Du musst dich anmelden um schreiben zu können</string>
-
-    <string name="fragment_chat_room_active_users_title">Aktive Benutzer</string>
 
     <string name="fragment_notification_delete_content_description">Löschen</string>
 
@@ -890,6 +957,7 @@
 
     <string name="action_search">Suchen</string>
     <string name="action_filter">Filter</string>
+    <string name="action_close">Schließen</string>
     <string name="action_sort">Sortierung</string>
     <string name="action_share">Teilen</string>
     <string name="action_answer">Antworten</string>

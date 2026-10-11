@@ -18,6 +18,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Checkout the API library
+        uses: actions/checkout@v4
+        with:
+          repository: MrP1ck/ProxerLibJava
+          # Change to the default branch once the library changes are merged.
+          ref: feature/characters-persons-novels
+          path: ProxerLibJava
+
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
@@ -35,7 +43,7 @@ jobs:
 
       - id: build
         name: Build with Gradle
-        run: ./gradlew ktlintCheck detekt build bundle
+        run: ./gradlew -PproxerLib.path=ProxerLibJava ktlintCheck detekt build bundle
 
       - name: Store reports
         uses: actions/upload-artifact@v4

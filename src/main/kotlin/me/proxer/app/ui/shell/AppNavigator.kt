@@ -14,9 +14,14 @@ import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.chat.prv.Participant
 import me.proxer.app.chat.prv.PrvMessengerActivity
 import me.proxer.app.chat.prv.create.CreateConferenceActivity
-import me.proxer.app.chat.pub.message.ChatActivity
+import me.proxer.app.discover.DirectoryActivity
+import me.proxer.app.discover.DirectoryEntry
+import me.proxer.app.discover.DirectoryKind
+import me.proxer.app.discover.DiscoverActivity
 import me.proxer.app.forum.TopicActivity
+import me.proxer.app.info.character.CharacterActivity
 import me.proxer.app.info.industry.IndustryActivity
+import me.proxer.app.info.person.PersonActivity
 import me.proxer.app.info.translatorgroup.TranslatorGroupActivity
 import me.proxer.app.manga.MangaActivity
 import me.proxer.app.media.MediaActivity
@@ -50,6 +55,21 @@ class AppNavigator(private val activity: BaseActivity, private val navController
     }
 
     fun openIndustry(id: String, name: String? = null) = IndustryActivity.navigateTo(activity, id, name)
+
+    fun openCharacter(id: String, name: String? = null) = CharacterActivity.navigateTo(activity, id, name)
+
+    fun openPerson(id: String, name: String? = null) = PersonActivity.navigateTo(activity, id, name)
+
+    fun openDiscover() = DiscoverActivity.navigateTo(activity)
+
+    fun openDirectory(kind: DirectoryKind) = DirectoryActivity.navigateTo(activity, kind)
+
+    fun openDirectoryEntry(kind: DirectoryKind, entry: DirectoryEntry) = when (kind) {
+        DirectoryKind.CHARACTERS -> openCharacter(entry.id, entry.name)
+        DirectoryKind.PERSONS -> openPerson(entry.id, entry.name)
+        DirectoryKind.TRANSLATOR_GROUPS -> openTranslatorGroup(entry.id, entry.name)
+        DirectoryKind.INDUSTRIES -> openIndustry(entry.id, entry.name)
+    }
 
     fun openTranslatorGroup(id: String, name: String? = null) = TranslatorGroupActivity.navigateTo(activity, id, name)
 
@@ -98,10 +118,6 @@ class AppNavigator(private val activity: BaseActivity, private val navController
 
     fun openCreateConference(isGroup: Boolean, initialParticipant: Participant? = null) {
         CreateConferenceActivity.navigateTo(activity, isGroup, initialParticipant)
-    }
-
-    fun openChatRoom(id: String, name: String, isReadOnly: Boolean) {
-        ChatActivity.navigateTo(activity, id, name, isReadOnly)
     }
 
     fun openProfile(userId: String?, username: String?, image: String? = null) {
