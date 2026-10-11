@@ -23,15 +23,14 @@ import me.proxer.app.R
 import me.proxer.app.settings.theme.ThemeVariant
 import me.proxer.app.ui.LinkCheckDialog
 import me.proxer.app.ui.WebViewActivity
+import me.proxer.app.util.CustomTabsConnection
 import me.proxer.app.util.Utils
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.library.ProxerException
 import me.proxer.library.util.ProxerUrls.hasProxerHost
-import me.zhanghai.android.customtabshelper.CustomTabsHelperFragment
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.koin.android.ext.android.get
-import org.koin.android.ext.android.getKoin
 import org.koin.core.parameter.ParametersHolder
 import java.util.EnumSet
 import java.util.regex.Pattern.quote
@@ -111,7 +110,7 @@ inline fun unsafeParametersOf(vararg parameters: Any?): ParametersHolder {
     return ParametersHolder(parameters.toMutableList())
 }
 
-fun CustomTabsHelperFragment.fallbackHandleLink(
+fun CustomTabsConnection.fallbackHandleLink(
     activity: FragmentActivity,
     url: HttpUrl,
     forceBrowser: Boolean = false,
@@ -157,7 +156,7 @@ fun CustomTabsHelperFragment.fallbackHandleLink(
     }
 }
 
-private fun CustomTabsHelperFragment.fallbackHandleLink(
+private fun CustomTabsConnection.fallbackHandleLink(
     activity: FragmentActivity,
     url: HttpUrl,
     skipCheck: Boolean = false
@@ -170,8 +169,8 @@ private fun CustomTabsHelperFragment.fallbackHandleLink(
     }
 }
 
-fun CustomTabsHelperFragment.openHttpPage(activity: Activity, url: HttpUrl) {
-    val colorScheme = when (getKoin().get<PreferenceHelper>().themeContainer.variant) {
+fun CustomTabsConnection.openHttpPage(activity: Activity, url: HttpUrl) {
+    val colorScheme = when (activity.get<PreferenceHelper>().themeContainer.variant) {
         ThemeVariant.LIGHT -> CustomTabsIntent.COLOR_SCHEME_LIGHT
         ThemeVariant.DARK -> CustomTabsIntent.COLOR_SCHEME_DARK
         ThemeVariant.SYSTEM -> CustomTabsIntent.COLOR_SCHEME_SYSTEM
@@ -194,7 +193,7 @@ fun CustomTabsHelperFragment.openHttpPage(activity: Activity, url: HttpUrl) {
         .let {
             it.intent.addReferer()
 
-            CustomTabsHelperFragment.open(activity, it, url.androidUri()) { context, uri ->
+            open(activity, it, url.androidUri()) { context, uri ->
                 WebViewActivity.navigateTo(context, uri.toString())
             }
         }

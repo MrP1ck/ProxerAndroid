@@ -260,7 +260,6 @@ dependencies {
 
     implementation(libs.material)
     implementation(libs.aboutlibraries.compose)
-    implementation(libs.customtabshelper)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
     implementation(libs.media3.exoplayer)
@@ -282,7 +281,6 @@ dependencies {
     implementation(libs.moshi.adapters)
     implementation(libs.jsoup)
 
-    implementation(libs.strictmodecompat)
     implementation(libs.timber)
     implementation(libs.anrwatchdog)
 

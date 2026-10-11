@@ -74,7 +74,7 @@ class LinkCheckDialog : ComposeDialog() {
                         preferenceHelper.shouldCheckLinks = false
                     }
 
-                    customTabsHelper.openHttpPage(requireActivity(), link)
+                    customTabsConnection.openHttpPage(requireActivity(), link)
                     dismiss()
                 })
             },

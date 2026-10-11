@@ -6,7 +6,9 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
+import android.os.Build
 import android.os.Environment
+import android.os.StrictMode
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.getSystemService
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -21,7 +23,6 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.GooglePlayServicesUtil
 import com.google.android.gms.security.ProviderInstaller
-import com.kirillr.strictmodehelper.StrictModeCompat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.proxer.app.auth.LoginHandler
@@ -141,30 +142,36 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
 
     private fun enableStrictModeForDebug() {
         if (BuildConfig.DEBUG) {
-            val threadPolicy = StrictModeCompat.ThreadPolicy.Builder()
-                .detectAll()
-                .permitCustomSlowCalls()
-                .permitDiskWrites()
-                .permitDiskReads()
-                .penaltyDialog()
-                .penaltyLog()
-                .build()
+            StrictMode.setThreadPolicy(
+                StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .permitCustomSlowCalls()
+                    .permitDiskWrites()
+                    .permitDiskReads()
+                    .penaltyDialog()
+                    .penaltyLog()
+                    .build()
+            )
 
-            val vmPolicy = StrictModeCompat.VmPolicy.Builder()
-                .detectActivityLeaks()
-                .detectCleartextNetwork()
-                .detectFileUriExposure()
-                .detectLeakedClosableObjects()
-                .detectLeakedRegistrationObjects()
-                .detectLeakedSqlLiteObjects()
-                .detectContentUriWithoutPermission()
-                .detectNonSdkApiUsage()
-                .detectImplicitDirectBoot()
-                .detectCredentialProtectedWhileLocked()
-                .penaltyLog()
-                .build()
-
-            StrictModeCompat.setPolicies(threadPolicy, vmPolicy)
+            StrictMode.setVmPolicy(
+                StrictMode.VmPolicy.Builder()
+                    .detectActivityLeaks()
+                    .detectCleartextNetwork()
+                    .detectFileUriExposure()
+                    .detectLeakedClosableObjects()
+                    .detectLeakedRegistrationObjects()
+                    .detectLeakedSqlLiteObjects()
+                    .apply {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) detectContentUriWithoutPermission()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) detectNonSdkApiUsage()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            detectImplicitDirectBoot()
+                            detectCredentialProtectedWhileLocked()
+                        }
+                    }
+                    .penaltyLog()
+                    .build()
+            )
         }
     }
 

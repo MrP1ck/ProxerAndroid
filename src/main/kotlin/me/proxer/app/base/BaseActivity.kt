@@ -10,16 +10,15 @@ import kotlinx.coroutines.launch
 import me.proxer.app.R
 import me.proxer.app.settings.theme.ThemeContainer
 import me.proxer.app.settings.theme.applyThemeContainer
+import me.proxer.app.util.CustomTabsConnection
 import me.proxer.app.util.compat.TaskDescriptionCompat
 import me.proxer.app.util.data.EventBus
 import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.androidUri
 import me.proxer.app.util.extension.fallbackHandleLink
-import me.zhanghai.android.customtabshelper.CustomTabsHelperFragment
 import okhttp3.HttpUrl
 import org.koin.android.ext.android.inject
-import kotlin.properties.Delegates
 
 /**
  * @author Ruben Gees
@@ -44,7 +43,7 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
     protected val storageHelper by inject<StorageHelper>()
     protected val preferenceHelper by inject<PreferenceHelper>()
 
-    private var customTabsHelper by Delegates.notNull<CustomTabsHelperFragment>()
+    private val customTabsConnection = CustomTabsConnection(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // This needs to be called before super.onCreate(), because otherwise Fragments might not see the
@@ -60,7 +59,7 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
 
         super.onCreate(savedInstanceState)
 
-        customTabsHelper = CustomTabsHelperFragment.attachTo(this)
+        lifecycle.addObserver(customTabsConnection)
 
         lifecycleScope.launch {
             preferenceHelper.themeChanges.collect { onThemeChanged(it) }
@@ -84,10 +83,10 @@ abstract class BaseActivity : AppCompatActivity(), CustomTabsAware {
     }
 
     override fun setLikelyUrl(url: HttpUrl): Boolean {
-        return customTabsHelper.mayLaunchUrl(url.androidUri(), bundleOf(), emptyList())
+        return customTabsConnection.mayLaunchUrl(url.androidUri(), bundleOf(), emptyList())
     }
 
     override fun showPage(url: HttpUrl, forceBrowser: Boolean, skipCheck: Boolean) {
-        customTabsHelper.fallbackHandleLink(this, url, forceBrowser, skipCheck)
+        customTabsConnection.fallbackHandleLink(this, url, forceBrowser, skipCheck)
     }
 }
