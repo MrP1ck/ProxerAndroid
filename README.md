@@ -1,5 +1,4 @@
-# ![](art/logo/proxer-logo-title.png) Proxer.Me Android [![Latest Release](https://img.shields.io/github/release/proxer/ProxerAndroid.svg)](https://github.com/proxer/ProxerAndroid/releases/latest) [![Build status](https://github.com/proxer/ProxerAndroid/workflows/CI/badge.svg)](https://github.com/proxer/ProxerAndroid/actions?workflow=CI)
-
+# ![](art/logo/proxer-logo-title.png) Proxer.Me Android [![Latest Release](https://img.shields.io/github/release/proxer/ProxerAndroid.svg)](https://github.com/MrP1ck/ProxerAndroid/releases/latest)
 ### About this fork
 
 This fork contains fixes on top of the last official release (1.11.5):
