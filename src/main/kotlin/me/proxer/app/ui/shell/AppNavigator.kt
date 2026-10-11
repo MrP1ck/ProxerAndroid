@@ -15,7 +15,9 @@ import me.proxer.app.chat.prv.Participant
 import me.proxer.app.chat.prv.PrvMessengerActivity
 import me.proxer.app.chat.prv.create.CreateConferenceActivity
 import me.proxer.app.forum.TopicActivity
+import me.proxer.app.info.character.CharacterActivity
 import me.proxer.app.info.industry.IndustryActivity
+import me.proxer.app.info.person.PersonActivity
 import me.proxer.app.info.translatorgroup.TranslatorGroupActivity
 import me.proxer.app.manga.MangaActivity
 import me.proxer.app.media.MediaActivity
@@ -49,6 +51,10 @@ class AppNavigator(private val activity: BaseActivity, private val navController
     }
 
     fun openIndustry(id: String, name: String? = null) = IndustryActivity.navigateTo(activity, id, name)
+
+    fun openCharacter(id: String, name: String? = null) = CharacterActivity.navigateTo(activity, id, name)
+
+    fun openPerson(id: String, name: String? = null) = PersonActivity.navigateTo(activity, id, name)
 
     fun openTranslatorGroup(id: String, name: String? = null) = TranslatorGroupActivity.navigateTo(activity, id, name)
 

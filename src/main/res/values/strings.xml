@@ -8,6 +8,59 @@
     <string name="section_messenger">Messenger</string>
     <string name="section_manga">Manga</string>
     <string name="section_novel">Novel</string>
+    <string name="section_characters">Charaktere</string>
+    <string name="section_persons">Personen</string>
+    <string name="error_no_data_characters">Für dieses Werk sind keine Charaktere eingetragen</string>
+    <string name="error_no_data_persons">Für dieses Werk sind keine Personen eingetragen</string>
+    <string name="profile_names">Weitere Namen</string>
+    <string name="profile_name_default">Name</string>
+    <string name="profile_gender">Geschlecht</string>
+    <string name="profile_gender_male">Männlich</string>
+    <string name="profile_gender_female">Weiblich</string>
+    <string name="profile_birthday">Geburtstag</string>
+    <string name="profile_blood_type">Blutgruppe</string>
+    <string name="profile_height">Größe</string>
+    <string name="profile_weight">Gewicht</string>
+    <string name="profile_birthplace">Geburtsort</string>
+    <string name="profile_nationality">Nationalität</string>
+    <string name="profile_residence">Wohnort</string>
+    <string name="profile_occupations">Berufe</string>
+    <string name="profile_voiced_by">Gesprochen von</string>
+    <string name="profile_voices">Spricht</string>
+    <string name="profile_appears_in">Auftritte</string>
+    <string name="profile_works">Werke</string>
+    <string name="profile_centimeters">%s cm</string>
+    <string name="profile_kilograms">%s kg</string>
+    <string name="profile_birthday_day_month">%1$d. %2$s</string>
+    <string name="profile_birthday_full">%1$d. %2$s %3$d</string>
+    <string name="profile_name_with_alternative">%1$s (%2$s)</string>
+    <string name="character_type_main">Hauptcharakter</string>
+    <string name="character_type_support">Nebencharakter</string>
+    <string name="character_group_main">Hauptcharaktere</string>
+    <string name="character_group_support">Nebencharaktere</string>
+    <string name="person_type_seiyuu">Sprecher</string>
+    <string name="person_type_original_creator">Originalautor</string>
+    <string name="person_type_director">Regie</string>
+    <string name="person_type_author" tools:ignore="Typos">Autor</string>
+    <string name="person_type_author_art" tools:ignore="Typos">Autor und Zeichner</string>
+    <string name="person_type_art">Zeichner</string>
+    <string name="person_type_mangaka">Mangaka</string>
+    <string name="person_type_misc">Sonstige</string>
+    <string name="profile_subject_intro">Einleitung</string>
+    <string name="profile_subject_appearance">Aussehen</string>
+    <string name="profile_subject_personality">Persönlichkeit</string>
+    <string name="profile_subject_trivia">Wissenswertes</string>
+    <string name="profile_subject_skills">Fähigkeiten</string>
+    <string name="profile_subject_past">Vergangenheit</string>
+    <string name="profile_subject_present">Gegenwart</string>
+    <string name="profile_subject_biography">Biografie</string>
+    <string name="profile_subject_awards">Auszeichnungen</string>
+    <string name="share_character">Schau dir den Charakter %1$s auf Proxer.Me, deiner Anime und Manga Community
+        an: %2$s
+    </string>
+    <string name="share_person">Schau dir die Person %1$s auf Proxer.Me, deiner Anime und Manga Community
+        an: %2$s
+    </string>
     <string name="section_news">News</string>
     <string name="section_bookmarks">Lesezeichen</string>
     <string name="section_guest">Gast</string>

@@ -5,10 +5,15 @@ import me.proxer.app.anime.AnimeStreamInfo
 import me.proxer.app.anime.resolver.StreamResolutionResult
 import me.proxer.app.chat.prv.ConferenceWithMessage
 import me.proxer.app.chat.prv.LocalConference
+import me.proxer.app.info.ProfileDetails
+import me.proxer.app.info.ProfileGroup
+import me.proxer.app.info.ProfileLink
 import me.proxer.app.media.comments.ParsedComment
 import me.proxer.app.ui.view.bbcode.toBBTree
 import me.proxer.library.entity.info.AdaptionInfo
 import me.proxer.library.entity.info.Entry
+import me.proxer.library.entity.info.EntryCharacter
+import me.proxer.library.entity.info.EntryPerson
 import me.proxer.library.entity.info.EntrySeasonInfo
 import me.proxer.library.entity.info.EntryTranslatorGroup
 import me.proxer.library.entity.info.InfoGenre
@@ -34,6 +39,7 @@ import me.proxer.library.enums.MessageAction
 import me.proxer.library.enums.Season
 import me.proxer.library.enums.SynonymType
 import me.proxer.library.enums.UserMediaProgress
+import me.proxer.library.util.ProxerUrls
 import java.time.Instant
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -254,6 +260,61 @@ object PreviewData {
         bayesianRating = 9.36f,
         availableEpisodeAmount = 26,
         isDeactivatedForApps = true
+    )
+
+    val entryCharacters = listOf(
+        EntryCharacter("1", "Frieren", "main"),
+        EntryCharacter("2", "Fern", "main"),
+        EntryCharacter("3", "Stark", "main"),
+        EntryCharacter("4", "Himmel", "support"),
+        EntryCharacter("5", "Heiter", "support")
+    )
+
+    val entryPersons = listOf(
+        EntryPerson("1", "Kanehito Yamada", "original-creator"),
+        EntryPerson("2", "Keiichirou Saitou", "director"),
+        EntryPerson("3", "Atsumi Tanezaki", "seiyuu"),
+        EntryPerson("4", "Kana Ichinose", "seiyuu")
+    )
+
+    val characterProfile = ProfileDetails(
+        name = "Frieren",
+        imageUrl = ProxerUrls.characterImage("1"),
+        facts = listOf("Geschlecht" to "Weiblich", "Geburtstag" to "5. Mai", "Größe" to "160 cm"),
+        names = listOf("Deutsch" to "Frieren", "Japanisch" to "フリーレン"),
+        descriptions = listOf(
+            "Einleitung" to "[b]Frieren[/b] ist eine [i]Elfe[/i] und Magierin, die mit der Heldengruppe den " +
+                "Dämonenkönig besiegt hat.",
+            "Persönlichkeit" to "Frieren wirkt gleichgültig, doch sie lernt langsam, die Menschen zu verstehen."
+        ),
+        groups = listOf(
+            ProfileGroup(
+                "Gesprochen von",
+                listOf(ProfileLink("1", "Atsumi Tanezaki", "Japanisch", ProxerUrls.personImage("3")) {})
+            ),
+            ProfileGroup(
+                "Auftritte",
+                listOf(ProfileLink("1", "Sousou no Frieren", "Hauptcharakter", ProxerUrls.entryImage("1")) {})
+            )
+        )
+    )
+
+    val personProfile = ProfileDetails(
+        name = "Atsumi Tanezaki",
+        imageUrl = ProxerUrls.personImage("3"),
+        facts = listOf("Geschlecht" to "Weiblich", "Geburtstag" to "13. Februar 1994", "Berufe" to "Sprecher"),
+        names = listOf("Name" to "Atsumi Tanezaki (種﨑 敦美)"),
+        descriptions = listOf("Biografie" to "[b]Atsumi Tanezaki[/b] ist eine japanische Synchronsprecherin."),
+        groups = listOf(
+            ProfileGroup(
+                "Werke",
+                listOf(ProfileLink("1", "Sousou no Frieren", "Sprecher", ProxerUrls.entryImage("1")) {})
+            ),
+            ProfileGroup(
+                "Spricht",
+                listOf(ProfileLink("1", "Frieren", "Japanisch", ProxerUrls.characterImage("1")) {})
+            )
+        )
     )
 
     val mediaUserInfo = MediaUserInfo(

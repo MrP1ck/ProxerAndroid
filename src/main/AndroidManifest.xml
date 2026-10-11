@@ -253,6 +253,48 @@
         <activity android:name=".info.industry.IndustryActivity" />
 
         <activity
+            android:name=".info.character.CharacterActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/character"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/character"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".info.person.PersonActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/persons"
+                    android:scheme="http" />
+
+                <data
+                    android:host="proxer.me"
+                    android:pathPattern="/persons"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".ui.ImageDetailActivity" />
 
         <activity

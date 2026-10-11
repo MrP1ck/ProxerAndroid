@@ -52,6 +52,7 @@ import me.proxer.app.ui.components.COVER_ASPECT_RATIO
 import me.proxer.app.ui.components.ChipRow
 import me.proxer.app.ui.components.ContentState
 import me.proxer.app.ui.components.ContentStateHost
+import me.proxer.app.ui.components.InfoRow
 import me.proxer.app.ui.components.LanguageFlag
 import me.proxer.app.ui.components.LocalSnackbarHostState
 import me.proxer.app.ui.components.ObserveAsEvents
@@ -518,33 +519,6 @@ private fun GeneralInfo(entry: Entry, onAdaptionClick: () -> Unit) {
                 onClick = onAdaptionClick
             )
         }
-    }
-}
-
-@Composable
-private fun InfoRow(title: String, content: String, isSelectable: Boolean = false, onClick: (() -> Unit)? = null) {
-    Row(Modifier.fillMaxWidth()) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(112.dp)
-        )
-
-        val contentModifier = Modifier
-            .weight(1f)
-            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
-
-        val contentText: @Composable () -> Unit = {
-            Text(
-                text = content,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (onClick != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                modifier = contentModifier
-            )
-        }
-
-        if (isSelectable) SelectionContainer(contentModifier) { contentText() } else contentText()
     }
 }
 
