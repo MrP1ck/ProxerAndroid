@@ -1,8 +1,8 @@
 [versions]
 # App
 appVersionMajor = "2"
-appVersionMinor = "0"
-appVersionPatch = "1"
+appVersionMinor = "1"
+appVersionPatch = "0"
 
 minSdk = "23"
 targetSdk = "36"
