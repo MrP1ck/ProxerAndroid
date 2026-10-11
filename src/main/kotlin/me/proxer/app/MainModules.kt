@@ -24,6 +24,8 @@ import me.proxer.app.chat.prv.message.MessengerReportViewModel
 import me.proxer.app.chat.prv.message.MessengerViewModel
 import me.proxer.app.chat.prv.sync.MessengerDatabase
 import me.proxer.app.comment.EditCommentViewModel
+import me.proxer.app.discover.DirectoryKind
+import me.proxer.app.discover.DirectoryViewModel
 import me.proxer.app.forum.TopicViewModel
 import me.proxer.app.info.character.CharacterViewModel
 import me.proxer.app.info.industry.IndustryInfoViewModel
@@ -280,6 +282,7 @@ private val viewModelModule = module {
     viewModel { (entryId: String) -> EntryCharactersViewModel(get(), entryId) }
     viewModel { (entryId: String) -> EntryPersonsViewModel(get(), entryId) }
     viewModel { (characterId: String) -> CharacterViewModel(get(), characterId) }
+    viewModel { (kind: DirectoryKind) -> DirectoryViewModel(get(), kind) }
     viewModel { (personId: String) -> PersonViewModel(get(), personId) }
     viewModel { (entryId: String) -> RecommendationViewModel(get(), entryId) }
     viewModel { (entryId: String) -> DiscussionViewModel(get(), entryId) }

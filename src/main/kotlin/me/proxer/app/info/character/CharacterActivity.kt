@@ -3,9 +3,12 @@ package me.proxer.app.info.character
 import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import me.proxer.app.R
 import me.proxer.app.base.ComposeActivity
+import me.proxer.app.discover.DirectoryActivity
+import me.proxer.app.discover.DirectoryKind
 import me.proxer.app.info.ProfileDetails
 import me.proxer.app.info.ProfileGroup
 import me.proxer.app.info.ProfileLink
@@ -45,11 +48,23 @@ class CharacterActivity : ComposeActivity() {
         }
     }
 
-    private val id: String
-        get() = intent.getStringExtra(ID_EXTRA) ?: intent.data?.getQueryParameter("id") ?: "-1"
+    private val id: String?
+        get() = intent.getStringExtra(ID_EXTRA) ?: intent.data?.getQueryParameter("id")
 
     @Composable
     override fun Content() {
+        val id = id
+
+        // Links to the list of the website have no id.
+        if (id == null) {
+            LaunchedEffect(Unit) {
+                DirectoryActivity.navigateTo(this@CharacterActivity, DirectoryKind.CHARACTERS)
+                finish()
+            }
+
+            return
+        }
+
         val context = LocalContext.current
         val navigator = LocalAppNavigator.current
         val viewModel = koinViewModel<CharacterViewModel> { parametersOf(id) }

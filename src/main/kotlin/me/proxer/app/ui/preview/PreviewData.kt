@@ -5,6 +5,7 @@ import me.proxer.app.anime.AnimeStreamInfo
 import me.proxer.app.anime.resolver.StreamResolutionResult
 import me.proxer.app.chat.prv.ConferenceWithMessage
 import me.proxer.app.chat.prv.LocalConference
+import me.proxer.app.discover.DirectoryEntry
 import me.proxer.app.info.ProfileDetails
 import me.proxer.app.info.ProfileGroup
 import me.proxer.app.info.ProfileLink
@@ -275,6 +276,13 @@ object PreviewData {
         EntryPerson("2", "Keiichirou Saitou", "director"),
         EntryPerson("3", "Atsumi Tanezaki", "seiyuu"),
         EntryPerson("4", "Kana Ichinose", "seiyuu")
+    )
+
+    val directoryEntries = listOf(
+        DirectoryEntry("1", "Frieren", ProxerUrls.characterImage("1")),
+        DirectoryEntry("2", "Fern", ProxerUrls.characterImage("2")),
+        DirectoryEntry("3", "Fiona", ProxerUrls.characterImage("3")),
+        DirectoryEntry("4", "Fritz", ProxerUrls.characterImage("4"))
     )
 
     val characterProfile = ProfileDetails(

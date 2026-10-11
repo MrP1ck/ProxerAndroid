@@ -14,6 +14,10 @@ import me.proxer.app.chat.prv.LocalConference
 import me.proxer.app.chat.prv.Participant
 import me.proxer.app.chat.prv.PrvMessengerActivity
 import me.proxer.app.chat.prv.create.CreateConferenceActivity
+import me.proxer.app.discover.DirectoryActivity
+import me.proxer.app.discover.DirectoryEntry
+import me.proxer.app.discover.DirectoryKind
+import me.proxer.app.discover.DiscoverActivity
 import me.proxer.app.forum.TopicActivity
 import me.proxer.app.info.character.CharacterActivity
 import me.proxer.app.info.industry.IndustryActivity
@@ -55,6 +59,17 @@ class AppNavigator(private val activity: BaseActivity, private val navController
     fun openCharacter(id: String, name: String? = null) = CharacterActivity.navigateTo(activity, id, name)
 
     fun openPerson(id: String, name: String? = null) = PersonActivity.navigateTo(activity, id, name)
+
+    fun openDiscover() = DiscoverActivity.navigateTo(activity)
+
+    fun openDirectory(kind: DirectoryKind) = DirectoryActivity.navigateTo(activity, kind)
+
+    fun openDirectoryEntry(kind: DirectoryKind, entry: DirectoryEntry) = when (kind) {
+        DirectoryKind.CHARACTERS -> openCharacter(entry.id, entry.name)
+        DirectoryKind.PERSONS -> openPerson(entry.id, entry.name)
+        DirectoryKind.TRANSLATOR_GROUPS -> openTranslatorGroup(entry.id, entry.name)
+        DirectoryKind.INDUSTRIES -> openIndustry(entry.id, entry.name)
+    }
 
     fun openTranslatorGroup(id: String, name: String? = null) = TranslatorGroupActivity.navigateTo(activity, id, name)
 
