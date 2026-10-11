@@ -304,7 +304,8 @@ private fun MediaEntryCard(entry: MediaListEntry, category: Category, onClick: (
 
 @StringRes
 private fun MediaType.label() = when (this) {
-    MediaType.ALL_ANIME, MediaType.ALL_MANGA, MediaType.ALL, MediaType.ALL_WITH_HENTAI -> R.string.action_filter_all
+    MediaType.ALL_ANIME, MediaType.ALL_MANGA, MediaType.ALL_NOVEL, MediaType.ALL, MediaType.ALL_WITH_HENTAI ->
+        R.string.action_filter_all
     MediaType.ANIMESERIES -> R.string.action_filter_anime_series
     MediaType.MOVIE -> R.string.action_filter_movies
     MediaType.OVA -> R.string.action_filter_ova
@@ -313,6 +314,9 @@ private fun MediaType.label() = when (this) {
     MediaType.ONESHOT -> R.string.action_filter_one_shots
     MediaType.DOUJIN -> R.string.action_filter_doujin
     MediaType.HMANGA -> R.string.action_filter_hmanga
+    MediaType.LIGHTNOVEL -> R.string.medium_lightnovel
+    MediaType.WEBNOVEL -> R.string.medium_webnovel
+    MediaType.VISUALNOVEL -> R.string.medium_visualnovel
 }
 
 @StringRes
