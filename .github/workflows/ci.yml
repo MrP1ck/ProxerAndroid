@@ -18,12 +18,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # The library branch with the new endpoints. Once it is merged and deleted, the default branch is used instead.
       - name: Checkout the API library
+        id: library
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          repository: MrP1ck/ProxerLibJava
+          ref: feature/characters-persons-novels
+          path: ProxerLibJava
+
+      - name: Checkout the API library (default branch)
+        if: steps.library.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: MrP1ck/ProxerLibJava
-          # Change to the default branch once the library changes are merged.
-          ref: feature/characters-persons-novels
           path: ProxerLibJava
 
       - name: Set up JDK 17
