@@ -14,7 +14,7 @@ import me.proxer.app.util.extension.awaitNullable
 import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.toParsedComment
 import me.proxer.library.enums.CommentSortCriteria
-import org.threeten.bp.Instant
+import java.time.Instant
 import kotlin.properties.Delegates
 
 /**

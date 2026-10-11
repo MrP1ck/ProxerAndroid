@@ -32,7 +32,7 @@ import me.proxer.library.enums.Medium
 import me.proxer.library.enums.Season
 import me.proxer.library.enums.SynonymType
 import me.proxer.library.enums.UserMediaProgress
-import org.threeten.bp.Instant
+import java.time.Instant
 import java.util.Date
 import java.util.concurrent.TimeUnit
 

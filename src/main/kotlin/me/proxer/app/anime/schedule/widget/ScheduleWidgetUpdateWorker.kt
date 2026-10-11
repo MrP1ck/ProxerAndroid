@@ -16,13 +16,12 @@ import me.proxer.app.R
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toInstantBP
-import me.proxer.app.util.extension.toLocalDateTimeBP
+import me.proxer.app.util.extension.toLocalDateTime
 import me.proxer.app.widget.WidgetError
 import me.proxer.app.widget.WidgetState
 import me.proxer.library.ProxerApi
-import org.threeten.bp.LocalDate
 import timber.log.Timber
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -67,15 +66,15 @@ class ScheduleWidgetUpdateWorker(
                 api.media.calendar()
                     .build()
                     .safeExecute()
-                    .filter { it.date.toLocalDateTimeBP().dayOfMonth == LocalDate.now().dayOfMonth }
+                    .filter { it.date.toLocalDateTime().dayOfMonth == LocalDate.now().dayOfMonth }
                     .map {
                         SimpleCalendarEntry(
                             it.id,
                             it.entryId,
                             it.name,
                             it.episode,
-                            it.date.toInstantBP(),
-                            it.uploadDate.toInstantBP()
+                            it.date.toInstant(),
+                            it.uploadDate.toInstant()
                         )
                     }
             }

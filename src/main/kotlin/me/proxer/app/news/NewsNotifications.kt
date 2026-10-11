@@ -15,7 +15,6 @@ import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.extension.getQuantityString
 import me.proxer.app.util.extension.notifyIfPermitted
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toInstantBP
 import me.proxer.library.entity.notifications.NewsArticle
 
 /**
@@ -89,7 +88,7 @@ object NewsNotifications {
 
         val shouldAlert = news
             .maxByOrNull { it.date }
-            ?.date?.toInstantBP()
+            ?.date?.toInstant()
             ?.isAfter(preferenceHelper.lastNewsDate)
             ?: true
 

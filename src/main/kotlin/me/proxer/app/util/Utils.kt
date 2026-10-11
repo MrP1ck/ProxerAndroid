@@ -14,9 +14,9 @@ import coil3.transform.CircleCropTransformation
 import kotlinx.coroutines.runBlocking
 import me.proxer.app.util.extension.androidUri
 import okhttp3.HttpUrl
-import org.threeten.bp.format.DateTimeFormatter
 import timber.log.Timber
 import java.net.NetworkInterface
+import java.time.format.DateTimeFormatter
 
 /**
  * @author Ruben Gees

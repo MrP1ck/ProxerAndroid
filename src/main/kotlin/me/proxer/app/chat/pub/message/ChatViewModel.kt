@@ -16,8 +16,8 @@ import me.proxer.app.util.extension.catchingErrors
 import me.proxer.app.util.extension.retryWithDelay
 import me.proxer.app.util.extension.toParsedMessage
 import me.proxer.library.enums.ChatMessageAction
-import org.threeten.bp.Instant
 import timber.log.Timber
+import java.time.Instant
 import java.util.Collections.emptyList
 import java.util.LinkedList
 import java.util.Queue

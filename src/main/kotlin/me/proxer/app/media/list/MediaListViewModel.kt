@@ -24,8 +24,8 @@ import me.proxer.library.enums.MediaType
 import me.proxer.library.enums.TagRateFilter
 import me.proxer.library.enums.TagSpoilerFilter
 import me.proxer.library.enums.TagType
-import org.threeten.bp.Instant
-import org.threeten.bp.LocalDate
+import java.time.Instant
+import java.time.LocalDate
 
 /**
  * The anime or manga search. The [filter] is applied with [updateFilter].

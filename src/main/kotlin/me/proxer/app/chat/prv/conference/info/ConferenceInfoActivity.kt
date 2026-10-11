@@ -24,7 +24,7 @@ import me.proxer.app.ui.shell.LocalAppNavigator
 import me.proxer.app.util.Utils
 import me.proxer.app.util.extension.getSafeParcelableExtra
 import me.proxer.app.util.extension.startActivity
-import me.proxer.app.util.extension.toLocalDateTimeBP
+import me.proxer.app.util.extension.toLocalDateTime
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -53,7 +53,7 @@ class ConferenceInfoActivity : ComposeActivity() {
 
         ProxerScaffold(title = conference.topic, onNavigateUp = navigator::navigateUp) { padding ->
             ContentStateHost(state, onErrorAction, contentPadding = padding) { info ->
-                val creation = remember(info.firstMessageTime) { info.firstMessageTime.toLocalDateTimeBP() }
+                val creation = remember(info.firstMessageTime) { info.firstMessageTime.toLocalDateTime() }
 
                 LazyColumn(contentPadding = padding) {
                     item(key = "info") {

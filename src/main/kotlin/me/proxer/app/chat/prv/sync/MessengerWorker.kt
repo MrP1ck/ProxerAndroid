@@ -30,7 +30,6 @@ import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.awaitNullable
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toInstantBP
 import me.proxer.app.util.extension.toLocalConference
 import me.proxer.app.util.extension.toLocalMessage
 import me.proxer.library.ProxerApi
@@ -218,7 +217,7 @@ class MessengerWorker(
     private suspend fun handleLoadMoreMessages(conferenceId: Long): SynchronizationResult {
         val fetchedMessages = loadMoreMessages(conferenceId)
 
-        fetchedMessages.maxByOrNull { it.date }?.date?.toInstantBP()?.let { mostRecentDate ->
+        fetchedMessages.maxByOrNull { it.date }?.date?.toInstant()?.let { mostRecentDate ->
             if (mostRecentDate.isAfter(storageHelper.lastChatMessageDate)) {
                 storageHelper.lastChatMessageDate = mostRecentDate
             }

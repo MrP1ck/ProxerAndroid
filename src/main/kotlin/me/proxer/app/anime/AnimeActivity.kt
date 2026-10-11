@@ -90,8 +90,8 @@ import okhttp3.HttpUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
-import org.threeten.bp.Instant
-import org.threeten.bp.temporal.ChronoUnit
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 /**
  * The streams of an episode of an anime.

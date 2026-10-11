@@ -21,7 +21,6 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.GooglePlayServicesUtil
 import com.google.android.gms.security.ProviderInstaller
-import com.jakewharton.threetenabp.AndroidThreeTen
 import com.kirillr.strictmodehelper.StrictModeCompat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -173,7 +172,6 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
     @SuppressLint("RestrictedApi")
     private fun initLibs() {
         WorkManager.initialize(this, Configuration.Builder().build())
-        AndroidThreeTen.init(this)
 
         if (BuildConfig.LOG) {
             Timber.plant(TimberFileTree())

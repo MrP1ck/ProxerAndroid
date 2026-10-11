@@ -3,7 +3,6 @@ package me.proxer.app.news
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import me.proxer.app.base.PagedContentViewModel
-import me.proxer.app.util.extension.toInstantBP
 import me.proxer.library.api.PagingLimitEndpoint
 import me.proxer.library.entity.notifications.NewsArticle
 
@@ -16,7 +15,7 @@ class NewsViewModel : PagedContentViewModel<NewsArticle>() {
 
     override suspend fun loadData(): List<NewsArticle> = super.loadData().also {
         if (page == 0) {
-            it.firstOrNull()?.date?.toInstantBP()?.let { date ->
+            it.firstOrNull()?.date?.toInstant()?.let { date ->
                 preferenceHelper.lastNewsDate = date
             }
         }

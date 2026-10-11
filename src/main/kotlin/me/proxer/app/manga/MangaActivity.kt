@@ -93,7 +93,7 @@ import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.getSafeStringExtra
 import me.proxer.app.util.extension.startActivity
 import me.proxer.app.util.extension.toEpisodeAppString
-import me.proxer.app.util.extension.toLocalDateTimeBP
+import me.proxer.app.util.extension.toLocalDateTime
 import me.proxer.library.entity.info.EntryCore
 import me.proxer.library.entity.manga.Chapter
 import me.proxer.library.enums.Category
@@ -469,7 +469,7 @@ class MangaActivity : ComposeActivity() {
             },
             MediaControlInfo(
                 getString(R.string.view_media_control_date),
-                Utils.dateFormatter.format(date.toLocalDateTimeBP())
+                Utils.dateFormatter.format(date.toLocalDateTime())
             )
         )
     }

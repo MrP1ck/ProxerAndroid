@@ -18,7 +18,6 @@ import me.proxer.app.util.data.PreferenceHelper
 import me.proxer.app.util.data.StorageHelper
 import me.proxer.app.util.extension.await
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toInstantBP
 import me.proxer.library.ProxerApi
 import me.proxer.library.entity.notifications.NotificationInfo
 import me.proxer.library.enums.NotificationFilter
@@ -114,12 +113,12 @@ class NotificationWorker(
                     .limit(notificationInfo?.newsAmount ?: 100)
                     .await()
                     .asSequence()
-                    .filter { it.date.toInstantBP().isAfter(lastNewsDate) }
+                    .filter { it.date.toInstant().isAfter(lastNewsDate) }
                     .sortedByDescending { it.date }
                     .toList()
         }
 
-        newNews.firstOrNull()?.date?.toInstantBP()?.let {
+        newNews.firstOrNull()?.date?.toInstant()?.let {
             if (!isStopped && it != lastNewsDate && !bus.post(NewsNotificationEvent())) {
                 NewsNotifications.showOrUpdate(context, newNews)
 
@@ -140,7 +139,7 @@ class NotificationWorker(
                     .await()
         }
 
-        newNotifications.firstOrNull()?.date?.toInstantBP()?.let {
+        newNotifications.firstOrNull()?.date?.toInstant()?.let {
             if (!isStopped && it != lastNotificationsDate && !bus.post(AccountNotificationEvent())) {
                 AccountNotifications.showOrUpdate(context, newNotifications)
 

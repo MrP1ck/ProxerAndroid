@@ -9,7 +9,7 @@ import me.proxer.app.util.extension.awaitNullable
 import me.proxer.app.util.extension.launchAsync
 import me.proxer.app.util.extension.safeInject
 import me.proxer.library.ProxerApi
-import org.threeten.bp.Instant
+import java.time.Instant
 
 /**
  * @author Ruben Gees

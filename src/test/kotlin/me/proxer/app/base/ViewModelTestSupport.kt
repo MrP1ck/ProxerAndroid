@@ -22,7 +22,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.Shadows.shadowOf
-import org.threeten.bp.Instant
+import java.time.Instant
 
 /**
  * Provides the dependencies of the base ViewModels (with plain SharedPreferences instead of the encrypted ones) and

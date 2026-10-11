@@ -8,7 +8,7 @@ import me.proxer.app.auth.LocalUser
 import me.proxer.app.profile.settings.LocalProfileSettings
 import me.proxer.library.enums.AnimeLanguage
 import me.proxer.library.enums.Language
-import org.threeten.bp.Instant
+import java.time.Instant
 
 /**
  * @author Ruben Gees

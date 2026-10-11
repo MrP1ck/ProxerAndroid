@@ -49,15 +49,15 @@ import me.proxer.app.ui.shell.LocalAppNavigator
 import me.proxer.app.util.ErrorUtils.ErrorAction
 import me.proxer.app.util.extension.formattedDistanceTo
 import me.proxer.app.util.extension.toAppString
-import me.proxer.app.util.extension.toLocalDateTimeBP
+import me.proxer.app.util.extension.toLocalDateTime
 import me.proxer.library.entity.media.CalendarEntry
 import me.proxer.library.enums.CalendarDay
 import me.proxer.library.util.ProxerUrls
 import org.koin.androidx.compose.koinViewModel
-import org.threeten.bp.DayOfWeek
-import org.threeten.bp.LocalDate
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 private val hourMinuteFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
@@ -160,8 +160,8 @@ private fun ScheduleDay(
 
 @Composable
 private fun ScheduleCard(entry: CalendarEntry, now: LocalDateTime, onClick: () -> Unit) {
-    val airingDateTime = entry.date.toLocalDateTimeBP()
-    val uploadDateTime = entry.uploadDate.toLocalDateTimeBP()
+    val airingDateTime = entry.date.toLocalDateTime()
+    val uploadDateTime = entry.uploadDate.toLocalDateTime()
 
     Card(onClick = onClick, modifier = Modifier.width(160.dp)) {
         Box {

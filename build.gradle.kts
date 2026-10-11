@@ -273,7 +273,6 @@ dependencies {
     implementation(libs.media3.cast)
 
     implementation(libs.proxerlib)
-    implementation(libs.threetenabp)
     implementation(libs.retrofit)
     implementation(libs.okhttp)
     implementation(libs.okhttp.brotli)

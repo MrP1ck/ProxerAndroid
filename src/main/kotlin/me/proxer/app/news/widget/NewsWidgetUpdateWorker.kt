@@ -16,7 +16,6 @@ import me.proxer.app.R
 import me.proxer.app.util.ErrorUtils
 import me.proxer.app.util.ErrorUtils.ErrorAction
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toInstantBP
 import me.proxer.app.widget.WidgetError
 import me.proxer.app.widget.WidgetState
 import me.proxer.library.ProxerApi
@@ -72,7 +71,7 @@ class NewsWidgetUpdateWorker(
                             it.categoryId,
                             it.subject,
                             it.category,
-                            it.date.toInstantBP()
+                            it.date.toInstant()
                         )
                     }
             }

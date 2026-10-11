@@ -16,7 +16,6 @@ import me.proxer.app.util.extension.androidUri
 import me.proxer.app.util.extension.getQuantityString
 import me.proxer.app.util.extension.notifyIfPermitted
 import me.proxer.app.util.extension.safeInject
-import me.proxer.app.util.extension.toInstantBP
 
 /**
  * @author Ruben Gees
@@ -87,7 +86,7 @@ object AccountNotifications {
 
         val shouldAlert = notifications
             .maxByOrNull { it.date }
-            ?.date?.toInstantBP()
+            ?.date?.toInstant()
             ?.isAfter(storageHelper.lastNotificationsDate)
             ?: true
 

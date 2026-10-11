@@ -11,7 +11,7 @@ import me.proxer.app.manga.MangaReaderOrientation
 import me.proxer.app.settings.theme.ThemeContainer
 import me.proxer.app.util.extension.getSafeString
 import okhttp3.logging.HttpLoggingInterceptor
-import org.threeten.bp.Instant
+import java.time.Instant
 
 /**
  * @author Ruben Gees
